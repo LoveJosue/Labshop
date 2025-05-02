@@ -1,0 +1,14 @@
+:root {
+    --bg: #ffffff;
+    --text: #314b6b;
+    --gray: #0f46c6;
+    --lightgray: #e5e5e5;
+    --blue: #2f79ce;
+
+    /* Profil avatar */
+    --avatar-size: 55px;
+    --gap-hf-size: 0.5rem;
+
+    /* Comment style */
+    --half-fw: 500;
+}
