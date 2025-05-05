@@ -1,8 +1,12 @@
 
 <template>
+  <Analytics />
   <router-view></router-view>
 </template>
 
-<style>
+<script setup>
+import { Analytics } from '@vercel/analytics/vue';
+</script>
 
+<style>
 </style>
