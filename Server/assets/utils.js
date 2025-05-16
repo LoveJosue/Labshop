@@ -1,7 +1,7 @@
-export const produits = [
+const produits = [
     {
       productId: 1,
-      nom: "Microscope Optique Binoculaire",
+      nom: "Microscopiiiiii Optique Binoculaire",
       type: "Microscope",
       marque: "Optika",
       modele: "B-157",
@@ -57,3 +57,4 @@ export const produits = [
     }
   ];
   
+  export default produits;
