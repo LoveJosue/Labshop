@@ -2,7 +2,8 @@ import {config} from 'dotenv';
 import products from './routes/products.js';
 import express from 'express';
 import logger from './middleware/logger.js'
-import cors from 'cors'
+import cors from 'cors';
+import { createServer } from '@vercel/node';
 config();
 const port = process.env.PORT || 3000;
 
@@ -31,3 +32,5 @@ app.use(logger);
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
 });
+
+export default createServer(app);
