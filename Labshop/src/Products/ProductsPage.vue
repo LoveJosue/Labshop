@@ -55,6 +55,9 @@ const onSortPriceDesc = () => {
 }
 
 onMounted(() => {
+  console.log(apiUrl);
+  console.log(apiUrl + "/products");
+  console.log(apiUrl + "/products");
   axios.get(`${apiUrl}/products`)
     .then(res => {
       productsResult.value = res.data;
