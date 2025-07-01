@@ -10,7 +10,7 @@ config();
 const app = express();
 
 // Connexion à MongoDB
-connectDB();
+// connectDB();
 
 // Restrictions d'accès à l'API
 // app.use(cors({
