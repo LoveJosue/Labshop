@@ -5,6 +5,8 @@ import logger from './middleware/logger.js'
 import cors from 'cors';
 import connectDB from './config/db.js';
 
+const port = process.env.PORT || 3000;
+
 config();
 
 const app = express();
@@ -28,5 +30,9 @@ app.use(logger);
 
 // Routes
 app.use('/api/products', products);
+
+app.listen(port, () => {
+    console.log(`App running on port ${port} ...`)
+})
 
 export default app;
