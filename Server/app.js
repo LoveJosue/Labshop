@@ -3,10 +3,14 @@ import products from './routes/products.js';
 import express from 'express';
 import logger from './middleware/logger.js'
 import cors from 'cors';
+import connectDB from './config/db.js';
 
 config();
 
 const app = express();
+
+// Connexion à MongoDB
+connectDB();
 
 // Restrictions d'accès à l'API
 // app.use(cors({
