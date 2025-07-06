@@ -21,7 +21,7 @@ const productSchema = new Schema({
     qtyPerUnit: Number,
     unitPerBox: Number,
     category: String,
-    imgUrl: [String],
+    imgsUrl: [String],
     priceList: [{
         name: {
             type: String,
