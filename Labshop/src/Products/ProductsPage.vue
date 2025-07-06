@@ -26,7 +26,7 @@
         <Produit v-for="p in productsResult" 
                       @imgClicked="gererClickPhoto"
                       :nom="p.name" 
-                      :images="p.imgUrl" />
+                      :images="p.imgsUrl" />
       </div>
       <div v-else>
         <p>Il n'y a pas de produits dans la BD</p>
