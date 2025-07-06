@@ -4,7 +4,7 @@
         
          <div class="productInfos">
              <div style="display: flex; justify-content: space-between;">
-                <p>{{ parseFloat(prix).toFixed(0) }} fcfa</p>
+                <!-- <p>{{ parseFloat(prix).toFixed(0) }} fcfa</p> -->
                 <p class="pi pi-heart"></p>
             </div>
             <p>{{ nom }}</p>
