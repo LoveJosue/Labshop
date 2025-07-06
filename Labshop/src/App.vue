@@ -1,11 +1,11 @@
 
 <template>
-  <Analytics />
   <router-view></router-view>
 </template>
 
 <script setup>
-import { Analytics } from '@vercel/analytics/vue';
+import { inject } from "@vercel/analytics"
+inject();
 </script>
 
 <style>
