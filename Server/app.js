@@ -3,10 +3,17 @@ import products from './routes/products.js';
 import express from 'express';
 import logger from './middleware/logger.js'
 import cors from 'cors';
+import connectDB from './db.js';
+import mongoose from 'mongoose';
+
+const port = process.env.PORT || 3000;
 
 config();
 
 const app = express();
+
+// Connexion à MongoDB
+connectDB();
 
 // Restrictions d'accès à l'API
 // app.use(cors({
@@ -24,5 +31,22 @@ app.use(logger);
 
 // Routes
 app.use('/api/products', products);
+
+// Middleware d'erreur global
+app.use((err, req, res, next) => {
+    console.error('Erreur :', err.message);
+    res.status(500).json({ error: 'Erreur interne du serveur' });
+})
+
+// Fermerture propre de MongoDB à l'arrêt
+process.on('SIGINT', async () => {
+    console.log('\n🛑 Fermeture du serveur...');
+    await mongoose.connection.close();
+    console.log('Connexion MongoDB fermée');
+    process.exit(0);
+})
+app.listen(port, () => {
+    console.log(`App running on port ${port} ...`)
+})
 
 export default app;

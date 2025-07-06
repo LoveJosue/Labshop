@@ -1,12 +1,10 @@
 import express from 'express';
-import produits from '../assets/utils.js';
+import productController from '../controllers/productController.js'
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    console.log(produits);
-    res.status(200).json(produits);
-});
+
+router.get('/', productController.getAllProducts);
 
 router.post('/', (req, res) => {
     const data = req.body;

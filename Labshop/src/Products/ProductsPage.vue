@@ -5,7 +5,7 @@
     <Filter @sortPriceAsc="onSortPriceAsc"
             @sortPriceDesc="onSortPriceDesc"/>
     
-    <div class="container">
+    <!-- <div class="container">
 
       <div v-if="productsResult && productsResult.length > 0">
         <Produit v-for="p in productsResult" 
@@ -13,6 +13,20 @@
                       :nom="p.nom" 
                       :images="p.images" 
         :prix="p.prix"/>
+      </div>
+      <div v-else>
+        <p>Il n'y a pas de produits dans la BD</p>
+      </div>
+  
+      
+    </div> -->
+    <div class="container">
+
+      <div v-if="productsResult && productsResult.length > 0">
+        <Produit v-for="p in productsResult" 
+                      @imgClicked="gererClickPhoto"
+                      :nom="p.name" 
+                      :images="p.imgsUrl" />
       </div>
       <div v-else>
         <p>Il n'y a pas de produits dans la BD</p>
