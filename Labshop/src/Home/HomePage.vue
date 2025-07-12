@@ -1,5 +1,4 @@
 <template>
-  <Header></Header>
   <div class="homepage">
       <main> 
         <section class="hero">
@@ -46,7 +45,6 @@
         </section> -->
       </main>
     </div>
-    <Footer></Footer>
 </template>
   
 <script setup>
@@ -55,9 +53,6 @@
   import { useRouter } from 'vue-router';
 
   import Button from 'primevue/button';
-  import Card from 'primevue/card';
-  import Header from '../Components/Header.vue'
-  import Footer from '@/Components/Footer.vue';
 
   const router = useRouter();
 

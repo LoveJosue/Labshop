@@ -1,42 +1,21 @@
 <template>
-  <Header></Header>
-  <div class="section">
-    <h1>Voici les produits que nous proposons</h1>
-    <Filter @sortPriceAsc="onSortPriceAsc"
-            @sortPriceDesc="onSortPriceDesc"/>
-    
-    <!-- <div class="container">
-
-      <div v-if="productsResult && productsResult.length > 0">
-        <Produit v-for="p in productsResult" 
-                      @imgClicked="gererClickPhoto"
-                      :nom="p.nom" 
-                      :images="p.images" 
-        :prix="p.prix"/>
+    <!-- <Filter @sortPriceAsc="onSortPriceAsc"
+            @sortPriceDesc="onSortPriceDesc"/> -->
+      <div v-if="productsResult && productsResult.length > 0" class="grid">
+        <h1>Nos produits</h1>
+        <!-- <Filter 
+            class="filter" 
+            @sortPriceAsc="onSortPriceAsc"
+            @sortPriceDesc="onSortPriceDesc"/> -->
+        <Produit 
+            v-for="p in productsResult" 
+            @imgClicked="gererClickPhoto"
+            :nom="p.name" 
+            :images="p.imgsUrl"/>
       </div>
       <div v-else>
         <p>Il n'y a pas de produits dans la BD</p>
       </div>
-  
-      
-    </div> -->
-    <div class="container">
-
-      <div v-if="productsResult && productsResult.length > 0">
-        <Produit v-for="p in productsResult" 
-                      @imgClicked="gererClickPhoto"
-                      :nom="p.name" 
-                      :images="p.imgsUrl" />
-      </div>
-      <div v-else>
-        <p>Il n'y a pas de produits dans la BD</p>
-      </div>
-  
-      
-    </div>
-  </div>
-  <Footer></Footer>
-  
 </template>
 
 
@@ -45,13 +24,9 @@
 import { ref } from "vue"
 import { onMounted } from "vue";
 import Produit from './Produit.vue'
-// import { produits } from '../utils';
 import axios from "axios";
 import Filter from "./Filter.vue";
 import "../../scss/custom.scss"
-import Header from "@/Components/Header.vue";
-import Footer from "@/Components/Footer.vue";
-
 import { apiUrl } from '@/config';
 
 let produits = [];
@@ -86,23 +61,27 @@ onMounted(() => {
 
 
 <style>
-h1 {
-  text-align: center;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 1.5rem;
 }
 
-.section {
-  text-align: center;
-  padding: 2rem;
+.grid h1 {
+  margin: 1.5rem 0 0;
 }
 
-.container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
-}
-
-.a {
-  border: 1px solid black;
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid h1 {
+    grid-column: 1 / 3;
+  }
+  .filter {
+    grid-column: 1 / 3;
+  }
 }
 </style>
