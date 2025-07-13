@@ -1,30 +1,19 @@
 <template>
-    <!-- <div class="card" @click="seeDetails">
-         <img :src="images[0]" alt="" @click="photoClicked(imgUrl)">
-        
-         <div class="productInfos">
-             <div style="display: flex; justify-content: space-between;">
-                <p>{{ parseFloat(prix).toFixed(0) }} fcfa</p>
-                <p class="pi pi-heart"></p>
-            </div>
-            <p>{{ nom }}</p>
-         </div>
-        
-    </div> -->
     <div class="elem" @click="seeDetails">
-        <img :src="images[0]" alt="" @click="photoClicked(imgUrl)">
+        <img :src="product.imgsUrl[0]" alt="" @click="photoClicked(imgsUrl[0])">
         <div>
-            <h1>EDTA Tube</h1>
-            <p>12 palettes / carton</p>
-            <p>Tarifs</p>
+            <h1>{{ product.name }}</h1>
+            <p>{{ product.unitPerBox }} {{ product.unitType }}{{ product.unitPerBox > 1 ? 's' : ''  }} / carton</p>
+            <p><u>Tarifs</u></p>
             <ul>
-                <li>Prix de détail 3 500F/unité</li>
-                <li>Prix de gros 2 500F/unité </li>
+                <li>Prix de détail {{ getRetailPrice() }} F/unité</li>
+                <li>Prix de gros : {{ getWholesalePriceRange()}} F/unité</li>
             </ul>
             <div class="actions">
-                <button class="btn-1">Acheter maintenant</button>
+                <button class="btn-1">Acheter</button>
                 <button class="btn-2">Ajouter au panier</button>
             </div>
+            <!-- <p class="pi pi-heart"></p> -->
         </div>
     </div>
 </template>
@@ -62,31 +51,48 @@
     background: black;
     color: white;
 }
-
-
 </style>
 
-
 <script setup>
-
 import { useRouter } from 'vue-router';
-
-
+const router = useRouter();
 const props = defineProps({
-    nom: String,
-    images: Array,
-    prix: Number
+    product: {
+        type: Object,
+        required: true,
+        default: () => ({
+            name: '',
+            material: '',
+            capacity: {
+                volume: 0,
+                unit: ''
+            },
+            unitType: '',
+            qtyPerUnit: 0,
+            unitPerBox: 0,
+            category: '',
+            imgsUrl: [],
+            priceList: [],
+            stock: {
+                totalUnits: 0,
+                wholesaleReserve: 0,
+                retailReserve: 0
+            },
+            dateAdded: ''
+        })
+    }
 })
 
 const emit = defineEmits(['imgClicked']);
-const photoClicked = (imgUrl) => {
-    emit('imgClicked', imgUrl)
+const photoClicked = (imgUrl) => { emit('imgClicked', imgUrl)}
+const seeDetails = () => {router.push('/productDetail')}
+const getRetailPrice = () => { 
+    return props.product.priceList[props.product.priceList.length-1].unitPrice.toLocaleString('fr-FR');
 }
-
-const router = useRouter();
-const seeDetails = () => {
-    router.push('/productDetail')
+const getWholesalePriceRange = () => {
+    const priceList = props.product.priceList;
+    const firstPricing = priceList[0];
+    const beforeLastPricing = priceList[priceList.length - 2];
+    return `${firstPricing.unitPrice.toLocaleString('fr-FR')} - ${beforeLastPricing.unitPrice.toLocaleString('fr-FR')}`;
 }
-
 </script>
-

@@ -7,11 +7,15 @@
             class="filter" 
             @sortPriceAsc="onSortPriceAsc"
             @sortPriceDesc="onSortPriceDesc"/> -->
-        <Produit 
+        <!-- <Produit 
             v-for="p in productsResult" 
             @imgClicked="gererClickPhoto"
             :nom="p.name" 
-            :images="p.imgsUrl"/>
+            :images="p.imgsUrl"/> -->
+        <Produit 
+            v-for="p in productsResult" 
+            :key="p._id"
+            :product="p"/>
       </div>
       <div v-else>
         <p>Il n'y a pas de produits dans la BD</p>
