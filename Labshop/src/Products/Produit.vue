@@ -6,8 +6,8 @@
             <p>{{ product.unitPerBox }} {{ product.unitType }}{{ product.unitPerBox > 1 ? 's' : ''  }} / carton</p>
             <p><u>Tarifs</u></p>
             <ul>
-                <li>Prix de détail {{ getRetailPrice() }} F/unité</li>
-                <li>Prix de gros : {{ getWholesalePriceRange()}} F/unité</li>
+                <li>Détail : {{ getRetailPrice() }} F/{{ product.unitType }}</li>
+                <li>Gros : {{ getWholesalePriceRange()}} F/{{ product.unitType }}</li>
             </ul>
             <div class="actions">
                 <button class="btn-1">Acheter</button>
@@ -19,37 +19,92 @@
 </template>
 
 <style>
-.elem{
+ .elem {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    column-gap: 1.5rem;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    column-gap: 2rem;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    align-items: center;
+    max-width: 900px;
+    margin: auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.elem:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 .elem img {
     display: block;
+    max-width: 100%;
     height: 200px;
-    cursor: pointer;
     object-fit: contain;
     mix-blend-mode: multiply;
-    cursor: pointer;
-    object-fit: contain;
+}
+.elem h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+.elem p {
+    margin: 0.25rem 0;
+    color: #555;
+}
+.elem ul {
+    padding-left: 5%;
+    list-style-type: none;
+}
+.elem ul li {
+    margin-bottom: 0.25rem;
 }
 .elem .actions {
     display: flex;
     gap: 1rem;
+    margin-top: 1rem;
 }
 .elem button {
-    all:inherit;
-    padding: 0.5rem 1rem;
+    padding: 0.6rem 1.2rem;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    height: 100%;
 }
 .elem .btn-1 {
-    background: black;
-    color: white;
+    background: #1a1a1a;
+    color: #fff;
+}
+.elem .btn-2 {
+    background: #f0f0f0;
+    color: #333;
+}
+.elem button:hover {
+    transform: scale(1.03);
+}
+.elem .btn-2:hover {
+    background-color: #e2e2e2;
+}
+
+@media(max-width: 768px) {
+    .elem {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .elem .actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    .elem img {
+        margin: 0 auto 1rem
+    }
+    .elem ul {
+        padding-left: 0;
+        list-style-type: none; 
+    }
 }
 </style>
 

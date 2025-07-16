@@ -2,7 +2,7 @@
     <!-- <Filter @sortPriceAsc="onSortPriceAsc"
             @sortPriceDesc="onSortPriceDesc"/> -->
       <div v-if="productsResult && productsResult.length > 0" class="grid">
-        <h1>Nos produits</h1>
+        <h1 class="grid-title">Nos produits</h1>
         <!-- <Filter 
             class="filter" 
             @sortPriceAsc="onSortPriceAsc"
@@ -73,8 +73,9 @@ onMounted(() => {
   gap: 1.5rem;
 }
 
-.grid h1 {
+.grid-title {
   margin: 1.5rem 0 0;
+  /* border: 1px solid red; */
 }
 
 @media (min-width: 768px) {
