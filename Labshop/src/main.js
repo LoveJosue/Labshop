@@ -4,6 +4,10 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import {createRouter, createWebHistory} from 'vue-router'
 
+import HomePage from './Home/HomePage.vue';
+import ProductsPage from './Products/ProductsPage.vue';
+import ProductDetail from './Products/ProductDetail/ProductDetail.vue';
+
 import './assets/css/variables.css'
 import './assets/css/index.css'
 import 'primeicons/primeicons.css'
@@ -11,9 +15,9 @@ import 'primeicons/primeicons.css'
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        { path: '/', component:  () => import ('./Home/HomePage.vue') },
-        { path: '/products', component:  () => import ('./Products/ProductsPage.vue') },
-        { path: '/products/:id', component: () => import ('./Products/ProductDetail/ProductDetail.vue') }
+        { path: '/', component:  HomePage },
+        { path: '/products', component:  ProductsPage },
+        { path: '/products/:id', component: ProductDetail }
     ]
 })
 const app = createApp(App)
