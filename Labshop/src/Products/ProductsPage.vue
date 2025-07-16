@@ -47,7 +47,7 @@ const onSortPriceDesc = () => {
   productsResult.value = productsResult.value.toSorted((a,b) => a.prix > b.prix ? -1 : 1)
 }
 
-onMounted(() => {
+onMounted(async () => {
   axios.get(`${apiUrl}/products`)
   .then(res => {
     if (res.data) {
