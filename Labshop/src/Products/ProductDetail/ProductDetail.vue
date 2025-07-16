@@ -1,5 +1,4 @@
 <template>
-    <Header></Header>
     <div class="main">
         <div class="product_img">
             <div class="img_1">
@@ -140,13 +139,9 @@
             </div>
         </div>
     </div>
-    <Footer></Footer>
 </template>
 
 <script setup>
-
-import Header from '@/Components/Header.vue';
-import Footer from '@/Components/Footer.vue';
 import Accordion from '@/Components/Accordion.vue';
 
 import { ref } from 'vue';
