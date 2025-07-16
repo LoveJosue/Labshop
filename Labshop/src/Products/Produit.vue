@@ -1,5 +1,5 @@
 <template>
-    <div class="elem" @click="seeDetails">
+    <div class="elem">
         <img :src="product.imgsUrl[0]" alt="" @click="photoClicked(imgsUrl[0])">
         <div>
             <h1>{{ product.name }}</h1>
@@ -10,7 +10,7 @@
                 <li>Gros : {{ getWholesalePriceRange()}} F/{{ product.unitType }}</li>
             </ul>
             <div class="actions">
-                <button class="btn-1">Acheter</button>
+                <button class="btn-1" @click="seeDetails">Voir</button>
                 <button class="btn-2">Ajouter au panier</button>
             </div>
             <!-- <p class="pi pi-heart"></p> -->
@@ -140,7 +140,8 @@ const props = defineProps({
 
 const emit = defineEmits(['imgClicked']);
 const photoClicked = (imgUrl) => { emit('imgClicked', imgUrl)}
-const seeDetails = () => {router.push('/productDetail')}
+// const seeDetails = () => {router.push('/productDetail')}
+const seeDetails = () => {router.push(`products/${props.product._id}`)};
 const getRetailPrice = () => { 
     return props.product.priceList[props.product.priceList.length-1].unitPrice.toLocaleString('fr-FR');
 }
@@ -148,6 +149,9 @@ const getWholesalePriceRange = () => {
     const priceList = props.product.priceList;
     const firstPricing = priceList[0];
     const beforeLastPricing = priceList[priceList.length - 2];
+    if(firstPricing.unitPrice === beforeLastPricing.unitPrice) {
+        return `${firstPricing.unitPrice.toLocaleString('fr-FR')}`;
+    }
     return `${firstPricing.unitPrice.toLocaleString('fr-FR')} - ${beforeLastPricing.unitPrice.toLocaleString('fr-FR')}`;
 }
 </script>
