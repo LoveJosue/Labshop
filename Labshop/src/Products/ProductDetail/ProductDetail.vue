@@ -1,34 +1,80 @@
 <template>
     <div class="main">
         <div class="product_img">
-            <div class="img_1">
-                <img src="../../images/img_1.jpg" alt="image1" class="image-fit">
-            </div>
-            <div class="img_2">
-                <img src="../../images/img_1.jpg" alt="image1" class="image-fit">
-            </div>
-            <div class="img_3">
-                <img src="../../images/img_1.jpg" alt="image1" class="image-fit">
+            <div v-for="(item, index) in product.imgsUrl" 
+                 :key="index" 
+                 :class="index === 0 ? 'img_1' : 'under_img'">
+                <img :src="item" alt="image" class="image-fit">
             </div>
         </div>
-        <div class="product_details">
-            <h1>Microscope</h1>
-            <h2>150 000 fcfa</h2>
+        <div class="product-details">
+            <h1>{{ product.name }}</h1>
+            <p style="font-size: 1rem; color: #555;">
+                <span v-if="product.qtyPerUnit">{{ getUnitType }} de {{ product.qtyPerUnit }} | </span>
+                <span>{{ product.unitPerBox }} {{ product.unitType }}{{ product.unitPerBox > 1 ? 's' : ''  }} par carton</span>
+            </p>
+            <h2 v-if="sectionSelected === FIRST_SELECT">{{ getWholesalePriceRange() }} F / <span>{{ product.unitType }}</span></h2>
+            <h2 v-else="sectionSelected === SECOND_SELECT">{{ getUnitPrice() }} F / <span>{{ product.unitType }}</span></h2>
+            
+            <!-- <div class="input-box">
+                    <NumberInputComponent 
+                    :min="1"
+                    :max="100"
+                    :modelValue="1"/>
+            </div> -->
             <div class="form_group">
-                <div class="input-group">
-                    <input id="inputQte" type="number" placeholder="Quantité" required :value="quantity" v-on:keyup="updateQte">
-                    <div class="btn-group">
-                        <span class="left-separator"></span>
-                        <button @click="decrementQte" :disabled="quantity===min" class="decrement-btn"><Span class="pi pi-minus"></Span></button>
-                        <button @click="incrementQte" :disabled="quantity===max" class="increment-btn"><Span class="pi pi-plus"></Span></button>
+                <div class="select-panel shadow-xs/30 rounded-md border">
+                    <div class="select-section">
+                        <div 
+                            id="1" 
+                            class="select-item" 
+                            :class="sectionSelected === FIRST_SELECT ? 'select-item-1-active' : 'select-item-1-unactive'" 
+                            @click="selectSection($event)"
+                        >
+                            Achat en gros
+                        </div>
+                        <div 
+                            id='2' 
+                            class="select-item"
+                            :class="sectionSelected === SECOND_SELECT ? 'select-item-2-active' : 'select-item-2-unactive'"
+                            @click="selectSection($event)">
+                            Achat en détail
+                        </div>
+                        
                     </div>
+                    <div v-if="sectionSelected === 1" class="select-content">
+                        <div>
+                            <p>Choix du tarif :</p>
+                            <SelectDropdown v-model="selected" :options="getWholeSalePriceList()" />
+                        </div>
+                          <div>
+                              <p>Quantité de cartons :</p>
+                              <div class="input-box rounded-md">
+                                <NumberInputComponent 
+                                :min="1"
+                                :max="100"
+                                :modelValue="1"/>
+                              </div>
+                          </div>
+                    </div>
+                    <div v-else-if="sectionSelected === 2" class="select-content">
+                        <div>
+                            <p>Quantité de {{ product.unitType }}s :</p>
+                            <div class="input-box rounded-md">
+                                <NumberInputComponent 
+                                :min="1"
+                                :max="100"
+                                :modelValue="1"/>
+                              </div>
+                        </div>
+                        
+                    </div>
+                    
                 </div>
-
-                <div class="form_group_elem add_to_card">
+                <div class="form_group_elem add_to_card rounded-sm shadow-xs/30">
                     Ajouter au panier
                 </div>
-
-                <div class="form_group_elem available_btn">
+                <div class="form_group_elem available_btn rounded-sm shadow-xs/30">
                     Disponibilité en boutique
                 </div>
 
@@ -143,48 +189,36 @@
 
 <script setup>
 import Accordion from '@/Components/Accordion.vue';
+import NumberInputComponent from '@/Components/NumberInputComponent.vue';
+import SelectDropdown from '@/Components/SelectDropdown.vue';
 
-import { ref } from 'vue';
+import axios from 'axios';
+import { apiUrl } from '@/config';
+
+import { onMounted, ref } from 'vue';
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
-const min = 1;
-const max = 100;
-const maxDigits = 3;
-const regex = new RegExp(`^[${min}-9][0-9]{0,${maxDigits - 1}}$`);
+const FIRST_SELECT = 1;
+const SECOND_SELECT = 2;
+
+const sectionSelected = ref(FIRST_SELECT);
+const selected = ref('');
+const options = [
+  { label: 'Option 1', value: 'opt1' },
+  { label: 'Option 2', value: 'opt2' },
+  { label: 'Option 3', value: 'opt3' },
+];
+
+const route = useRoute();
+const product = ref({});
+
 const maxStars = 5;
-let quantity = ref(min);
 const comments = ref([
     { id: 1, text: "Super produit", rating: 4 },
     { id: 2, text: "Pas mal", rating: 2 },
     { id: 3, text: "Mauvais produit", rating: 5 }
 ]);
-
-const incrementQte = () => quantity.value++;
-const decrementQte = () => quantity.value--;
-const updateQte = () => {
-    let value = document.getElementById('inputQte').value;
-    if (value==="") {
-        value = ""
-    } else {
-        if (!regex.test(value) || value.includes(",")) {
-        console.log("Regex test failed");
-        value = min
-        document.getElementById('inputQte').value = value;
-    }
-    let valueToInt = parseInt(value);
-    // Si la valueur est hors des bornes
-    if (valueToInt > max || valueToInt < min) {
-        valueToInt = clamp(valueToInt)
-        document.getElementById('inputQte').value = valueToInt;
-    }
-    quantity.value = valueToInt;
-    }
-    
-}
-
-function clamp(value) {
-    return Math.min(Math.max(value, min), max);
-}
 
 const getRatingAverage = computed(() => {
     if (comments.value.length === 0) return 0;
@@ -206,13 +240,74 @@ const getEmptystars = computed(() => {
 //     }
 //     return (sum / comments.value.length).toFixed(1).toString().replace(".", ",");
 // })
+const getUnitType = computed(() => {
+    const unit = product.value.unitType;
+    return typeof unit === 'string' && unit.length > 0 ? unit.charAt(0).toUpperCase() + unit.slice(1) : ''
+    
+});
+
+const getWholesalePriceRange = () => {
+    const priceList = product.value.priceList;
+     if (!Array.isArray(priceList) || priceList.length < 2) {
+        return '';
+    }
+    const firstPricing = priceList[0];
+    const beforeLastPricing = priceList[priceList.length - 2];
+    if(firstPricing.unitPrice === beforeLastPricing.unitPrice) {
+        return `${firstPricing.unitPrice.toLocaleString('fr-FR')}`;
+    }
+    return `${firstPricing.unitPrice.toLocaleString('fr-FR')} - ${beforeLastPricing.unitPrice.toLocaleString('fr-FR')}`;
+};
+
+const selectSection = (event) => {
+    const element = event.currentTarget;
+    const id = element.getAttribute('id');
+    sectionSelected.value = parseInt(id);
+}
+
+const getWholeSalePriceList = () => {
+    const priceList = product.value.priceList;
+    if (!Array.isArray(priceList) || priceList.length === 0) {
+        return [];
+    }
+    // Exclure le dernier élément (supposé être le détail)
+    const wholeSalePricingRange = priceList.slice(0, -1);
+    // Adapter les valeurs retournées au composant SelectDropDown
+    return wholeSalePricingRange.map((item, idx) => ({
+        label: `${item.name}`,
+        clue: item.best ? 'Meilleur' : null,
+        value: idx
+    }));
+}
+
+const getUnitPrice = () => {
+    const priceList = product.value.priceList;
+    if (!Array.isArray(priceList) || priceList.length === 0) {
+        return '';
+    }
+    const lastPricingIndex = priceList.length - 1;
+    const unitPrice = priceList[lastPricingIndex].unitPrice;
+    return unitPrice;
+}
+
+onMounted(() => {
+    const id = route.params.id;
+    axios.get(`${apiUrl}/products/${id}`)
+    .then(res => {
+        if (res.data) {
+            product.value = res.data;
+            console.log(product.value);
+        }
+    })
+    .catch(error => {
+        console.log(error);
+    })
+})
 
 
 </script>
 
-
 <style scoped>
-
 * {
     margin: 0;
     padding: 0;
@@ -220,19 +315,15 @@ const getEmptystars = computed(() => {
 }
 
 h1 {
-    text-align: left;
     font-weight: lighter;
 }
-
 h2 {
     font-weight: lighter;
     color: rgb(99, 99, 99);
 }
-
 .main_elem {
     grid-column: 1 / 3;
 }
-
 .main {
     display: grid;
     grid-template-columns: 3fr 2fr;
@@ -242,47 +333,109 @@ h2 {
     margin: 0 15px 0 10px;
     width: 1600px;
     max-width: 80%;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
+    margin: 0 auto;
 
 }
-
 .product_img {
     display: grid;
     grid-template-columns: 1fr 1fr;
     row-gap: 5px;
-    column-gap: 5px;
-    
+    column-gap: 5px;    
 }
-
 .product_img > * {
     border: 1px solid var(--lightgray);
     width: auto;
 }
-
 .img_1 {
-    background-color: gray;
     grid-column: 1 / 3;
     height: 600px;
-    border: 1px solid var(--lightgray);
-
 }
-
-.img_2 {
-    grid-column: 1 / 2;
+.under_img {
     height: 300px;
 }
-
-.img_3 {
-    grid-column: 2 / 3;
-    height: 300px;
-}
-
 .image-fit {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+.product-details h1 {
+  font-size: 2rem;
+  font-weight: 100;
+  margin-bottom: 0.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.product-details h2 {
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 1rem;
+  
+}
+
+.product-details {
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.product-details p {
+    font-size: 1rem; 
+    color: #555;
+    margin: 0 0 10px 0;
+    font-weight: 300;
+}
+.product-details h2 span {
+    font-size: 1rem;
+    font-weight: 300;
+}
+.product-details .select-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 500px;
+}
+.product-details .select-panel .select-section {
+    width:100%;
+    height: 50px;
+    display: flex;
+    
+}
+.select-item {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: none;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.select-item:hover {
+  background-color: #f0f0f0;
+}
+
+.select-item-1-active,
+.select-item-2-active {
+  background-color: white;
+  border-bottom: 2px solid #007bff;
+  color: #007bff;
+  font-weight: 600;
+}
+
+.select-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem 0.5rem;
+}
+
+.select-content p {
+    color: black;
+    font-size: 1rem;
+    font-weight: 300;
+    margin-left: 0.1rem;
+    margin-bottom: 0.4rem;
 }
 
 /* product_details column'style */
@@ -295,7 +448,6 @@ h2 {
     width: 100%;
     max-width: 540px;
 }
-
 .form_group_elem {
     text-align: center;
     align-content: center;
@@ -304,59 +456,27 @@ h2 {
     width: 100%;
     height: 50px;
 }
-
 .add_to_card {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    color: white;
-    background-color: #007bff;
+    background-color: rgb(0, 123, 255);
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    
 }
 .add_to_card:hover {
-    background-color: rgba(6, 59, 115, 0.9);
+    background-color: rgb(2, 111, 228);
 }
-
 .available_btn:hover {
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
+    transition: background-color 0.3s ease;
 }
-
-.input-group {
-    position: relative;
+.input-box {
+    border: 1px solid lightgray;
     width: 50%;
-    height: 50px;
+    height: 40px;
 }
 
-.input-group input {
-    text-align: left;
-    padding-left: 1rem;
-}
-
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-  width: 100%;
-  height: 100%;
-  
-  border: 1px solid #444;
-  transition: border 0.3s ease, box-shadow 0.3s ease;
-
-}
-
-input[type="number"]:focus {
-  outline: none;
-
-  border: 1px solid var(--lightgray);
-  box-shadow: 0 0 7px rgba(0, 0, 0, 0.2);
-}
- 
 .btn-group {
     width: 4rem;
     position: absolute;
@@ -368,14 +488,12 @@ input[type="number"]:focus {
     justify-content: space-around;
     height: 90%;
 }
-
 .btn-group > button {
     border: none;
     background-color: (var(--lightgray));
     height: 100%;
     width: 100%;
 }
-
 .btn-group > button:hover {
     background-color: rgb(230, 226, 226);
 }
@@ -393,8 +511,6 @@ input[type="number"]:focus {
     top:0;
     transform: translateY(50%) translateX(-180%);
 }
-
-/* Comments'style */
 .comments {
     border-top: 1px solid var(--lightgray);
     padding: 2rem 0;
@@ -407,47 +523,31 @@ input[type="number"]:focus {
     font-style: var(--font);
     font-size: x-large;
     padding-bottom: 2rem;
-    /* border: 1px solid red; */
 }
-
 .comments .comments_header .dot {
     width: 0.25rem;
     height: 0.25rem;
     border-radius: 0.5rem;
     background-color: currentColor;
 }
-
 .comments .comments_grid {
     display: grid;
     grid-template-rows: 1fr;
     gap: 2.1rem;
-
     padding-top: 2rem;
     border-top: 1px solid var(--lightgray);
-    width: 100%;
-    
+    width: 100%;   
 }
-
-@media(min-width: 950px) {
-    .comments .comments_grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
 .comments .comments_grid .comments_card {
     display: flex;
     flex-direction: column;
     gap: var(--gap-hf-size);
 }
-
-
-
 .comments .comments_card .profile {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: var(--gap-hf-size);
-    /* border: 1px solid red; */
 }
 .comments .comments_card .profile .profile-chld-1 {
     width: calc(var(--avatar-size) + 5px);
@@ -463,7 +563,6 @@ input[type="number"]:focus {
     display: flex;
     flex-direction: column;
     font-size: medium;
-    /* border: 1px solid red; */
     
 }
 .comments .comments_card .profile .profile-chld-2 .profile-name {
@@ -482,26 +581,22 @@ input[type="number"]:focus {
     border-radius: 50%;
     object-fit: cover;
 }
-
 .comments .comments_card .profile-infos {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 0.45rem;
     font-size: small;
-    /* color: var(--lightgray); */
 }
 .comments .comments_card .profile-infos .rating-starts {
     display: flex;
     flex-direction: row;
     gap: 0.1rem;
     align-items: center;
-    /* border: 1px solid red; */
 }
 .comments .comments_card .profile-infos .rating-starts > span {
     font-size: 0.6rem;
 }
-
 .comments .comments_card .profile-infos .dot {
     width: 0.1rem;
     height: 0.1rem;
@@ -510,13 +605,11 @@ input[type="number"]:focus {
 }
 .comments .comments_card .profile-infos .comment-date {
     font-weight: var(--half-fw);
-    /* color: red; */
+}
+@media(min-width: 950px) {
+    .comments .comments_grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
-/* .comments .comments_item .profile .profile-chld-2 {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-} */
-/* End Comments'style */
 </style>

@@ -1,4 +1,8 @@
-/* Global css classes */
+@import "tailwindcss";
+@theme {
+  --color-primaryBlue: #007bff;
+}
+
 /* Accordion */
 .accordion {
     margin: 0;
