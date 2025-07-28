@@ -32,10 +32,12 @@ const setConnexion = () => {
 
 <style scoped>
 .ctn {
-    background: #007bff;
-    color: white;
-    padding: 1rem;
-  }
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Support pour safari */
+  background: rgba(0, 123, 255);
+  padding: 1rem;
+  color :white;
+}
  .navbar {
     display: flex;
     justify-content: space-between;
