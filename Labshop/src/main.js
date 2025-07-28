@@ -17,7 +17,7 @@ const router = createRouter({
     routes: [
         { path: '/', component:  HomePage },
         { path: '/products', component:  ProductsPage },
-        { path: '/productDetail', component: ProductDetail}
+        { path: '/products/:id', component: ProductDetail }
     ]
 })
 const app = createApp(App)
