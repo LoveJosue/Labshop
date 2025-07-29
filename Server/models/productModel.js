@@ -30,6 +30,12 @@ const productSchema = new Schema({
         unitPrice: Number,
         best: Boolean
     }],
+    infos: {
+        description: String,
+        isFullyISO: Boolean,
+        storageGuide: String,
+        dimensions: String
+    },
     stock: {
         totalUnits: Number,
         wholesaleReserve: Number,
