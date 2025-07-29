@@ -15,19 +15,12 @@
             </p>
             <h2 v-if="sectionSelected === FIRST_SELECT">{{ getWholesalePriceRange() }} F / <span>{{ product.unitType }}</span></h2>
             <h2 v-else="sectionSelected === SECOND_SELECT">{{ getUnitPrice() }} F / <span>{{ product.unitType }}</span></h2>
-            
-            <!-- <div class="input-box">
-                    <NumberInputComponent 
-                    :min="1"
-                    :max="100"
-                    :modelValue="1"/>
-            </div> -->
             <div class="form_group">
                 <div class="select-panel shadow-xs/30 rounded-md border">
                     <div class="select-section">
                         <div 
                             id="1" 
-                            class="select-item" 
+                            class="select-item rounded-tl-md" 
                             :class="sectionSelected === FIRST_SELECT ? 'select-item-1-active' : 'select-item-1-unactive'" 
                             @click="selectSection($event)"
                         >
@@ -35,7 +28,7 @@
                         </div>
                         <div 
                             id='2' 
-                            class="select-item"
+                            class="select-item rounded-tr-md"
                             :class="sectionSelected === SECOND_SELECT ? 'select-item-2-active' : 'select-item-2-unactive'"
                             @click="selectSection($event)">
                             Achat en détail
@@ -290,6 +283,10 @@ const getUnitPrice = () => {
     return unitPrice;
 }
 
+const getAccordionItems = () => {
+    // if (!Array.isArray())
+}
+
 onMounted(() => {
     const id = route.params.id;
     axios.get(`${apiUrl}/products/${id}`)
@@ -393,13 +390,12 @@ h2 {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 500px;
+    margin-bottom: 0.8rem;
 }
 .product-details .select-panel .select-section {
     width:100%;
     height: 50px;
     display: flex;
-    
 }
 .select-item {
     width: 100%;
@@ -426,8 +422,8 @@ h2 {
 .select-content {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 0.5rem 0.5rem;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
 }
 
 .select-content p {
