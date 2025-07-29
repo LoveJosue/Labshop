@@ -284,11 +284,12 @@ const getUnitPrice = () => {
 }
 
 const getAccordionItems = () => {
-    let items = []
-    const item1 = {
-        "id": 1,
-        title: 
-    };
+    // let items = []
+    // const item1 = {
+    //     "id": 1,
+    //     title: 
+    // };
+    
     // infos.description
     // capacity.volume
     // unitType

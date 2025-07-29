@@ -31,12 +31,25 @@ const productSchema = new Schema({
         best: Boolean
     }],
     infos: [{
-        type: Number,
+        infoType: Number,
         title: String,
         content: String,
         subInfos: [{
             title: String,
-            content: String
+            content: String,
+            detailedContent: {
+                capacity: {
+                    volume: Number,
+                    unit: String
+                },
+                packaging: String,
+                dimensions: {
+                    length: Number,
+                    width: Number,
+                    height: Number,
+                    unit: String
+                }
+            }
         }]
     }],
     stock: {
