@@ -284,7 +284,49 @@ const getUnitPrice = () => {
 }
 
 const getAccordionItems = () => {
-    // if (!Array.isArray())
+    let items = []
+    const item1 = {
+        "id": 1,
+        title: 
+    };
+    // infos.description
+    // capacity.volume
+    // unitType
+    // infos.dimensions
+    // infos.isFullyISO
+    // infos.storageGuide
+
+    // const accordionItems = [
+    //     {
+    //         id: 1,
+    //         title:  "Détails du produit",
+    //         subElems: [
+    //             {
+    //                 title: 'Description',
+    //                 content: 'Ceci est un produit qui peut-être utilisé pour ceci et cela'
+    //             },
+
+    //             {
+    //                 title: "Détails",
+    //                 content: {
+    //                     volume: '1µL',
+    //                     packaging: 'sachet',
+    //                     dimensions: '110mm x 40mm'
+    //                 }
+    //             }
+    //         ],
+    //     },
+    //     {
+    //         id: 2,
+    //         title:  "Caractéristiques du produit",
+    //         content: 'Ce produit est conforme aux normes de fabrication ISO'
+    //     },
+    //     {
+    //         id: 3,
+    //         title:  "Guide d'entreposage",
+    //         content: "Concervez ce produit à température ambiente dans un espace aéré pour éviter le développement de moisissures."
+    //     }
+    // ]
 }
 
 onMounted(() => {
