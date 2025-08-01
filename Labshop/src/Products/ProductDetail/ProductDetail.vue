@@ -72,7 +72,15 @@
                 </div>
 
                 <div class="form_group">
-                    <Accordion></Accordion>
+                    <!-- <Accordion></Accordion> -->
+                    <!-- <Accordion 
+                        v-if="Array.isArray(product.infos) && product.infos.length > 0"
+                        :accordionItems="accordionItems">
+                    </Accordion> -->
+                    <Accordion
+                        v-if="Array.isArray(product.infos) && product.infos.length > 0"
+                        :accordionItems="product.infos">
+                    </Accordion>
                 </div>
             </div>
         </div>
@@ -197,11 +205,6 @@ const SECOND_SELECT = 2;
 
 const sectionSelected = ref(FIRST_SELECT);
 const selected = ref('');
-const options = [
-  { label: 'Option 1', value: 'opt1' },
-  { label: 'Option 2', value: 'opt2' },
-  { label: 'Option 3', value: 'opt3' },
-];
 
 const route = useRoute();
 const product = ref({});
@@ -280,7 +283,7 @@ const getUnitPrice = () => {
     }
     const lastPricingIndex = priceList.length - 1;
     const unitPrice = priceList[lastPricingIndex].unitPrice;
-    return unitPrice;
+    return unitPrice.toLocaleString('fr-FR');
 }
 
 const getAccordionItems = () => {
@@ -289,7 +292,7 @@ const getAccordionItems = () => {
     //     "id": 1,
     //     title: 
     // };
-    
+
     // infos.description
     // capacity.volume
     // unitType
@@ -336,7 +339,6 @@ onMounted(() => {
     .then(res => {
         if (res.data) {
             product.value = res.data;
-            console.log(product.value);
         }
     })
     .catch(error => {

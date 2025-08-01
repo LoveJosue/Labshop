@@ -42,13 +42,18 @@ const productSchema = new Schema({
                     volume: Number,
                     unit: String
                 },
-                packaging: String,
+                packaging: {
+                    type: String,
+                    lowercase: true
+                },
                 dimensions: {
                     length: Number,
                     width: Number,
-                    height: Number,
+                    diameter: Number,
+                    thickness: Number,
                     unit: String
-                }
+                },
+                material: String
             }
         }]
     }],
