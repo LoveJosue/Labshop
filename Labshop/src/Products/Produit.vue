@@ -141,7 +141,6 @@ const props = defineProps({
 
 const emit = defineEmits(['imgClicked']);
 const photoClicked = (imgUrl) => { emit('imgClicked', imgUrl)}
-// const seeDetails = () => {router.push('/productDetail')}
 const seeDetails = () => {router.push(`products/${props.product._id}`)};
 const getRetailPrice = () => {
     return props.product.priceList[props.product.priceList.length-1].unitPrice.toLocaleString('fr-FR');

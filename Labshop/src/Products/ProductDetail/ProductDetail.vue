@@ -241,7 +241,6 @@ const getUnitType = computed(() => {
     return typeof unit === 'string' && unit.length > 0 ? unit.charAt(0).toUpperCase() + unit.slice(1) : ''
     
 });
-
 const getWholesalePriceRange = () => {
     const priceList = product.value.priceList;
      if (!Array.isArray(priceList) || priceList.length < 2) {
@@ -254,15 +253,14 @@ const getWholesalePriceRange = () => {
     }
     return `${firstPricing.unitPrice.toLocaleString('fr-FR')} - ${beforeLastPricing.unitPrice.toLocaleString('fr-FR')}`;
 };
-
 const selectSection = (event) => {
     const element = event.currentTarget;
     const id = element.getAttribute('id');
     sectionSelected.value = parseInt(id);
 }
-
 const getWholeSalePriceList = () => {
     const priceList = product.value.priceList;
+    const unitType = product.value.unitType;
     if (!Array.isArray(priceList) || priceList.length === 0) {
         return [];
     }
@@ -271,11 +269,12 @@ const getWholeSalePriceList = () => {
     // Adapter les valeurs retournées au composant SelectDropDown
     return wholeSalePricingRange.map((item, idx) => ({
         label: `${item.name}`,
+        unitPrice: `${item.unitPrice.toLocaleString('fr-FR')}`,
+        unitType: unitType,
         clue: item.best ? 'Meilleur' : null,
         value: idx
     }));
 }
-
 const getUnitPrice = () => {
     const priceList = product.value.priceList;
     if (!Array.isArray(priceList) || priceList.length === 0) {
@@ -285,54 +284,6 @@ const getUnitPrice = () => {
     const unitPrice = priceList[lastPricingIndex].unitPrice;
     return unitPrice.toLocaleString('fr-FR');
 }
-
-const getAccordionItems = () => {
-    // let items = []
-    // const item1 = {
-    //     "id": 1,
-    //     title: 
-    // };
-
-    // infos.description
-    // capacity.volume
-    // unitType
-    // infos.dimensions
-    // infos.isFullyISO
-    // infos.storageGuide
-
-    // const accordionItems = [
-    //     {
-    //         id: 1,
-    //         title:  "Détails du produit",
-    //         subElems: [
-    //             {
-    //                 title: 'Description',
-    //                 content: 'Ceci est un produit qui peut-être utilisé pour ceci et cela'
-    //             },
-
-    //             {
-    //                 title: "Détails",
-    //                 content: {
-    //                     volume: '1µL',
-    //                     packaging: 'sachet',
-    //                     dimensions: '110mm x 40mm'
-    //                 }
-    //             }
-    //         ],
-    //     },
-    //     {
-    //         id: 2,
-    //         title:  "Caractéristiques du produit",
-    //         content: 'Ce produit est conforme aux normes de fabrication ISO'
-    //     },
-    //     {
-    //         id: 3,
-    //         title:  "Guide d'entreposage",
-    //         content: "Concervez ce produit à température ambiente dans un espace aéré pour éviter le développement de moisissures."
-    //     }
-    // ]
-}
-
 onMounted(() => {
     const id = route.params.id;
     axios.get(`${apiUrl}/products/${id}`)

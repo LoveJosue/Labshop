@@ -20,12 +20,13 @@
         @click="selectOption(option)"
         class="px-3 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
         :class="{
-          'bg-gray-50 text-gray-700 font-medium': option.value === modelValue
+          'bg-gray-100 text-gray-700 font-medium': option.value === modelValue
         }"
       >
-        <div class="flex flex-row space-between justify-between">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr;" class="gap-x-2">
             <span>{{ option.label }}</span>
-            <span class='text-primaryBlue border bg-white rounded-md px-2' v-if='option.clue'>{{ option.clue }}</span>
+            <span class="text-center text-xs bg-gray-100 text-primaryBlue rounded-md px-1 py-1 size-fit text-right">{{ option.unitPrice }} F / {{ option.unitType }}</span>
+            <span class='text-center text-white border bg-primaryBlue rounded-lg px-2 shadow-md/20 size-fit' v-if='option.clue'>{{ option.clue }}</span>
         </div>
       </li>
     </ul>
@@ -49,12 +50,6 @@ export default {
       isOpen: false
     };
   },
-//   computed: {
-//     selectedLabel() {
-//       const selected = this.options.find(opt => opt.value === this.modelValue);
-//       return selected ? selected.label : 'Selectionnez votre tarif ...';
-//     }
-//   },
     computed: {
         selectedLabel() {
         const selected = this.options.find(opt => opt.value === this.modelValue);
