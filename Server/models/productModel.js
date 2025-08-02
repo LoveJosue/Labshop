@@ -30,6 +30,33 @@ const productSchema = new Schema({
         unitPrice: Number,
         best: Boolean
     }],
+    infos: [{
+        infoType: Number,
+        title: String,
+        content: String,
+        subInfos: [{
+            title: String,
+            content: String,
+            detailedContent: {
+                capacity: {
+                    volume: Number,
+                    unit: String
+                },
+                packaging: {
+                    type: String,
+                    lowercase: true
+                },
+                dimensions: {
+                    length: Number,
+                    width: Number,
+                    diameter: Number,
+                    thickness: Number,
+                    unit: String
+                },
+                material: String
+            }
+        }]
+    }],
     stock: {
         totalUnits: Number,
         wholesaleReserve: Number,
