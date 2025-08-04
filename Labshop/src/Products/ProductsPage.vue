@@ -18,7 +18,7 @@
             :product="p"/>
       </div>
       <div v-else>
-        <p>Il n'y a pas de produits dans la BD</p>
+        <p>Chargement ...</p>
       </div>
 </template>
 
