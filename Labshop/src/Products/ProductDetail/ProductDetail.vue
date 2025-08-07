@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        <div class="product_img">
+        <div class="product_img flex">
             <div v-for="(item, index) in product.imgsUrl" 
                  :key="index" 
                  :class="index === 0 ? 'img_1' : 'under_img'">
@@ -89,7 +89,7 @@
                 <span class="pi pi-star-fill"></span>
                 <span class="rate">{{ getRatingAverage.toFixed(1).toString().replace('.', ',') }}</span>
                 <span class="dot"></span>
-                <span class="comments_header_title">{{ comments.length }} commentaire{{ comments.length > 1 ? 's' : ''}}</span>
+                <span class="comments_header_title">{{ comments.length }} Commentaire{{ comments.length > 1 ? 's' : ''}}</span>
             </div>
             <div class="comments_grid">
                 <!-- Afficher 6 commentaires. S'il y en a plus, les afficher dans  une liste déroulante-->
@@ -304,9 +304,8 @@ onMounted(() => {
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box;    
 }
-
 h1 {
     font-weight: lighter;
 }
@@ -364,14 +363,14 @@ h2 {
   margin-bottom: 1rem;
   
 }
-
 .product-details {
   padding: 2rem;
+  padding-bottom: 3rem;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  height: fit-content;
 }
-
 .product-details p {
     font-size: 1rem; 
     color: #555;
@@ -414,14 +413,12 @@ h2 {
   color: #007bff;
   font-weight: 600;
 }
-
 .select-content {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     padding: 1.5rem 1rem;
 }
-
 .select-content p {
     color: black;
     font-size: 1rem;
@@ -601,6 +598,13 @@ h2 {
 @media(min-width: 950px) {
     .comments .comments_grid {
         grid-template-columns: 1fr 1fr;
+    }
+}
+@media(max-width: 1190px) {
+    .main {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
 }
 

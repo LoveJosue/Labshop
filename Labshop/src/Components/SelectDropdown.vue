@@ -70,4 +70,7 @@ export default {
 
 <style scoped>
 /* Fermeture du dropdown en cliquant en dehors (bonus JS si nécessaire) */
+li {
+  /* transition: all 2s ease; */
+}
 </style>
