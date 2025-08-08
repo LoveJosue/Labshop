@@ -18,8 +18,8 @@
             <div class="form_group">
                 <div class="select-panel shadow-xs/30 rounded-md border">
                     <div class="select-section">
-                        <div 
-                            id="1" 
+                        <div
+                            id='1' 
                             class="select-item rounded-tl-md" 
                             :class="sectionSelected === FIRST_SELECT ? 'select-item-1-active' : 'select-item-1-unactive'" 
                             @click="selectSection($event)"
@@ -64,19 +64,24 @@
                     </div>
                     
                 </div>
-                <div class="form_group_elem add_to_card rounded-sm shadow-xs/30">
+                <!-- Bouton dans la section produit -->
+                <div ref="addToCartOriginal" class="add_to_card rounded-sm shadow-xs/30">
                     Ajouter au panier
                 </div>
+
+                <!-- Bouton fixe, affiché seulement quand l’original est hors écran -->
+                <div 
+                    v-if="showFixedBtn"
+                    class="add_to_card fixed animate-in"
+                >
+                Ajouter au panier
+                </div>
+
                 <div class="form_group_elem available_btn rounded-sm shadow-xs/30">
                     Disponibilité en boutique
                 </div>
 
                 <div class="form_group">
-                    <!-- <Accordion></Accordion> -->
-                    <!-- <Accordion 
-                        v-if="Array.isArray(product.infos) && product.infos.length > 0"
-                        :accordionItems="accordionItems">
-                    </Accordion> -->
                     <Accordion
                         v-if="Array.isArray(product.infos) && product.infos.length > 0"
                         :accordionItems="product.infos">
@@ -97,7 +102,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -119,7 +124,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -141,7 +146,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -163,7 +168,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -196,9 +201,14 @@ import SelectDropdown from '@/Components/SelectDropdown.vue';
 import axios from 'axios';
 import { apiUrl } from '@/config';
 
-import { onMounted, ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { watch } from 'vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+
+
+const addToCartOriginal = ref(null);
+const showFixedBtn = ref(false);
 
 const FIRST_SELECT = 1;
 const SECOND_SELECT = 2;
@@ -285,6 +295,44 @@ const getUnitPrice = () => {
     return unitPrice.toLocaleString('fr-FR');
 }
 onMounted(() => {
+    getProductInfos();
+    updateTitle();
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                // Si le bouton original est visible => bouton fixe masqué
+                showFixedBtn.value = !entry.isIntersecting;
+            });
+        },
+        {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        }
+    );
+
+  if (addToCartOriginal.value) {
+    observer.observe(addToCartOriginal.value);
+  }
+
+  onBeforeUnmount(() => {
+    if (addToCartOriginal.value) {
+      observer.unobserve(addToCartOriginal.value);
+    }
+  });
+
+});
+
+function updateTitle() {
+    // Attendre que les données produit soient chargées avant d'utiliser product.value.name
+    watch(product, (newVal) => {
+        if (newVal && newVal.name) {
+            document.title = newVal.name;
+        }
+    }, { immediate: false });
+}
+
+function getProductInfos() {
     const id = route.params.id;
     axios.get(`${apiUrl}/products/${id}`)
     .then(res => {
@@ -295,7 +343,7 @@ onMounted(() => {
     .catch(error => {
         console.log(error);
     })
-})
+}
 
 
 </script>
@@ -322,9 +370,7 @@ h2 {
     column-gap: 50px;
     row-gap: 2rem;
     background-color: var(--bg);
-    margin: 0 15px 0 10px;
-    width: 1600px;
-    max-width: 80%;
+    max-width: 1300px;
     margin: 0 auto;
 
 }
@@ -389,7 +435,6 @@ h2 {
 }
 .product-details .select-panel .select-section {
     width:100%;
-    height: 50px;
     display: flex;
 }
 .select-item {
@@ -445,19 +490,36 @@ h2 {
     width: 100%;
     height: 50px;
 }
-.add_to_card {
+/* .add_to_card {
+    position: static;
     background-color: rgb(0, 123, 255);
     font-weight: 500;
     font-size: 1rem;
     transition: background-color 0.3s ease;
-    
+} */
+
+.add_to_card {
+    position: static;
+    background-color: rgb(0, 123, 255);
+    font-size: 1rem;
+    color: white;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    padding: 14px;
+    cursor: pointer;
+    font-weight: 300;
 }
+
 .add_to_card:hover {
     background-color: rgb(2, 111, 228);
+}
+.available_btn {
+    font-weight: 300;
 }
 .available_btn:hover {
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
+    font-weight: 300;
     transition: background-color 0.3s ease;
 }
 .input-box {
@@ -595,9 +657,12 @@ h2 {
 .comments .comments_card .profile-infos .comment-date {
     font-weight: var(--half-fw);
 }
-@media(min-width: 950px) {
-    .comments .comments_grid {
-        grid-template-columns: 1fr 1fr;
+
+/* Sur petits écrans */
+@media(max-width: 640px) {
+    .select-section {
+        display: flex;
+        flex-direction: column;
     }
 }
 @media(max-width: 1190px) {
@@ -606,6 +671,37 @@ h2 {
         flex-direction: column;
         width: 100%;
     }
+    .add_to_card.fixed {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        border-radius: 0;
+        z-index: 999;
+        animation: slideUp 0.4s ease-out;
+        font-weight: 300;
+        align-content: center;
+  }
+    .add_to_card:hover {
+        background-color: rgb(2, 111, 228);
+    }
+}
+@media(min-width: 950px) {
+    .comments .comments_grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
+/* Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
 </style>

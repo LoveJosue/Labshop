@@ -35,6 +35,7 @@
 
 <script setup>
 import {onMounted, ref} from 'vue';
+const ZERO = 0;
 const ONE = 1; // 1 -> Détails du produit
 const TWO = 2; // 2 -> Caractéristiques du produit
 const THREE = 3; // 3 -> Guide d'entreposage
@@ -42,7 +43,7 @@ const THREE = 3; // 3 -> Guide d'entreposage
 const props = defineProps({
     accordionItems : { type: Array, default: []}
 })
-const activeIndexes = ref([]);
+const activeIndexes = ref([ZERO]);
 
 onMounted(() => {
     if (props.accordionItems) {

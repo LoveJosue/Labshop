@@ -1,18 +1,18 @@
 <template>
     <div class="ctn">
-        <nav class="navbar">
-          <h1 class="logo">LabStore</h1>
-          <ul class="nav-links">
-            <li><router-link to="/">Accueil <i class="pi pi-home"></i></router-link></li>
+        <div class="nav">
+          <h4 class="logo">Labstore</h4>
+          <ul class="links">
+            <li><router-link to="/">Accueil</router-link></li>
             <li><router-link to="/products">Produits</router-link></li>
-            <div class="accountIcon">
-              <i class="pi pi-bars" style="color: rgb(190, 187, 181); margin-left: 4px;"></i>
-              <!-- <img src="@/images/user.png" alt="user_icon" class="user_icon"> -->
-              <img v-if="connected" src="@/images/user.png" alt="user_icon" class="user_icon" @click="setConnexion">
-              <img v-else src="@/images/josue_profil.jpg" alt="user_icon" class="user_icon" @click="setConnexion">
-            </div>
+            <li><router-link to="/about">À propos</router-link></li>
           </ul>
-        </nav>
+          <div class="icons">
+            <img src="@/images/user-empty.svg">
+            <img src="@/images/heart-empty.svg">
+            <img src="@/images/shop-bag-empty.svg">
+          </div>
+        </div>
     </div>
 </template>
 
@@ -32,59 +32,53 @@ const setConnexion = () => {
 
 <style scoped>
 .ctn {
+  position: sticky;
+  top: 0%;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px); /* Support pour safari */
-  background: rgba(0, 123, 255);
-  padding: 1rem;
-  color :white;
+  background: rgba(255, 255, 255, 0.8);
+  margin: auto;
+  color :black;
+  z-index: 2;
+  /* Ombre douce et étalée */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  /* Petite bordure fine pour mieux détacher du fond */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
 }
- .navbar {
+ .nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-width: 1300px;
+    width: 95%;
+    margin: 0 auto;
+    height: 70px;
   }
-  
-  .nav-links {
+  .links {
     list-style: none;
     display: flex;
-    gap: 1rem;
     align-items: center;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
   }
-  
-  .nav-links a {
-    color: white;
+  .links li {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .links a {
+    color: inherit;
     text-decoration: none;
   }
-
-  .accountIcon:hover {
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 5px 10px;
-  }
-  
-  .accountIcon {
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    gap: 0.8rem;
+  .icons {
     display: flex;
-    justify-content: center;
-    width: 75px;
-    height: 45px;
-    padding: 1.2rem 2.4rem;
     align-items: center;
+  }
+  .icons img {
+    width: 2rem;
+    height: 1.2rem;
     cursor: pointer;
   }
-
-  .accountIcon img {
-    /* Empêche l'image de se redimensionner */
-    flex-shrink: 0; 
-  }
-
-  .user_icon {
-    width: 1.9rem;
-    height: 1.9rem;
-    border-radius: 50%;
-    object-fit: fill;
-  }
-  
-  
 </style>
