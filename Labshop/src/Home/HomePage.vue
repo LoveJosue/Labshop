@@ -8,7 +8,7 @@
         </section>
 
 
-        <CCarousel :controls="true" indicators :interval="3000" dark transition="slide">
+        <CCarousel :controls="true" indicators :interval="3000" dark transition="slide" style="z-index:-1">
           <CCarouselItem>
             <img class="d-block w-100 carousel-image" src="../images/img_1.jpg" alt="slide 1"/>
                 <!-- <h3 class="caption-info">Explorez des appareils de loboratoire à la fine pointe de la technologie</h3> -->

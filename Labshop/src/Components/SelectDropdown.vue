@@ -23,7 +23,7 @@
           'bg-gray-100 text-gray-700 font-medium': option.value === modelValue
         }"
       >
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr;" class="gap-x-2">
+        <div class="gap-x-2 option-content">
             <span>{{ option.label }}</span>
             <span class="text-center text-xs bg-gray-100 text-primaryBlue rounded-md px-1 py-1 size-fit text-right">{{ option.unitPrice }} F / {{ option.unitType }}</span>
             <span class='text-center text-white border bg-primaryBlue rounded-lg px-2 shadow-md/20 size-fit' v-if='option.clue'>{{ option.clue }}</span>
@@ -70,4 +70,16 @@ export default {
 
 <style scoped>
 /* Fermeture du dropdown en cliquant en dehors (bonus JS si nécessaire) */
+
+.option-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+/* Sur petits écrans */
+@media(max-width: 640px) {
+    .option-content {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+}
 </style>
