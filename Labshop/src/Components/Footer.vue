@@ -10,7 +10,7 @@
     
 <style scoped>
 .ctn {
-    background: #f4f4f4;
+    background: rgba(83, 82, 82, 0.1);
     color: black;
     padding: 1rem;
     margin-top: 2rem;
