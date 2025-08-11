@@ -20,7 +20,7 @@
                     <div class="select-section">
                         <div
                             id='1' 
-                            class="select-item rounded-tl-md" 
+                            class="select-item max-sm:rounded-t-md rounded-tl-md" 
                             :class="sectionSelected === FIRST_SELECT ? 'select-item-1-active' : 'select-item-1-unactive'" 
                             @click="selectSection($event)"
                         >
@@ -222,8 +222,9 @@ const product = ref({});
 const maxStars = 5;
 const comments = ref([
     { id: 1, text: "Super produit", rating: 4 },
-    { id: 2, text: "Pas mal", rating: 2 },
-    { id: 3, text: "Mauvais produit", rating: 5 }
+    { id: 2, text: "Pas mal", rating: 3 },
+    { id: 3, text: "Bon produit", rating: 5 },
+    { id: 4, text: "Mauvais produit", rating: 2 }
 ]);
 
 const getRatingAverage = computed(() => {
@@ -370,9 +371,9 @@ h2 {
     column-gap: 50px;
     row-gap: 2rem;
     background-color: var(--bg);
-    max-width: 1300px;
+    max-width: var(--website-max-width);
+    width: var(--website-section-width);
     margin: 0 auto;
-
 }
 .product_img {
     display: grid;
@@ -396,19 +397,6 @@ h2 {
     height: 100%;
     object-fit: contain;
 }
-.product-details h1 {
-  font-size: 2rem;
-  font-weight: 100;
-  margin-bottom: 0.5rem;
-  font-family: 'Poppins', sans-serif;
-}
-
-.product-details h2 {
-  font-size: 1.5rem;
-  color: #222;
-  margin-bottom: 1rem;
-  
-}
 .product-details {
   padding: 2rem;
   padding-bottom: 3rem;
@@ -416,6 +404,17 @@ h2 {
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   height: fit-content;
+}
+.product-details h1 {
+  font-size: 2rem;
+  font-weight: 100;
+  margin-bottom: 0.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+.product-details h2 {
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 1rem;
 }
 .product-details p {
     font-size: 1rem; 
@@ -480,7 +479,7 @@ h2 {
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    max-width: 540px;
+    /* max-width: 540px; */
 }
 .form_group_elem {
     text-align: center;
@@ -526,6 +525,7 @@ h2 {
     border: 1px solid lightgray;
     width: 50%;
     height: 40px;
+    max-width: 290px;
 }
 
 .btn-group {
@@ -671,6 +671,10 @@ h2 {
         flex-direction: column;
         width: 100%;
     }
+    .main > *:not(:first-child) {
+        width: var(--website-section-width);
+        margin: 0 auto;
+    }
     .add_to_card.fixed {
         position: fixed;
         bottom: 0;
@@ -682,9 +686,13 @@ h2 {
         animation: slideUp 0.4s ease-out;
         font-weight: 300;
         align-content: center;
-  }
+    }
     .add_to_card:hover {
         background-color: rgb(2, 111, 228);
+    }
+    .product-details {
+        padding: 0;
+        border-radius: 0%;
     }
 }
 @media(min-width: 950px) {

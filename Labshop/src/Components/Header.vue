@@ -78,10 +78,11 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1300px;
-    width: 95%;
+    max-width: var(--website-max-width);
+    width: var(--website-section-width);
     margin: 0 auto;
     height: 70px;
+    /* Ça commence */
   }
 .links {
   list-style: none;
@@ -100,6 +101,8 @@ onUnmounted(() => {
 .links li:hover, .side-bar-links li:hover {
   color: black;
   transition: color 600ms ease;
+}
+.side-bar-links li:hover {
   text-decoration: underline;
 }
 .ctn a {

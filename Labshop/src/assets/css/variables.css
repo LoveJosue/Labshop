@@ -11,4 +11,8 @@
 
     /* Comment style */
     --half-fw: 500;
+
+    /* Sizing */
+    --website-max-width: 1300px;
+    --website-section-width: 95%;
 }

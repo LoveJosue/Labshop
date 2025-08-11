@@ -1,11 +1,11 @@
 <template>
     <footer class="ctn">
-        <p>&copy; 2025 ShopSmart. All rights reserved.</p>
+        <p>&copy; {{ currentYear }} Labstore. All rights reserved.</p>
       </footer>
 </template>
     
 <script setup>
-    
+const currentYear = new Date().getFullYear();
 </script>
     
 <style scoped>
