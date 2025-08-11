@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        <div class="product_img">
+        <div class="product_img flex">
             <div v-for="(item, index) in product.imgsUrl" 
                  :key="index" 
                  :class="index === 0 ? 'img_1' : 'under_img'">
@@ -18,9 +18,9 @@
             <div class="form_group">
                 <div class="select-panel shadow-xs/30 rounded-md border">
                     <div class="select-section">
-                        <div 
-                            id="1" 
-                            class="select-item rounded-tl-md" 
+                        <div
+                            id='1' 
+                            class="select-item max-sm:rounded-t-md rounded-tl-md" 
                             :class="sectionSelected === FIRST_SELECT ? 'select-item-1-active' : 'select-item-1-unactive'" 
                             @click="selectSection($event)"
                         >
@@ -64,19 +64,24 @@
                     </div>
                     
                 </div>
-                <div class="form_group_elem add_to_card rounded-sm shadow-xs/30">
+                <!-- Bouton dans la section produit -->
+                <div ref="addToCartOriginal" class="add_to_card rounded-sm shadow-xs/30">
                     Ajouter au panier
                 </div>
+
+                <!-- Bouton fixe, affiché seulement quand l’original est hors écran -->
+                <div 
+                    v-if="showFixedBtn"
+                    class="add_to_card fixed animate-in"
+                >
+                Ajouter au panier
+                </div>
+
                 <div class="form_group_elem available_btn rounded-sm shadow-xs/30">
                     Disponibilité en boutique
                 </div>
 
                 <div class="form_group">
-                    <!-- <Accordion></Accordion> -->
-                    <!-- <Accordion 
-                        v-if="Array.isArray(product.infos) && product.infos.length > 0"
-                        :accordionItems="accordionItems">
-                    </Accordion> -->
                     <Accordion
                         v-if="Array.isArray(product.infos) && product.infos.length > 0"
                         :accordionItems="product.infos">
@@ -89,7 +94,7 @@
                 <span class="pi pi-star-fill"></span>
                 <span class="rate">{{ getRatingAverage.toFixed(1).toString().replace('.', ',') }}</span>
                 <span class="dot"></span>
-                <span class="comments_header_title">{{ comments.length }} commentaire{{ comments.length > 1 ? 's' : ''}}</span>
+                <span class="comments_header_title">{{ comments.length }} Commentaire{{ comments.length > 1 ? 's' : ''}}</span>
             </div>
             <div class="comments_grid">
                 <!-- Afficher 6 commentaires. S'il y en a plus, les afficher dans  une liste déroulante-->
@@ -97,7 +102,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -119,7 +124,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -141,7 +146,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -163,7 +168,7 @@
                 <div class="comments_card">
                     <div class="profile">
                         <div class="profile-chld-1">
-                            <img src="@/images/josue_profil.jpg" alt="" class="profile-avatar">
+                            <img src="@/images/user-full.svg" alt="" class="profile-avatar">
                         </div>
                         <div class="profile-chld-2">
                             <span class="profile-name">Josué</span>
@@ -196,9 +201,14 @@ import SelectDropdown from '@/Components/SelectDropdown.vue';
 import axios from 'axios';
 import { apiUrl } from '@/config';
 
-import { onMounted, ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { watch } from 'vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+
+
+const addToCartOriginal = ref(null);
+const showFixedBtn = ref(false);
 
 const FIRST_SELECT = 1;
 const SECOND_SELECT = 2;
@@ -212,8 +222,9 @@ const product = ref({});
 const maxStars = 5;
 const comments = ref([
     { id: 1, text: "Super produit", rating: 4 },
-    { id: 2, text: "Pas mal", rating: 2 },
-    { id: 3, text: "Mauvais produit", rating: 5 }
+    { id: 2, text: "Pas mal", rating: 3 },
+    { id: 3, text: "Bon produit", rating: 5 },
+    { id: 4, text: "Mauvais produit", rating: 2 }
 ]);
 
 const getRatingAverage = computed(() => {
@@ -285,6 +296,44 @@ const getUnitPrice = () => {
     return unitPrice.toLocaleString('fr-FR');
 }
 onMounted(() => {
+    getProductInfos();
+    updateTitle();
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                // Si le bouton original est visible => bouton fixe masqué
+                showFixedBtn.value = !entry.isIntersecting;
+            });
+        },
+        {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        }
+    );
+
+  if (addToCartOriginal.value) {
+    observer.observe(addToCartOriginal.value);
+  }
+
+  onBeforeUnmount(() => {
+    if (addToCartOriginal.value) {
+      observer.unobserve(addToCartOriginal.value);
+    }
+  });
+
+});
+
+function updateTitle() {
+    // Attendre que les données produit soient chargées avant d'utiliser product.value.name
+    watch(product, (newVal) => {
+        if (newVal && newVal.name) {
+            document.title = newVal.name;
+        }
+    }, { immediate: false });
+}
+
+function getProductInfos() {
     const id = route.params.id;
     axios.get(`${apiUrl}/products/${id}`)
     .then(res => {
@@ -295,7 +344,7 @@ onMounted(() => {
     .catch(error => {
         console.log(error);
     })
-})
+}
 
 
 </script>
@@ -304,9 +353,8 @@ onMounted(() => {
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box;    
 }
-
 h1 {
     font-weight: lighter;
 }
@@ -323,11 +371,9 @@ h2 {
     column-gap: 50px;
     row-gap: 2rem;
     background-color: var(--bg);
-    margin: 0 15px 0 10px;
-    width: 1600px;
-    max-width: 80%;
+    max-width: var(--website-max-width);
+    width: var(--website-section-width);
     margin: 0 auto;
-
 }
 .product_img {
     display: grid;
@@ -351,27 +397,25 @@ h2 {
     height: 100%;
     object-fit: contain;
 }
+.product-details {
+  padding: 2rem;
+  padding-bottom: 3rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+}
 .product-details h1 {
   font-size: 2rem;
   font-weight: 100;
   margin-bottom: 0.5rem;
   font-family: 'Poppins', sans-serif;
 }
-
 .product-details h2 {
   font-size: 1.5rem;
   color: #222;
   margin-bottom: 1rem;
-  
 }
-
-.product-details {
-  padding: 2rem;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-}
-
 .product-details p {
     font-size: 1rem; 
     color: #555;
@@ -390,7 +434,6 @@ h2 {
 }
 .product-details .select-panel .select-section {
     width:100%;
-    height: 50px;
     display: flex;
 }
 .select-item {
@@ -414,14 +457,12 @@ h2 {
   color: #007bff;
   font-weight: 600;
 }
-
 .select-content {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     padding: 1.5rem 1rem;
 }
-
 .select-content p {
     color: black;
     font-size: 1rem;
@@ -438,7 +479,7 @@ h2 {
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    max-width: 540px;
+    /* max-width: 540px; */
 }
 .form_group_elem {
     text-align: center;
@@ -448,25 +489,43 @@ h2 {
     width: 100%;
     height: 50px;
 }
-.add_to_card {
+/* .add_to_card {
+    position: static;
     background-color: rgb(0, 123, 255);
     font-weight: 500;
     font-size: 1rem;
     transition: background-color 0.3s ease;
-    
+} */
+
+.add_to_card {
+    position: static;
+    background-color: rgb(0, 123, 255);
+    font-size: 1rem;
+    color: white;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    padding: 14px;
+    cursor: pointer;
+    font-weight: 300;
 }
+
 .add_to_card:hover {
     background-color: rgb(2, 111, 228);
+}
+.available_btn {
+    font-weight: 300;
 }
 .available_btn:hover {
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
+    font-weight: 300;
     transition: background-color 0.3s ease;
 }
 .input-box {
     border: 1px solid lightgray;
     width: 50%;
     height: 40px;
+    max-width: 290px;
 }
 
 .btn-group {
@@ -598,10 +657,59 @@ h2 {
 .comments .comments_card .profile-infos .comment-date {
     font-weight: var(--half-fw);
 }
+
+/* Sur petits écrans */
+@media(max-width: 640px) {
+    .select-section {
+        display: flex;
+        flex-direction: column;
+    }
+}
+@media(max-width: 1190px) {
+    .main {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    .main > *:not(:first-child) {
+        width: var(--website-section-width);
+        margin: 0 auto;
+    }
+    .add_to_card.fixed {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        border-radius: 0;
+        z-index: 999;
+        animation: slideUp 0.4s ease-out;
+        font-weight: 300;
+        align-content: center;
+    }
+    .add_to_card:hover {
+        background-color: rgb(2, 111, 228);
+    }
+    .product-details {
+        padding: 0;
+        border-radius: 0%;
+    }
+}
 @media(min-width: 950px) {
     .comments .comments_grid {
         grid-template-columns: 1fr 1fr;
     }
 }
 
+/* Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
 </style>
