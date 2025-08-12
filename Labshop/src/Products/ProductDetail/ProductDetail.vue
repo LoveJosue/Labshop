@@ -1,6 +1,7 @@
 <template>
     <div class="main">
-        <div class="product_img flex">
+        <Spinner v-if="loading"></Spinner>
+        <div v-else class="product_img flex">
             <div v-for="(item, index) in product.imgsUrl" 
                  :key="index" 
                  :class="index === 0 ? 'img_1' : 'under_img'">
@@ -205,7 +206,9 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { watch } from 'vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import Spinner from '@/Components/Spinner.vue';
 
+const loading = ref(true);
 
 const addToCartOriginal = ref(null);
 const showFixedBtn = ref(false);
@@ -295,8 +298,8 @@ const getUnitPrice = () => {
     const unitPrice = priceList[lastPricingIndex].unitPrice;
     return unitPrice.toLocaleString('fr-FR');
 }
-onMounted(() => {
-    getProductInfos();
+onMounted(async () => {
+    await getProductInfos();
     updateTitle();
 
     const observer = new IntersectionObserver(
@@ -333,17 +336,24 @@ function updateTitle() {
     }, { immediate: false });
 }
 
-function getProductInfos() {
+async function getProductInfos() {
     const id = route.params.id;
-    axios.get(`${apiUrl}/products/${id}`)
-    .then(res => {
-        if (res.data) {
-            product.value = res.data;
-        }
-    })
-    .catch(error => {
-        console.log(error);
-    })
+    try {
+        await axios.get(`${apiUrl}/products/${id}`)
+        .then(res => {
+            if (res.data) {
+                product.value = res.data;
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        })
+
+    } catch (err) {
+        console.log('Erreur');
+    } finally {
+        loading.value = false;
+    }
 }
 
 
@@ -682,7 +692,7 @@ h2 {
         width: 100%;
         height: 60px;
         border-radius: 0;
-        z-index: 999;
+        z-index: 2;
         animation: slideUp 0.4s ease-out;
         font-weight: 300;
         align-content: center;
