@@ -701,7 +701,7 @@ h2 {
         background-color: rgb(2, 111, 228);
     }
     .product-details {
-        padding: 0;
+        /* padding: 0; */
         border-radius: 0%;
     }
 }
