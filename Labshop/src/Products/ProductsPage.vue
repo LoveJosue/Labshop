@@ -1,7 +1,10 @@
 <template>
     <!-- <Filter @sortPriceAsc="onSortPriceAsc"
             @sortPriceDesc="onSortPriceDesc"/> -->
-      <div v-if="productsResult && productsResult.length > 0" class="grid">
+      <!-- <div v-if="productsResult && productsResult.length > 0" class="grid"> -->
+
+      <Spinner v-if="loading"/>
+      <div v-else class="grid">
         <h1 class="grid-title">Nos produits</h1>
         <!-- <Filter 
             class="filter" 
@@ -17,9 +20,6 @@
             :key="p._id"
             :product="p"/>
       </div>
-      <div v-else>
-        <p>Chargement ...</p>
-      </div>
 </template>
 
 
@@ -32,6 +32,9 @@ import axios from "axios";
 import Filter from "./Filter.vue";
 import "../../scss/custom.scss"
 import { apiUrl } from '@/config';
+import Spinner from "@/Components/Spinner.vue";
+
+const loading = ref(true);
 
 let produits = [];
 let productsResult = ref(produits)
@@ -48,10 +51,11 @@ const onSortPriceDesc = () => {
 }
 
 onMounted(async () => {
-  axios.get(`${apiUrl}/products`)
+  await axios.get(`${apiUrl}/products`)
   .then(res => {
     if (res.data) {
       productsResult.value = res.data;
+      loading.value = false; 
     }
     })
     .catch(error => {
