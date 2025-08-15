@@ -39,7 +39,7 @@
                     <div v-if="sectionSelected === 1" class="select-content">
                         <div>
                             <p>Choix du tarif :</p>
-                            <SelectDropdown v-model="selected" :options="getWholeSalePriceList()" />
+                            <SelectDropdown v-model="optionSelected" :options="getWholeSalePriceList()" />
                         </div>
                           <div>
                               <p>Quantité de cartons :</p>
@@ -47,7 +47,8 @@
                                 <NumberInputComponent 
                                 :min="1"
                                 :max="100"
-                                :modelValue="1"/>
+                                :modelValue="1"
+                                v-model="quantity"/>
                               </div>
                           </div>
                     </div>
@@ -58,7 +59,8 @@
                                 <NumberInputComponent 
                                 :min="1"
                                 :max="100"
-                                :modelValue="1"/>
+                                :modelValue="1"
+                                v-model="quantity"/>
                               </div>
                         </div>
                         
@@ -66,7 +68,7 @@
                     
                 </div>
                 <!-- Bouton dans la section produit -->
-                <div ref="addToCartOriginal" class="add_to_card rounded-sm shadow-xs/30">
+                <div @click="addToCart()" ref="addToCartOriginal" class="add_to_card rounded-sm shadow-xs/30">
                     Ajouter au panier
                 </div>
 
@@ -74,6 +76,7 @@
                 <div 
                     v-if="showFixedBtn"
                     class="add_to_card fixed animate-in"
+                    @click="addToCart()"
                 >
                 Ajouter au panier
                 </div>
@@ -198,6 +201,7 @@
 import Accordion from '@/Components/Accordion.vue';
 import NumberInputComponent from '@/Components/NumberInputComponent.vue';
 import SelectDropdown from '@/Components/SelectDropdown.vue';
+import Spinner from '@/Components/Spinner.vue';
 
 import axios from 'axios';
 import { apiUrl } from '@/config';
@@ -206,18 +210,19 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { watch } from 'vue';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import Spinner from '@/Components/Spinner.vue';
+
+const FIRST_SELECT = 1; // Achat en gros
+const SECOND_SELECT = 2; // Achat en détail
 
 const loading = ref(true);
-
-const addToCartOriginal = ref(null);
 const showFixedBtn = ref(false);
 
-const FIRST_SELECT = 1;
-const SECOND_SELECT = 2;
+const addToCartOriginal = ref(null);
 
 const sectionSelected = ref(FIRST_SELECT);
-const selected = ref('');
+const optionSelected = ref('');
+const quantity = ref(1);
+// const retailQte = ref(1);
 
 const route = useRoute();
 const product = ref({});
@@ -298,35 +303,57 @@ const getUnitPrice = () => {
     const unitPrice = priceList[lastPricingIndex].unitPrice;
     return unitPrice.toLocaleString('fr-FR');
 }
-onMounted(async () => {
-    await getProductInfos();
-    updateTitle();
+const addToCart = () => {
+    // Achat en gros
+    if (sectionSelected.value === FIRST_SELECT) {
+        // validerDonneesRecquises() et aviserInterfaceAuBesoin()
+        const p = product.value;
+        const currentFullUrl = getCurrentFullYrl();
+        const unitPrice = p.priceList[optionSelected.value].unitPrice;
 
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach(entry => {
-                // Si le bouton original est visible => bouton fixe masqué
-                showFixedBtn.value = !entry.isIntersecting;
-            });
-        },
-        {
-            threshold: 0.1,
-            rootMargin: "0px 0px -50px 0px"
+        const wholeSaleItem = {
+            "productId": p._id,
+            "name": p.name,
+            "imgUrl": p.imgsUrl[0],
+            "purchaseType": FIRST_SELECT,
+            "qte": quantity.value, // Mettre la quantité retournée par le composant
+            "unitPerBox": p.unitPerBox,
+            "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
+            "productUrl": currentFullUrl
+        };
+
+        alert(JSON.stringify(wholeSaleItem));
+    } 
+    else { // Achat en détail
+        const p = product.value;
+        const priceList = p.priceList;
+        const index = priceList.length - 1;
+        
+        const unitPrice = priceList[index].unitPrice;
+        const currentFullUrl = getCurrentFullYrl();
+        
+        const retailItem = {
+            "productId": p.id,
+            "name": p.name,
+            "imgUrl": p.imgsUrl[0],
+            "purchaseType": SECOND_SELECT,
+            "qte": quantity.value,
+            "unitType": p.unitType,
+            "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
+            "productUrl": currentFullUrl
         }
-    );
-
-  if (addToCartOriginal.value) {
-    observer.observe(addToCartOriginal.value);
-  }
-
-  onBeforeUnmount(() => {
-    if (addToCartOriginal.value) {
-      observer.unobserve(addToCartOriginal.value);
     }
-  });
-
-});
-
+    
+    // const itemToString = JSON.stringify(item);
+    // if (JSON.parse(localStorage.getItem('cart')).indexOf(item.id) === -1) {
+    //     localStorage.setItem('cart', itemToString)
+        
+    // }
+    
+}
+function getCurrentFullYrl () {
+    return window.location.href;
+}
 function updateTitle() {
     // Attendre que les données produit soient chargées avant d'utiliser product.value.name
     watch(product, (newVal) => {
@@ -355,8 +382,34 @@ async function getProductInfos() {
         loading.value = false;
     }
 }
+onMounted(async () => {
+    await getProductInfos();
+    updateTitle();
 
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach(entry => {
+                // Si le bouton original est visible => bouton fixe masqué
+                showFixedBtn.value = !entry.isIntersecting;
+            });
+        },
+        {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        }
+    );
 
+  if (addToCartOriginal.value) {
+    observer.observe(addToCartOriginal.value);
+  }
+
+  onBeforeUnmount(() => {
+    if (addToCartOriginal.value) {
+      observer.unobserve(addToCartOriginal.value);
+    }
+  });
+
+});
 </script>
 
 <style scoped>
