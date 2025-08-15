@@ -39,16 +39,22 @@
                     <div v-if="sectionSelected === 1" class="select-content">
                         <div>
                             <p>Choix du tarif :</p>
-                            <SelectDropdown v-model="optionSelected" :options="getWholeSalePriceList()" />
+                            <SelectDropdown v-model="optionSelected" :options="getWholeSalePriceList()" @update:modelValue="onTarifChange"/>
                         </div>
                           <div>
                               <p>Quantité de cartons :</p>
                               <div class="input-box rounded-md">
-                                <NumberInputComponent 
+                                <!-- <NumberInputComponent 
                                 :min="1"
                                 :max="100"
                                 :modelValue="1"
-                                v-model="quantity"/>
+                                v-model="quantity"/> -->
+                                <NumberInputComponent 
+                                :min="1"
+                                :max="100"
+                                :modelValue="wholeSaleQte"
+                                v-model="wholeSaleQte"
+                                @update:modelValue="onQteChange"/>
                               </div>
                           </div>
                     </div>
@@ -59,8 +65,8 @@
                                 <NumberInputComponent 
                                 :min="1"
                                 :max="100"
-                                :modelValue="1"
-                                v-model="quantity"/>
+                                :modelValue="retailQte"
+                                v-model="retailQte"/>
                               </div>
                         </div>
                         
@@ -221,8 +227,8 @@ const addToCartOriginal = ref(null);
 
 const sectionSelected = ref(FIRST_SELECT);
 const optionSelected = ref(0);
-const quantity = ref(1);
-// const retailQte = ref(1);
+const wholeSaleQte = ref(1);
+const retailQte = ref(1);
 
 const route = useRoute();
 const product = ref({});
@@ -307,7 +313,6 @@ const addToCart = () => {
     // Achat en gros
     
     if (sectionSelected.value === FIRST_SELECT) {
-        // validerDonneesRecquises() et aviserInterfaceAuBesoin()
         const p = product.value;
         const currentFullUrl = getCurrentFullYrl();
         const unitPrice = p.priceList[optionSelected.value].unitPrice;
@@ -317,7 +322,7 @@ const addToCart = () => {
             "name": p.name,
             "imgUrl": p.imgsUrl[0],
             "purchaseType": FIRST_SELECT,
-            "qte": quantity.value, // Mettre la quantité retournée par le composant
+            "qte": wholeSaleQte.value, // Mettre la quantité retournée par le composant
             "unitPerBox": p.unitPerBox,
             "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
             "productUrl": currentFullUrl
@@ -336,7 +341,7 @@ const addToCart = () => {
             "name": p.name,
             "imgUrl": p.imgsUrl[0],
             "purchaseType": SECOND_SELECT,
-            "qte": quantity.value,
+            "qte": retailQte.value,
             "unitType": p.unitType,
             "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
             "productUrl": currentFullUrl
@@ -353,18 +358,7 @@ const addToCart = () => {
 function getCurrentFullYrl () {
     return window.location.href;
 }
-function validateData() {
-    // Achat en gros
-    if (sectionSelected.value === FIRST_SELECT) {
-        if(!optionSelected.value) {
-            
-        }
-        return true;
 
-    } else { // Achat en détail
-        return true;
-    }
-}
 function updateTitle() {
     // Attendre que les données produit soient chargées avant d'utiliser product.value.name
     watch(product, (newVal) => {
@@ -374,9 +368,28 @@ function updateTitle() {
     }, { immediate: false });
 }
 
-function setPriceSelection() {
+function setOptionSelected() {
     const lastWholeSalePricing = product.value.priceList.length - 2;
     optionSelected.value = lastWholeSalePricing;
+}
+
+function onTarifChange(index) {
+    const minBoxes = product.value.priceList[index].minBoxes;
+    wholeSaleQte.value = minBoxes;
+}
+
+function onQteChange(value) {
+    optionSelected.value = getPricingIndex(value);
+}
+
+function getPricingIndex(value) {
+    const priceList = product.value.priceList;
+    const length = product.value.priceList.length - 2;
+    for (let i = 0; i <= length; i++) {
+        if (value >= priceList[i].minBoxes) {
+            return i;
+        }
+    }
 }
 
 async function getProductInfos() {
@@ -401,7 +414,7 @@ async function getProductInfos() {
 onMounted(async () => {
     await getProductInfos();
     updateTitle();
-    setPriceSelection();
+    setOptionSelected();
 
     const observer = new IntersectionObserver(
         (entries) => {
