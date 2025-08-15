@@ -220,7 +220,7 @@ const showFixedBtn = ref(false);
 const addToCartOriginal = ref(null);
 
 const sectionSelected = ref(FIRST_SELECT);
-const optionSelected = ref('');
+const optionSelected = ref(0);
 const quantity = ref(1);
 // const retailQte = ref(1);
 
@@ -305,6 +305,7 @@ const getUnitPrice = () => {
 }
 const addToCart = () => {
     // Achat en gros
+    
     if (sectionSelected.value === FIRST_SELECT) {
         // validerDonneesRecquises() et aviserInterfaceAuBesoin()
         const p = product.value;
@@ -321,8 +322,6 @@ const addToCart = () => {
             "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
             "productUrl": currentFullUrl
         };
-
-        alert(JSON.stringify(wholeSaleItem));
     } 
     else { // Achat en détail
         const p = product.value;
@@ -354,6 +353,18 @@ const addToCart = () => {
 function getCurrentFullYrl () {
     return window.location.href;
 }
+function validateData() {
+    // Achat en gros
+    if (sectionSelected.value === FIRST_SELECT) {
+        if(!optionSelected.value) {
+            
+        }
+        return true;
+
+    } else { // Achat en détail
+        return true;
+    }
+}
 function updateTitle() {
     // Attendre que les données produit soient chargées avant d'utiliser product.value.name
     watch(product, (newVal) => {
@@ -361,6 +372,11 @@ function updateTitle() {
             document.title = newVal.name;
         }
     }, { immediate: false });
+}
+
+function setPriceSelection() {
+    const lastWholeSalePricing = product.value.priceList.length - 2;
+    optionSelected.value = lastWholeSalePricing;
 }
 
 async function getProductInfos() {
@@ -385,6 +401,7 @@ async function getProductInfos() {
 onMounted(async () => {
     await getProductInfos();
     updateTitle();
+    setPriceSelection();
 
     const observer = new IntersectionObserver(
         (entries) => {
