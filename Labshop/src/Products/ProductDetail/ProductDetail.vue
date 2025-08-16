@@ -215,7 +215,9 @@ import { apiUrl } from '@/config';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { watch } from 'vue';
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { onBeforeRouteUpdate, useRoute } from 'vue-router';
+
+const CART = 'cart';
 
 const FIRST_SELECT = 1; // Achat en gros
 const SECOND_SELECT = 2; // Achat en détail
@@ -254,13 +256,14 @@ const getEmptystars = computed(() => {
     return maxStars - Math.floor(getRatingAverage.value);
 });
 // const getRatingAverage = computed(() => {
-//     if (comments.value.length === 0) return 0;
-//     let sum = 0;
-//     for (let i = 0; i < comments.value.length; i++) {
-//         sum += comments.value[i].rating;
-//     }
-//     return (sum / comments.value.length).toFixed(1).toString().replace(".", ",");
-// })
+    //     if (comments.value.length === 0) return 0;
+    //     let sum = 0;
+    //     for (let i = 0; i < comments.value.length; i++) {
+        //         sum += comments.value[i].rating;
+        //     }
+        //     return (sum / comments.value.length).toFixed(1).toString().replace(".", ",");
+        // })
+
 const getUnitType = computed(() => {
     const unit = product.value.unitType;
     return typeof unit === 'string' && unit.length > 0 ? unit.charAt(0).toUpperCase() + unit.slice(1) : ''
@@ -310,53 +313,74 @@ const getUnitPrice = () => {
     return unitPrice.toLocaleString('fr-FR');
 }
 const addToCart = () => {
-    // Achat en gros
-    
-    if (sectionSelected.value === FIRST_SELECT) {
-        const p = product.value;
-        const currentFullUrl = getCurrentFullYrl();
-        const unitPrice = p.priceList[optionSelected.value].unitPrice;
-
-        const wholeSaleItem = {
-            "productId": p._id,
-            "name": p.name,
-            "imgUrl": p.imgsUrl[0],
-            "purchaseType": FIRST_SELECT,
-            "qte": wholeSaleQte.value, // Mettre la quantité retournée par le composant
-            "unitPerBox": p.unitPerBox,
-            "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
-            "productUrl": currentFullUrl
-        };
-    } 
-    else { // Achat en détail
-        const p = product.value;
-        const priceList = p.priceList;
-        const index = priceList.length - 1;
-        
-        const unitPrice = priceList[index].unitPrice;
-        const currentFullUrl = getCurrentFullYrl();
-        
-        const retailItem = {
-            "productId": p.id,
-            "name": p.name,
-            "imgUrl": p.imgsUrl[0],
-            "purchaseType": SECOND_SELECT,
-            "qte": retailQte.value,
-            "unitType": p.unitType,
-            "unitPrice": unitPrice, // Mettre le prix du tarif sélectionné
-            "productUrl": currentFullUrl
-        }
-    }
-    
-    // const itemToString = JSON.stringify(item);
-    // if (JSON.parse(localStorage.getItem('cart')).indexOf(item.id) === -1) {
-    //     localStorage.setItem('cart', itemToString)
-        
-    // }
-    
+    const cart = loadCart();
+    const item = buildItem();
+    const index = cart.findIndex(cartItem => cartItem.productId === item.productId);
+    // Si l'item existe déjà dans le panier
+    if (index > -1) {
+        alert('Le produit existe déjà');
+    } else {
+        cart.push(item);
+        saveCart(cart);
+        alert('Item ajouté');
+    }    
 }
-function getCurrentFullYrl () {
-    return window.location.href;
+
+function saveCart(cart) {
+    localStorage.setItem(CART, JSON.stringify(cart));
+}
+
+function loadCart() {
+    return JSON.parse(localStorage.getItem(CART)) || [];
+}
+
+function buildItem() {
+    if (sectionSelected.value === FIRST_SELECT) return buildWholeSaleItem();
+    return buildRetailItem();       
+}
+
+function buildWholeSaleItem () {
+    const p = product.value;
+    const currentFullUrl = getCurrentUrlPath();
+    const unitPrice = p.priceList[optionSelected.value].unitPrice;
+
+    const wholeSaleItem = {
+        "productId": p._id,
+        "name": p.name,
+        "imgUrl": p.imgsUrl[0],
+        "purchaseType": FIRST_SELECT,
+        "qte": wholeSaleQte.value,
+        "unitPerBox": p.unitPerBox,
+        "unitPrice": unitPrice,
+        "productUrl": currentFullUrl
+    };
+
+    return wholeSaleItem;
+}
+
+function buildRetailItem () {
+    const p = product.value;
+    const priceList = p.priceList;
+    const index = priceList.length - 1;
+    
+    const unitPrice = priceList[index].unitPrice;
+    const currentFullUrl = getCurrentUrlPath();
+    
+    const retailItem = {
+        "productId": p._id,
+        "name": p.name,
+        "imgUrl": p.imgsUrl[0],
+        "purchaseType": SECOND_SELECT,
+        "qte": retailQte.value,
+        "unitType": p.unitType,
+        "unitPrice": unitPrice,
+        "productUrl": currentFullUrl
+    }
+    return retailItem;
+}
+
+function getCurrentUrlPath () {
+    return window.location.pathname;
 }
 
 function updateTitle() {
@@ -392,27 +416,9 @@ function getPricingIndex(value) {
     }
 }
 
-async function getProductInfos() {
-    const id = route.params.id;
-    try {
-        await axios.get(`${apiUrl}/products/${id}`)
-        .then(res => {
-            if (res.data) {
-                product.value = res.data;
-            }
-        })
-        .catch(error => {
-            console.log(error);
-        })
-
-    } catch (err) {
-        console.log('Erreur');
-    } finally {
-        loading.value = false;
-    }
-}
-onMounted(async () => {
-    await getProductInfos();
+async function initializeProduct(id) {
+    loading.value = true;
+    await getProductInfos(id);
     updateTitle();
     setOptionSelected();
 
@@ -439,7 +445,34 @@ onMounted(async () => {
     }
   });
 
-});
+  loading.value = false;
+}
+
+async function getProductInfos(id) {
+    try {
+        await axios.get(`${apiUrl}/products/${id}`)
+        .then(res => {
+            if (res.data) {
+                product.value = res.data;
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        })
+
+    } catch (err) {
+        console.log('Erreur');
+    }
+}
+onMounted(() => {
+    initializeProduct(route.params.id);
+})
+
+// À chaque changement d'ID sans recréer le composant
+onBeforeRouteUpdate((to, from, next) => {
+    initializeProduct(to.params.id);
+    next();
+})
 </script>
 
 <style scoped>
@@ -592,7 +625,7 @@ h2 {
 
 .add_to_card {
     position: static;
-    background-color: rgb(0, 123, 255);
+    background-color: #007bff;
     font-size: 1rem;
     color: white;
     text-align: center;
