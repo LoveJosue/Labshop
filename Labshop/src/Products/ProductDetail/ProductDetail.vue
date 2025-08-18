@@ -312,18 +312,66 @@ const getUnitPrice = () => {
     const unitPrice = priceList[lastPricingIndex].unitPrice;
     return unitPrice.toLocaleString('fr-FR');
 }
+// const addToCart = () => {
+//     const cart = loadCart();
+//     const item = buildItem();
+//     const index = cart.findIndex(cartItem => cartItem.productId === item.productId);
+//     // Si l'item existe déjà dans le panier
+//     if (index > -1) {
+//         alert('Le produit existe déjà');
+//         item = updateItemQte(item);
+//     } else {
+//         cart.push(item);
+//         saveCart(cart);
+//         alert('Item ajouté');
+//     }    
+// }
 const addToCart = () => {
     const cart = loadCart();
-    const item = buildItem();
-    const index = cart.findIndex(cartItem => cartItem.productId === item.productId);
+    let item = buildItem();
+    const { existingItem, index } = findCartItem(item, cart); 
     // Si l'item existe déjà dans le panier
-    if (index > -1) {
-        alert('Le produit existe déjà');
+    if (existingItem) {
+        item = updateItem(item, existingItem);
+        cart[index] = item;
+        saveCart(cart);
+        alert('Quantité mise à jour');
     } else {
         cart.push(item);
         saveCart(cart);
         alert('Item ajouté');
     }    
+}
+
+function findCartItem (item, cart) {
+    if (cart.length > 0) {
+        for (let i = 0; i < cart.length; i++) {
+            if (cart[i].productId === item.productId && cart[i].purchaseType === sectionSelected.value) {
+                return { existingItem: cart[i], index: i };
+            }
+        }
+    }
+    return { existingItem: undefined, index: -1 };
+}
+// Mettre à jour la qte de l'item existant et le tarif aussi si achat en gros
+function updateItem (item, existingItem) {
+    // Si achat en gros
+    if (sectionSelected.value == FIRST_SELECT && existingItem.purchaseType == FIRST_SELECT) {
+        const p = product.value;
+        const priceList = p.priceList;
+
+        const newQte = item.qte + existingItem.qte;
+        const newUnitPrice = priceList[getPricingIndex(newQte)].unitPrice;
+
+        item.qte = newQte;
+        item.unitPrice = newUnitPrice;
+        
+        return item;
+    } else if (sectionSelected.value == SECOND_SELECT && existingItem.purchaseType == SECOND_SELECT) {
+        // Si achat en détail
+        item.qte += existingItem.qte;
+        return item;
+    }
 }
 
 function saveCart(cart) {
@@ -808,7 +856,7 @@ h2 {
         width: 100%;
         height: 60px;
         border-radius: 0;
-        z-index: 2;
+        /* z-index: 2; */
         animation: slideUp 0.4s ease-out;
         font-weight: 300;
         align-content: center;

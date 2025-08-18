@@ -131,7 +131,7 @@ const total = computed(() => {
     padding: 1.5rem;
     background-color: #fdfdfd;
     box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-    z-index: 50;
+    z-index: 3;
 }
 .cart-header {
     display: flex;
