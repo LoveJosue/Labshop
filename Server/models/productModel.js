@@ -28,6 +28,7 @@ const productSchema = new Schema({
             lowercase: true
         },
         unitPrice: Number,
+        minBoxes: Number,
         best: Boolean
     }],
     infos: [{

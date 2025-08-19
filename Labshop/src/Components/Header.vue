@@ -10,11 +10,16 @@
           <div class="icons">
             <img src="@/images/user-empty.svg">
             <img src="@/images/heart-empty.svg">
-            <img src="@/images/shop-bag-empty.svg">
+            <img src="@/images/shop-bag-empty.svg" @click="toggleCart()">
             <img class="menu" src="@/images/menu.svg" alt="" @click="toggleSideBar()">
           </div>
         </div>
-        <div v-if="sideBarVisible === true" class="side-bar">
+        
+        
+        <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
+
+
+        <div v-if="isSideBarVisible === true" class="side-bar">
           <ul @click="toggleSideBar()" class="side-bar-links">
             <li><router-link to="/">Accueil</router-link></li>
             <li><router-link to="/products">Produits</router-link></li>
@@ -24,24 +29,32 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
           </svg>
         </div>
-        <div v-if="sideBarVisible === true" class="overlay" @click="toggleSideBar()"></div>
+        <div v-if="isSideBarVisible === true" class="overlay" @click="toggleSideBar()"></div>
     </div>
 </template>
 
 <script setup>
+import Cart from './Cart.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 
-const sideBarVisible = ref(false);
-const toggleSideBar = () => {
-  sideBarVisible.value = !sideBarVisible.value;
-}
+const isCardOpen = ref(false);
+const isSideBarVisible = ref(false);
+
 const screenWidth = ref(window.innerWidth);
+
+const toggleCart = () => {
+  isCardOpen.value = !isCardOpen.value;
+}
+
+const toggleSideBar = () => {
+  isSideBarVisible.value = !isSideBarVisible.value;
+}
 
 const updateWidth = () => {
   const SM_SCREEN_WIDTH = 640;
   screenWidth.value = window.innerWidth;
   if (window.innerWidth > SM_SCREEN_WIDTH) {
-    sideBarVisible.value = false;
+    isSideBarVisible.value = false;
   }
 };
 
