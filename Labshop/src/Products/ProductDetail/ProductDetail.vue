@@ -39,15 +39,22 @@
                     <div v-if="sectionSelected === 1" class="select-content">
                         <div>
                             <p>Choix du tarif :</p>
-                            <SelectDropdown v-model="selected" :options="getWholeSalePriceList()" />
+                            <SelectDropdown v-model="optionSelected" :options="getWholeSalePriceList()" @update:modelValue="onTarifChange"/>
                         </div>
                           <div>
                               <p>Quantité de cartons :</p>
                               <div class="input-box rounded-md">
+                                <!-- <NumberInputComponent 
+                                :min="1"
+                                :max="100"
+                                :modelValue="1"
+                                v-model="quantity"/> -->
                                 <NumberInputComponent 
                                 :min="1"
                                 :max="100"
-                                :modelValue="1"/>
+                                :modelValue="wholeSaleQte"
+                                v-model="wholeSaleQte"
+                                @update:modelValue="onQteChange"/>
                               </div>
                           </div>
                     </div>
@@ -58,7 +65,8 @@
                                 <NumberInputComponent 
                                 :min="1"
                                 :max="100"
-                                :modelValue="1"/>
+                                :modelValue="retailQte"
+                                v-model="retailQte"/>
                               </div>
                         </div>
                         
@@ -66,7 +74,7 @@
                     
                 </div>
                 <!-- Bouton dans la section produit -->
-                <div ref="addToCartOriginal" class="add_to_card rounded-sm shadow-xs/30">
+                <div @click="addToCart()" ref="addToCartOriginal" class="add_to_card rounded-sm shadow-xs/30">
                     Ajouter au panier
                 </div>
 
@@ -74,6 +82,7 @@
                 <div 
                     v-if="showFixedBtn"
                     class="add_to_card fixed animate-in"
+                    @click="addToCart()"
                 >
                 Ajouter au panier
                 </div>
@@ -198,6 +207,7 @@
 import Accordion from '@/Components/Accordion.vue';
 import NumberInputComponent from '@/Components/NumberInputComponent.vue';
 import SelectDropdown from '@/Components/SelectDropdown.vue';
+import Spinner from '@/Components/Spinner.vue';
 
 import axios from 'axios';
 import { apiUrl } from '@/config';
@@ -205,19 +215,22 @@ import { apiUrl } from '@/config';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { watch } from 'vue';
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
-import Spinner from '@/Components/Spinner.vue';
+import { onBeforeRouteUpdate, useRoute } from 'vue-router';
+
+const CART = 'cart';
+
+const FIRST_SELECT = 1; // Achat en gros
+const SECOND_SELECT = 2; // Achat en détail
 
 const loading = ref(true);
-
-const addToCartOriginal = ref(null);
 const showFixedBtn = ref(false);
 
-const FIRST_SELECT = 1;
-const SECOND_SELECT = 2;
+const addToCartOriginal = ref(null);
 
 const sectionSelected = ref(FIRST_SELECT);
-const selected = ref('');
+const optionSelected = ref(0);
+const wholeSaleQte = ref(1);
+const retailQte = ref(1);
 
 const route = useRoute();
 const product = ref({});
@@ -243,13 +256,14 @@ const getEmptystars = computed(() => {
     return maxStars - Math.floor(getRatingAverage.value);
 });
 // const getRatingAverage = computed(() => {
-//     if (comments.value.length === 0) return 0;
-//     let sum = 0;
-//     for (let i = 0; i < comments.value.length; i++) {
-//         sum += comments.value[i].rating;
-//     }
-//     return (sum / comments.value.length).toFixed(1).toString().replace(".", ",");
-// })
+    //     if (comments.value.length === 0) return 0;
+    //     let sum = 0;
+    //     for (let i = 0; i < comments.value.length; i++) {
+        //         sum += comments.value[i].rating;
+        //     }
+        //     return (sum / comments.value.length).toFixed(1).toString().replace(".", ",");
+        // })
+
 const getUnitType = computed(() => {
     const unit = product.value.unitType;
     return typeof unit === 'string' && unit.length > 0 ? unit.charAt(0).toUpperCase() + unit.slice(1) : ''
@@ -298,9 +312,163 @@ const getUnitPrice = () => {
     const unitPrice = priceList[lastPricingIndex].unitPrice;
     return unitPrice.toLocaleString('fr-FR');
 }
-onMounted(async () => {
-    await getProductInfos();
+// const addToCart = () => {
+//     const cart = loadCart();
+//     const item = buildItem();
+//     const index = cart.findIndex(cartItem => cartItem.productId === item.productId);
+//     // Si l'item existe déjà dans le panier
+//     if (index > -1) {
+//         alert('Le produit existe déjà');
+//         item = updateItemQte(item);
+//     } else {
+//         cart.push(item);
+//         saveCart(cart);
+//         alert('Item ajouté');
+//     }    
+// }
+const addToCart = () => {
+    const cart = loadCart();
+    let item = buildItem();
+    const { existingItem, index } = findCartItem(item, cart); 
+    // Si l'item existe déjà dans le panier
+    if (existingItem) {
+        item = updateItem(item, existingItem);
+        cart[index] = item;
+        saveCart(cart);
+        alert('Quantité mise à jour');
+    } else {
+        cart.push(item);
+        saveCart(cart);
+        alert('Item ajouté');
+    }    
+}
+
+function findCartItem (item, cart) {
+    if (cart.length > 0) {
+        for (let i = 0; i < cart.length; i++) {
+            if (cart[i].productId === item.productId && cart[i].purchaseType === sectionSelected.value) {
+                return { existingItem: cart[i], index: i };
+            }
+        }
+    }
+    return { existingItem: undefined, index: -1 };
+}
+// Mettre à jour la qte de l'item existant et le tarif aussi si achat en gros
+function updateItem (item, existingItem) {
+    // Si achat en gros
+    if (sectionSelected.value == FIRST_SELECT && existingItem.purchaseType == FIRST_SELECT) {
+        const p = product.value;
+        const priceList = p.priceList;
+
+        const newQte = item.qte + existingItem.qte;
+        const newUnitPrice = priceList[getPricingIndex(newQte)].unitPrice;
+
+        item.qte = newQte;
+        item.unitPrice = newUnitPrice;
+        
+        return item;
+    } else if (sectionSelected.value == SECOND_SELECT && existingItem.purchaseType == SECOND_SELECT) {
+        // Si achat en détail
+        item.qte += existingItem.qte;
+        return item;
+    }
+}
+
+function saveCart(cart) {
+    localStorage.setItem(CART, JSON.stringify(cart));
+}
+
+function loadCart() {
+    return JSON.parse(localStorage.getItem(CART)) || [];
+}
+
+function buildItem() {
+    if (sectionSelected.value === FIRST_SELECT) return buildWholeSaleItem();
+    return buildRetailItem();       
+}
+
+function buildWholeSaleItem () {
+    const p = product.value;
+    const currentFullUrl = getCurrentUrlPath();
+    const unitPrice = p.priceList[optionSelected.value].unitPrice;
+
+    const wholeSaleItem = {
+        "productId": p._id,
+        "name": p.name,
+        "imgUrl": p.imgsUrl[0],
+        "purchaseType": FIRST_SELECT,
+        "qte": wholeSaleQte.value,
+        "unitPerBox": p.unitPerBox,
+        "unitPrice": unitPrice,
+        "productUrl": currentFullUrl
+    };
+
+    return wholeSaleItem;
+}
+
+function buildRetailItem () {
+    const p = product.value;
+    const priceList = p.priceList;
+    const index = priceList.length - 1;
+    
+    const unitPrice = priceList[index].unitPrice;
+    const currentFullUrl = getCurrentUrlPath();
+    
+    const retailItem = {
+        "productId": p._id,
+        "name": p.name,
+        "imgUrl": p.imgsUrl[0],
+        "purchaseType": SECOND_SELECT,
+        "qte": retailQte.value,
+        "unitType": p.unitType,
+        "unitPrice": unitPrice,
+        "productUrl": currentFullUrl
+    }
+    return retailItem;
+}
+
+function getCurrentUrlPath () {
+    return window.location.pathname;
+}
+
+function updateTitle() {
+    // Attendre que les données produit soient chargées avant d'utiliser product.value.name
+    watch(product, (newVal) => {
+        if (newVal && newVal.name) {
+            document.title = newVal.name;
+        }
+    }, { immediate: false });
+}
+
+function setOptionSelected() {
+    const lastWholeSalePricing = product.value.priceList.length - 2;
+    optionSelected.value = lastWholeSalePricing;
+}
+
+function onTarifChange(index) {
+    const minBoxes = product.value.priceList[index].minBoxes;
+    wholeSaleQte.value = minBoxes;
+}
+
+function onQteChange(value) {
+    optionSelected.value = getPricingIndex(value);
+}
+
+function getPricingIndex(value) {
+    const priceList = product.value.priceList;
+    const length = product.value.priceList.length - 2;
+    for (let i = 0; i <= length; i++) {
+        if (value >= priceList[i].minBoxes) {
+            return i;
+        }
+    }
+}
+
+async function initializeProduct(id) {
+    loading.value = true;
+    await getProductInfos(id);
     updateTitle();
+    setOptionSelected();
 
     const observer = new IntersectionObserver(
         (entries) => {
@@ -325,19 +493,10 @@ onMounted(async () => {
     }
   });
 
-});
-
-function updateTitle() {
-    // Attendre que les données produit soient chargées avant d'utiliser product.value.name
-    watch(product, (newVal) => {
-        if (newVal && newVal.name) {
-            document.title = newVal.name;
-        }
-    }, { immediate: false });
+  loading.value = false;
 }
 
-async function getProductInfos() {
-    const id = route.params.id;
+async function getProductInfos(id) {
     try {
         await axios.get(`${apiUrl}/products/${id}`)
         .then(res => {
@@ -351,12 +510,17 @@ async function getProductInfos() {
 
     } catch (err) {
         console.log('Erreur');
-    } finally {
-        loading.value = false;
     }
 }
+onMounted(() => {
+    initializeProduct(route.params.id);
+})
 
-
+// À chaque changement d'ID sans recréer le composant
+onBeforeRouteUpdate((to, from, next) => {
+    initializeProduct(to.params.id);
+    next();
+})
 </script>
 
 <style scoped>
@@ -509,7 +673,7 @@ h2 {
 
 .add_to_card {
     position: static;
-    background-color: rgb(0, 123, 255);
+    background-color: #007bff;
     font-size: 1rem;
     color: white;
     text-align: center;
@@ -692,7 +856,7 @@ h2 {
         width: 100%;
         height: 60px;
         border-radius: 0;
-        z-index: 2;
+        /* z-index: 2; */
         animation: slideUp 0.4s ease-out;
         font-weight: 300;
         align-content: center;

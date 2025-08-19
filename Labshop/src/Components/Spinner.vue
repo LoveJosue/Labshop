@@ -9,7 +9,7 @@
 
 </script>
 
-<style>
+<style scoped>
 .spin-container {
     position: fixed;
     top: 0%;
