@@ -44,11 +44,6 @@
                           <div>
                               <p>Quantité de cartons :</p>
                               <div class="input-box rounded-md">
-                                <!-- <NumberInputComponent 
-                                :min="1"
-                                :max="100"
-                                :modelValue="1"
-                                v-model="quantity"/> -->
                                 <NumberInputComponent 
                                 :min="1"
                                 :max="100"
@@ -312,37 +307,28 @@ const getUnitPrice = () => {
     const unitPrice = priceList[lastPricingIndex].unitPrice;
     return unitPrice.toLocaleString('fr-FR');
 }
-// const addToCart = () => {
-//     const cart = loadCart();
-//     const item = buildItem();
-//     const index = cart.findIndex(cartItem => cartItem.productId === item.productId);
-//     // Si l'item existe déjà dans le panier
-//     if (index > -1) {
-//         alert('Le produit existe déjà');
-//         item = updateItemQte(item);
-//     } else {
-//         cart.push(item);
-//         saveCart(cart);
-//         alert('Item ajouté');
-//     }    
-// }
 const addToCart = () => {
     const cart = loadCart();
     let item = buildItem();
-    const { existingItem, index } = findCartItem(item, cart); 
+    let { existingItem, index } = findCartItem(item, cart); 
     // Si l'item existe déjà dans le panier
     if (existingItem) {
-        item = updateItem(item, existingItem);
-        cart[index] = item;
+        existingItem = updateExistingItem(item, existingItem);
+        cart[index] = existingItem;
         saveCart(cart);
         alert('Quantité mise à jour');
     } else {
+        item.id = createItemID(cart);
         cart.push(item);
         saveCart(cart);
         alert('Item ajouté');
     }    
 }
 
+// L'id d'un item est basé sur son ordre dans la liste
+function createItemID(cart) {
+    return cart.length + 1;
+}
 function findCartItem (item, cart) {
     if (cart.length > 0) {
         for (let i = 0; i < cart.length; i++) {
@@ -354,23 +340,23 @@ function findCartItem (item, cart) {
     return { existingItem: undefined, index: -1 };
 }
 // Mettre à jour la qte de l'item existant et le tarif aussi si achat en gros
-function updateItem (item, existingItem) {
+function updateExistingItem (item, existingItem) {
     // Si achat en gros
-    if (sectionSelected.value == FIRST_SELECT && existingItem.purchaseType == FIRST_SELECT) {
+    if (sectionSelected.value === FIRST_SELECT && existingItem.purchaseType === FIRST_SELECT) {
         const p = product.value;
         const priceList = p.priceList;
 
-        const newQte = item.qte + existingItem.qte;
+        const newQte = existingItem.qte + item.qte;
         const newUnitPrice = priceList[getPricingIndex(newQte)].unitPrice;
 
-        item.qte = newQte;
-        item.unitPrice = newUnitPrice;
+        existingItem.qte = newQte;
+        existingItem.unitPrice = newUnitPrice;
         
-        return item;
-    } else if (sectionSelected.value == SECOND_SELECT && existingItem.purchaseType == SECOND_SELECT) {
+        return existingItem;
+    } else if (sectionSelected.value === SECOND_SELECT && existingItem.purchaseType === SECOND_SELECT) {
         // Si achat en détail
-        item.qte += existingItem.qte;
-        return item;
+        existingItem.qte += item.qte;
+        return existingItem;
     }
 }
 
