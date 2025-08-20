@@ -316,12 +316,10 @@ const addToCart = () => {
         existingItem = updateExistingItem(item, existingItem);
         cart[index] = existingItem;
         saveCart(cart);
-        alert('Quantité mise à jour');
     } else {
         item.id = createItemID(cart);
         cart.push(item);
         saveCart(cart);
-        alert('Item ajouté');
     }    
 }
 
