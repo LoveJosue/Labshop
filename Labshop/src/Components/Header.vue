@@ -10,7 +10,13 @@
           <div class="icons">
             <img src="@/images/user-empty.svg">
             <img src="@/images/heart-empty.svg">
-            <img src="@/images/shop-bag-empty.svg" @click="toggleCart()">
+            <img v-if="isCartEmpty" src="@/images/shop-bag-empty.svg" @click="toggleCart()">
+            <div v-else  class="full-shop-bag">
+              <img src="@/images/shop-bag-full.svg" @click="toggleCart()">
+              <div class="notif-icon">
+                {{ itemsQtySum }}
+              </div>
+            </div>
             <img class="menu" src="@/images/menu.svg" alt="" @click="toggleSideBar()">
           </div>
         </div>
@@ -35,21 +41,24 @@
 
 <script setup>
 import Cart from './Cart.vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+
+const ONE_SEC = 1000;
 
 const isCardOpen = ref(false);
 const isSideBarVisible = ref(false);
+const isCartEmpty = ref(true);
+const itemsQtySum = ref(0);
+let intervalID;
 
 const screenWidth = ref(window.innerWidth);
 
 const toggleCart = () => {
   isCardOpen.value = !isCardOpen.value;
 }
-
 const toggleSideBar = () => {
   isSideBarVisible.value = !isSideBarVisible.value;
 }
-
 const updateWidth = () => {
   const SM_SCREEN_WIDTH = 640;
   screenWidth.value = window.innerWidth;
@@ -57,13 +66,25 @@ const updateWidth = () => {
     isSideBarVisible.value = false;
   }
 };
-
+const checkCart = () => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    isCartEmpty.value = cart.length === 0;
+    !isCartEmpty.value && updateItemsQtySum(cart);
+}
+const updateItemsQtySum = (cart) => {
+  let qtySum = 0;
+  cart.forEach((item) => { qtySum += item.qte });
+  itemsQtySum.value = qtySum;
+}
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
+  checkCart(); // Vérifie au montage
+  intervalID = setInterval(checkCart, ONE_SEC); // Vérifie toutes les secondes
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateWidth);
+  clearInterval(intervalID);
 });
 
 </script>
@@ -78,24 +99,20 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(10px); /* Support pour safari */
   background: rgba(255, 255, 255, 0.8);
   margin: auto;
-  /* color :rgb(102, 97, 97); */
   color: #333;
   z-index: 2;
-  /* Ombre douce et étalée */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  /* Petite bordure fine pour mieux détacher du fond */
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
 }
  .nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: var(--website-max-width);
-    width: var(--website-section-width);
-    margin: 0 auto;
-    height: 70px;
-    /* Ça commence */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--website-max-width);
+  width: var(--website-section-width);
+  margin: 0 auto;
+  height: 70px;
   }
 .links {
   list-style: none;
@@ -133,6 +150,27 @@ onUnmounted(() => {
 }
 .icons .menu {
   display: none;
+}
+.full-shop-bag {
+  position: relative;
+}
+.full-shop-bag .notif-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  border: 1px solid black;
+  width: 20px;
+  height: 20px;
+  background-color: black;
+  border: transparent;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px white;
 }
 .side-bar {
   position: absolute;
