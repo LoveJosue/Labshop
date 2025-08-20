@@ -66,12 +66,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const CART = 'cart';
+
 const ONE = 1 // Achat en gros
 const TWO = 2 // Achat en détail
 
@@ -105,10 +106,6 @@ function removeItem(itemId) {
     cart.value = cart.value.filter(item => item.id !== itemId);
     localStorage.setItem(CART, JSON.stringify(cart.value));
 }
-onMounted(() => {
-    cart.value = loadCart();
-});
-
 
 const total = computed(() => {
     let sum = 0;
@@ -116,6 +113,10 @@ const total = computed(() => {
         item.purchaseType === ONE ? sum += (item.unitPrice * item.unitPerBox * item.qte) : sum += (item.unitPrice * item.qte);
     })
     return sum;
+});
+
+onMounted(() => {
+    cart.value = loadCart();
 });
 </script>
 

@@ -10,7 +10,8 @@
           <div class="icons">
             <img src="@/images/user-empty.svg">
             <img src="@/images/heart-empty.svg">
-            <img src="@/images/shop-bag-empty.svg" @click="toggleCart()">
+            <img v-if="isCartEmpty" src="@/images/shop-bag-empty.svg" @click="toggleCart()">
+            <img v-else src="@/images/shop-bag-full.svg" @click="toggleCart()" st>
             <img class="menu" src="@/images/menu.svg" alt="" @click="toggleSideBar()">
           </div>
         </div>
@@ -37,8 +38,12 @@
 import Cart from './Cart.vue';
 import { ref, onMounted, onUnmounted } from 'vue';
 
+const ONE_SEC = 1000;
+
 const isCardOpen = ref(false);
 const isSideBarVisible = ref(false);
+const isCartEmpty = ref(true);
+let intervalID;
 
 const screenWidth = ref(window.innerWidth);
 
@@ -58,12 +63,20 @@ const updateWidth = () => {
   }
 };
 
+const checkCart = () => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    isCartEmpty.value = cart.length === 0;
+}
+
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
+  checkCart(); // Vérifie au montage
+  intervalID = setInterval(checkCart, ONE_SEC); // Vérifie toutes les secondes
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateWidth);
+  clearInterval(intervalID);
 });
 
 </script>
