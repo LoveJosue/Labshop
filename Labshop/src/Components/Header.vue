@@ -1,7 +1,11 @@
 <template>
   <div class="ctn">
         <div class="nav">
-          <h4 class="logo"><router-link to="/">Labstore</router-link></h4>
+          <!-- <h4 class="logo"><router-link to="/">Labstore</router-link></h4> -->
+           <div class="logo-ctn">
+            <img class="logo" src="@/images/logo-1.svg" @click="goToHomePage"/>
+            <img class="logo" src="@/images/logo-2.svg" @click="goToHomePage"/>
+           </div>
           <ul class="links">
             <li><router-link to="/">Accueil</router-link></li>
             <li><router-link to="/products">Produits</router-link></li>
@@ -42,8 +46,11 @@
 <script setup>
 import Cart from './Cart.vue';
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 const ONE_SEC = 1000;
+
+const router = useRouter();
 
 const isCardOpen = ref(false);
 const isSideBarVisible = ref(false);
@@ -53,6 +60,9 @@ let intervalID;
 
 const screenWidth = ref(window.innerWidth);
 
+const goToHomePage = () => {
+  router.push('/')
+}
 const toggleCart = () => {
   isCardOpen.value = !isCardOpen.value;
 }
@@ -112,8 +122,25 @@ onUnmounted(() => {
   max-width: var(--website-max-width);
   width: var(--website-section-width);
   margin: 0 auto;
-  height: 70px;
+  height: 80px;
   }
+.logo-ctn {
+  height: 100%;
+  width: 120px;
+  display: flex;
+  align-items: center;
+}
+.logo-ctn .logo:first-child {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+.logo-ctn img {
+  cursor: pointer;
+}
+.logo-ctn .logo:last-child {
+  display: none;
+}
 .links {
   list-style: none;
   display: flex;
@@ -207,6 +234,18 @@ onUnmounted(() => {
   }
   .icons .menu {
     display: block;
+  }
+  .nav {
+    height: 60px;
+  }
+  .logo-ctn .logo:first-child {
+    display: none;
+  }
+  .logo-ctn .logo:last-child {
+    display: block;
+    height: 80%;
+    width: auto;
+    object-fit: contain;
   }
 }
 </style>
