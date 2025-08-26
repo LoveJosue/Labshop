@@ -16,7 +16,7 @@
           <h3>Liens utiles</h3>
           <ul>
             <li><RouterLink to="/">Accueil</RouterLink></li>
-            <li><RouterLink to="/produits">Produits</RouterLink></li>
+            <li><RouterLink to="/products">Produits</RouterLink></li>
             <li><RouterLink to="/about">À propos</RouterLink></li>
             <li><RouterLink to="/contact">Contact</RouterLink></li>
             <li><RouterLink to="/faq">FAQ / Aide</RouterLink></li>
