@@ -243,9 +243,13 @@ onUnmounted(() => {
   }
   .logo-ctn .logo:last-child {
     display: block;
-    height: 80%;
     width: auto;
     object-fit: contain;
+    width: 25px;
+    height: 25px;
+  }
+  .icons > *:nth-child(2) {
+    display: none;
   }
 }
 </style>
