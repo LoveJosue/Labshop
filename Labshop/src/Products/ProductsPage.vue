@@ -1,29 +1,16 @@
 <template>
     <!-- <Filter @sortPriceAsc="onSortPriceAsc"
             @sortPriceDesc="onSortPriceDesc"/> -->
-      <!-- <div v-if="productsResult && productsResult.length > 0" class="grid"> -->
-
-      <Spinner v-if="loading"/>
-      <div v-else class="grid">
-        <h1 class="grid-title">Nos produits</h1>
-        <!-- <Filter 
-            class="filter" 
-            @sortPriceAsc="onSortPriceAsc"
-            @sortPriceDesc="onSortPriceDesc"/> -->
-        <!-- <Produit 
-            v-for="p in productsResult" 
-            @imgClicked="gererClickPhoto"
-            :nom="p.name" 
-            :images="p.imgsUrl"/> -->
-        <Produit 
-            v-for="p in productsResult" 
-            :key="p._id"
-            :product="p"/>
-      </div>
+      
+    <Spinner v-if="loading"/>
+    <div v-else class="grid">
+      <h1 class="grid-title">Nos produits</h1>
+      <Produit 
+          v-for="p in productsResult" 
+          :key="p._id"
+          :product="p"/>
+    </div>
 </template>
-
-
-
 <script setup>
 import { ref } from "vue"
 import { onMounted } from "vue";
@@ -38,10 +25,6 @@ const loading = ref(true);
 
 let produits = [];
 let productsResult = ref(produits)
-
-const gererClickPhoto = (message) => {
-  // Aller sur une page qui affiche en détail la description du produit
-}
 
 const onSortPriceAsc = () => {
   productsResult.value = productsResult.value.toSorted((a,b) => a.prix < b.prix ? -1 : 1)
@@ -62,12 +45,7 @@ onMounted(async () => {
       console.log(error);
     })
 });
-
-
 </script>
-
-
-
 <style>
 .grid {
   display: grid;
@@ -75,11 +53,11 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   gap: 1.5rem;
+  padding-bottom: 4rem;
 }
 
 .grid-title {
   margin: 1.5rem 0 0;
-  /* border: 1px solid red; */
 }
 
 @media (min-width: 768px) {
