@@ -647,14 +647,6 @@ h2 {
     width: 100%;
     height: 50px;
 }
-/* .add_to_card {
-    position: static;
-    background-color: rgb(0, 123, 255);
-    font-weight: 500;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
-} */
-
 .add_to_card {
     position: static;
     background-color: #007bff;
@@ -840,7 +832,7 @@ h2 {
         width: 100%;
         height: 60px;
         border-radius: 0;
-        /* z-index: 2; */
+        z-index: 1;
         animation: slideUp 0.4s ease-out;
         font-weight: 300;
         align-content: center;
