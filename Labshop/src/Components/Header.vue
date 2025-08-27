@@ -245,8 +245,8 @@ onUnmounted(() => {
     display: block;
     width: auto;
     object-fit: contain;
-    width: 40px;
-    height: 40px;
+    width: 25px;
+    height: 25px;
   }
   .icons > *:nth-child(2) {
     display: none;
