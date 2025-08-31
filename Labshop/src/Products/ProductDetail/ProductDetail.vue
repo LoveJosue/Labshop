@@ -1,7 +1,7 @@
 <template>
-    <div class="main">
-        <Spinner v-if="loading"></Spinner>
-        <div v-else class="product_img flex">
+    <Spinner v-if="loading"></Spinner>
+    <div v-else class="main">
+        <div class="product_img flex">
             <div v-for="(item, index) in product.imgsUrl" 
                  :key="index" 
                  :class="index === 0 ? 'img_1' : 'under_img'">
