@@ -7,6 +7,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import HomePage from './Home/HomePage.vue';
 import ProductsPage from './Products/ProductsPage.vue';
 import ProductDetail from './Products/ProductDetail/ProductDetail.vue';
+import Order from './Order/Order.vue';
 
 import './assets/css/variables.css'
 import './assets/css/index.css'
@@ -17,7 +18,8 @@ const router = createRouter({
     routes: [
         { path: '/', component:  HomePage },
         { path: '/products', component:  ProductsPage },
-        { path: '/products/:id', component: ProductDetail }
+        { path: '/products/:id', component: ProductDetail },
+        { path: '/order', name: 'order', component: Order }
     ]
 })
 const app = createApp(App)
