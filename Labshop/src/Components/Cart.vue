@@ -88,6 +88,7 @@ const getPackaging = (item) => {
     }
 }
 
+// Calcule le coût de l'item en fonction du type d'achat
 const calculateItemPrice = (item) => item.purchaseType === ONE ? (item.unitPrice * item.unitPerBox * item.qte) : item.unitPrice * item.qte;
 
 const imgClicked = (item) => {

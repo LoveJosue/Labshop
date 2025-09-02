@@ -1,15 +1,17 @@
 <template>
-    <div class="color"></div>
+    <div class="back-color"></div>
         <div class="main">
             <div class="left">1</div>
-            <div class="right">2</div>
+            <div class="right">
+                <OrderSummary />
+            </div>
         </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
+import OrderSummary from './OrderSummary.vue';
 const router = useRouter();
 
 const isCartEmpty = () => {
@@ -19,11 +21,11 @@ const isCartEmpty = () => {
 onMounted(() => {
     // Si le panier est vide, revenir à la page d'accueil
     isCartEmpty() && router.replace('/');
-})
+});
 </script>
 
 <style scoped>
-.color {
+.back-color {
     top: 71px;
     right: 0;
     position: absolute;
@@ -37,20 +39,27 @@ onMounted(() => {
     max-width: 1000px;
     margin: 0 auto;
     display: grid;
-    /* grid-template-columns: 7fr 6fr; */
     grid-template-columns: 1fr 1fr;
     height: 100%;
 }
 .left {
     height: 100lvh;
     border-right: 1px solid lightgray;
+    padding: 2.5rem 2.5rem 2.5rem 0;
 }
 .right {
     background-color: rgb(237, 237, 237);
+    padding:2.5rem 0 2.5rem 2.5rem;
 }
 @media (max-width: 1000px) {
     .main {
         grid-template-columns: 1fr;
+    }
+    .back-color {
+        display: none;
+    }
+    .left {
+        border-right: none;
     }
 }
 </style>
