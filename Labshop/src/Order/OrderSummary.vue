@@ -7,7 +7,12 @@
         <div class="cart-content" :class="[hasOverflow ? borderPosition : '', { 'hide-scroll': !showScrollbar }]" ref="cartContent">
             <div v-for="item in cart" :key="item.productId" class="cart-item">
                 <!-- Image produit -->
-                <img :src="item.imgUrl" :alt="item.name" />
+                 <div class="item-img-box">
+                     <img :src="item.imgUrl" :alt="item.name" />
+                     <div class="notif-icon">
+                        {{ item.qte }}
+                     </div>
+                 </div>
                 <div class="item-details">
                     <div class="item-infos">
                         <div class="chld-1">
@@ -26,8 +31,29 @@
                 Faites défiler pour voir plus ↓
             </div>
         </div>
-        <!-- Summary footer -->
-        <div></div>
+        <!-- Bill summary-->
+        <div class="bill-ctn">
+            <div class="flex-element">
+                <p>Sous-total · <span>{{ cart.length }}</span> article{{ cart.length > 1 ? 's' : '' }}</p>
+                <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
+            </div>
+            <div class="flex-element">
+                <p>Récupération en boutique</p>
+                <p>GRATUIT</p>
+            </div class="flex-element">
+            <div class="flex-element">
+                <p>Taxes</p>
+                <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
+            </div>
+        </div>
+        <!-- Purchase total -->
+         <div class="total-ctn">
+            <p>Total</p>
+            <div class="total-amout gap-x-2">
+                <p class="currenty">XOF</p>
+                <p class="value">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
+            </div>
+         </div>
     </div>
 </template>
 
@@ -47,20 +73,19 @@ let hideTimeout;
 
 const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [] ;
 const calculateItemPrice = (item) => item.purchaseType === ONE ? (item.unitPrice * item.unitPerBox * item.qte) : item.unitPrice * item.qte;
-const total = computed(() => {
+const subTotal = computed(() => {
     let sum = 0;
     cart.value.forEach((item) => {
         sum+= calculateItemPrice(item);
     })
     return sum;
 });
-const getPackaging = (item) => {
-    if (item.purchaseType === ONE) {
-        return item.qte > 1 ? 'cartons' : 'carton'
-    } else {
-        return item.qte > 1 ? `${item.unitType}s` : `${item.unitType}`
-    }
-}
+const TVA = computed(() => {
+    return Math.ceil(subTotal.value * 0.18); // Arrondir à l'entier FCFA supérieur
+});
+const totalWithTVA = computed(() => {
+    return subTotal.value + TVA.value;
+}) 
 function checkOverflow() {
   nextTick(() => {
     if (cartContent.value) {
@@ -104,14 +129,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+* {
+  margin: 0;  
+  padding: 0;
+}
 .ctn {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 2rem;
     justify-content: space-between;
+    letter-spacing: -0.01em;   
 }
 .cart-content {
-    position: relative; /* pour que le hint se place dedans */
+position: relative; /* pour que le hint se place dedans */
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -121,6 +151,7 @@ onMounted(() => {
   scrollbar-gutter: stable;
   box-sizing: content-box;
   padding-right: 0;
+  padding-top: 12px;
 }
 .cart-content::-webkit-scrollbar {
   position: absolute;
@@ -147,6 +178,12 @@ onMounted(() => {
     display: grid;
     grid-template-columns: 64px auto;
     gap: 0.75rem;
+    overflow: visible;
+}
+.item-img-box {
+    position: relative;
+    overflow: visible;
+    /* border: 1px solid black; */
 }
 .cart-item img {
     width: 64px;
@@ -156,6 +193,25 @@ onMounted(() => {
     border: 1px solid #e5e7eb;
     padding: 1.2rem 0.01rem 0.01rem 0.01rem;
     mix-blend-mode: multiply;
+}
+.notif-icon {
+    position: absolute;
+    top: 0px;      
+    right: 0px;    
+    width: 30%;
+    height: 30%;
+    min-width: 18px;
+    min-height: 18px;
+    background-color: rgba(0, 0, 0, 0.672);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    
 }
 .item-details {
     display: flex;
@@ -206,5 +262,42 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   pointer-events: none;
   white-space: nowrap;
+}
+
+.bill-ctn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    font-size: 14px;
+}
+.flex-element {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.total-ctn {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 19px;
+    font-weight: 900;
+    color: black;
+}
+.total-ctn .currenty {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.56);
+    height: fit-content;
+    transform: translateY(12.5%);
+    font-weight: lighter;
+}
+.total-ctn .total-amout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.total-amout .value {
+    align-content: start;
+    align-content: start;
+    height: 100%;
 }
 </style>
