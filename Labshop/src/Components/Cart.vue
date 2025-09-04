@@ -123,12 +123,12 @@ onMounted(() => {
 
 <style scoped>
 .cart {
-    position: absolute;
+    position: fixed;
     top:0;
     right: 0;
     display: flex;
     flex-direction: column;
-    height: 100lvh;
+    height: 100vh;
     width: var(--cartWidth);
     padding: 1.5rem;
     background-color: #fdfdfd;
@@ -252,10 +252,10 @@ onMounted(() => {
 }
 
 .overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  height: 100lvh;
+  height: 100vh;
   width: calc(100% - var(--cartWidth));
   background-color: rgba(17, 24, 39, 0.5);
   transition: opacity 0.4s ease;
