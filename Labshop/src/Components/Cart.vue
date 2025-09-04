@@ -57,7 +57,7 @@
                 <span>Total :</span>
                 <span class="total-price">{{ total.toLocaleString('fr-FR') }} FCFA</span>
             </div>
-            <button class="checkout-btn">Commander</button>
+            <button v-if="!isOrderPage()" class="checkout-btn" @click="order()">Commander</button>
         </div>
     </div>
 
@@ -67,9 +67,10 @@
 
 <script setup>
 import { onMounted, ref, computed, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 
 const CART = 'cart';
 
@@ -99,15 +100,19 @@ const goProductPage = (item) => {
     console.log(item.productUrl)
     router.push(item.productUrl);
 }
+const order = () => {
+    router.push('/order');
+}
+const isOrderPage = () => {
+    return route.name === 'order';
+}
 function loadCart() {
     return JSON.parse(localStorage.getItem(CART)) || [];
 }
-
 function removeItem(itemId) {
     cart.value = cart.value.filter(item => item.id !== itemId);
     localStorage.setItem(CART, JSON.stringify(cart.value));
 }
-
 const total = computed(() => {
     let sum = 0;
     cart.value.forEach((item) => {

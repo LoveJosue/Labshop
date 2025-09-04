@@ -1,8 +1,8 @@
 <template>
     <div class="back-color"></div>
         <div class="main">
-            <div class="left">1</div>
-            <div class="right">
+            <div class="left"></div>
+            <div class="right grid-row-1-position">
                 <OrderSummary />
             </div>
         </div>
@@ -60,6 +60,17 @@ onMounted(() => {
     }
     .left {
         border-right: none;
+    }
+    .right {
+        padding: 0;
+    }
+    .main {
+        display: grid;
+        grid-row: 1fr;
+        grid-template-rows: auto;
+    }
+    .grid-row-1-position {
+        grid-row-start: 1;
     }
 }
 </style>

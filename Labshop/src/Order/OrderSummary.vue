@@ -4,6 +4,10 @@
         Qté : {{ item.qte }} {{ getPackaging(item) }}
     </span> -->
     <div class="ctn">
+        <div class="order-summary">
+            <p>Résumé d'achat</p>
+            <p class="amout">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
+        </div>
         <div class="cart-content" :class="[hasOverflow ? borderPosition : '', { 'hide-scroll': !showScrollbar }]" ref="cartContent">
             <div v-for="item in cart" :key="item.productId" class="cart-item">
                 <!-- Image produit -->
@@ -34,7 +38,7 @@
         <!-- Bill summary-->
         <div class="bill-ctn">
             <div class="flex-element">
-                <p>Sous-total · <span>{{ cart.length }}</span> article{{ cart.length > 1 ? 's' : '' }}</p>
+                <p>Sous-total · <span>{{ itemsQtySum }}</span> article{{ itemsQtySum > 1 ? 's' : '' }}</p>
                 <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
             </div>
             <div class="flex-element">
@@ -68,6 +72,7 @@ const cartContent = ref(null);
 const hasOverflow = ref(false);
 const showScrollbar = ref(true);
 const isAtBottom = ref(false);
+const itemsQtySum = ref(0);
 let scrollTimeout;
 let hideTimeout;
 
@@ -85,7 +90,12 @@ const TVA = computed(() => {
 });
 const totalWithTVA = computed(() => {
     return subTotal.value + TVA.value;
-}) 
+})
+const updateItemsQtySum = () => {
+  let qtySum = 0;
+  cart.value.forEach((item) => { qtySum += item.qte });
+  itemsQtySum.value = qtySum;
+};
 function checkOverflow() {
   nextTick(() => {
     if (cartContent.value) {
@@ -124,6 +134,7 @@ onMounted(() => {
     if (cartContent.value) {
         cartContent.value.addEventListener('scroll', handleScroll);
     }
+    updateItemsQtySum();
 });
 
 </script>
@@ -134,11 +145,15 @@ onMounted(() => {
   padding: 0;
 }
 .ctn {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2rem;
     justify-content: space-between;
-    letter-spacing: -0.01em;   
+    letter-spacing: -0.01em;
+}
+.order-summary {
+    display: none;
 }
 .cart-content {
 position: relative; /* pour que le hint se place dedans */
@@ -146,34 +161,12 @@ position: relative; /* pour que le hint se place dedans */
   flex-direction: column;
   gap: 1.2rem;
   justify-content: flex-start;
-  max-height: 300px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
+  
   box-sizing: content-box;
   padding-right: 0;
-  padding-top: 12px;
-}
-.cart-content::-webkit-scrollbar {
-  position: absolute;
-    width: 6px;
-}
-.cart-content::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
-.cart-content.top {
-  border-top: 1px solid lightgray;
-}
-.cart-content.bottom {
-  border-bottom: 1px solid lightgray;
-}
-.cart-content.hide-scroll::-webkit-scrollbar {
-  display: none;
+  padding-top: 10px;
 }
 
-.cart-content.hide-scroll {
-  scrollbar-width: none; /* Firefox */
-}
 .cart-item {
     display: grid;
     grid-template-columns: 64px auto;
@@ -183,7 +176,6 @@ position: relative; /* pour que le hint se place dedans */
 .item-img-box {
     position: relative;
     overflow: visible;
-    /* border: 1px solid black; */
 }
 .cart-item img {
     width: 64px;
@@ -249,21 +241,6 @@ position: relative; /* pour que le hint se place dedans */
     letter-spacing: -0.01em;
     color: rgb(0, 0, 0);
 }
-.scroll-hint {
-  position: sticky;       
-  bottom: 8px;            
-  display: inline-block;  
-  align-self: center;     
-  background: #ccc;
-  color: #333;
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-  white-space: nowrap;
-}
-
 .bill-ctn {
     display: flex;
     flex-direction: column;
@@ -299,5 +276,73 @@ position: relative; /* pour que le hint se place dedans */
     align-content: start;
     align-content: start;
     height: 100%;
+}
+@media (max-width: 1000px) {
+    .ctn {
+        gap: 1.2rem;
+    }
+    .cart-content {
+        overflow-y:unset;
+    }
+    .scroll-hint {
+        display: none;
+    }
+    .order-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        height: 64px;
+        border-bottom: 1px solid lightgray;
+    }
+    .order-summary .amout {
+        font-size: 19px;
+        font-weight: 900;
+        color: black;
+    }
+    .total-ctn {
+        padding-bottom: 12px;
+    }
+}
+@media (min-width: 1001px) {
+    .cart-content {
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+    }
+    .cart-content::-webkit-scrollbar {
+        position: absolute;
+        width: 6px;
+    }
+    .cart-content::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+    }
+    .cart-content.top {
+        border-top: 1px solid lightgray;
+    }
+    .cart-content.bottom {
+        border-bottom: 1px solid lightgray;
+    }
+    .cart-content.hide-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    .cart-content.hide-scroll {
+        scrollbar-width: none; /* Firefox */
+    }
+    .scroll-hint {
+        position: sticky;       
+        bottom: 8px;            
+        display: inline-block;  
+        align-self: center;     
+        background: #ccc;
+        color: #333;
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        pointer-events: none;
+        white-space: nowrap;
+    }
 }
 </style>
