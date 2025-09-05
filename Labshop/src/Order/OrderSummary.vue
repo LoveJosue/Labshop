@@ -294,6 +294,7 @@ position: relative; /* pour que le hint se place dedans */
         cursor: pointer;
         height: 64px;
         border-bottom: 1px solid lightgray;
+        background-color: #F5F5F5;
     }
     .order-summary .amout {
         font-size: 19px;
