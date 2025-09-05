@@ -18,4 +18,6 @@
     --website-section-width: 95%;
     --cartWidth: 444px;
     --orderPageWidth: 1060px;
+    --order-sumary-box-height: 64px;
+    --order-sumary-box-height-minus-1-px: 63px;
 }

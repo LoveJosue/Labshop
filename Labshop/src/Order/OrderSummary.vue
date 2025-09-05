@@ -5,10 +5,12 @@
     </span> -->
     <div class="ctn">
         <div class="order-summary">
+            <div class="order-bg"></div>
             <p>Résumé d'achat</p>
             <p class="amout">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
         </div>
         <div class="cart-content" :class="[hasOverflow ? borderPosition : '', { 'hide-scroll': !showScrollbar }]" ref="cartContent">
+            <div class="bg border-top"></div>
             <div v-for="item in cart" :key="item.productId" class="cart-item">
                 <!-- Image produit -->
                  <div class="item-img-box">
@@ -37,6 +39,7 @@
         </div>
         <!-- Bill summary-->
         <div class="bill-ctn">
+            <div class="bg"></div>
             <div class="flex-element">
                 <p>Sous-total · <span>{{ itemsQtySum }}</span> article{{ itemsQtySum > 1 ? 's' : '' }}</p>
                 <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
@@ -161,12 +164,10 @@ position: relative; /* pour que le hint se place dedans */
   flex-direction: column;
   gap: 1.2rem;
   justify-content: flex-start;
-  
   box-sizing: content-box;
   padding-right: 0;
   padding-top: 10px;
 }
-
 .cart-item {
     display: grid;
     grid-template-columns: 64px auto;
@@ -281,6 +282,7 @@ position: relative; /* pour que le hint se place dedans */
     .ctn {
         gap: 1.2rem;
     }
+    
     .cart-content {
         overflow-y:unset;
     }
@@ -288,11 +290,13 @@ position: relative; /* pour que le hint se place dedans */
         display: none;
     }
     .order-summary {
+        position: relative;
         display: flex;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
-        height: 64px;
+        /* height: 64px; */
+        height: var(--order-sumary-box-height);
         border-bottom: 1px solid lightgray;
         background-color: #F5F5F5;
     }
@@ -301,8 +305,30 @@ position: relative; /* pour que le hint se place dedans */
         font-weight: 900;
         color: black;
     }
+    .order-bg {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 100vw;
+        height: 100%;
+        background-color: #F5F5F5;
+        z-index: -1;
+    }
     .total-ctn {
         padding-bottom: 12px;
+    }
+    /* Styles  clés*/
+    .bg {
+        position: absolute;
+        left: 50%;
+        top: var(--order-sumary-box-height-minus-1-px);
+        transform: translateX(-50%);
+        width: 100vw;
+        height: calc(100% - var(--order-sumary-box-height));
+        background-color:rgb(237, 237, 237);
+        z-index: -1;
+        border-top: 1px solid lightgray;
     }
 }
 @media (min-width: 1001px) {
