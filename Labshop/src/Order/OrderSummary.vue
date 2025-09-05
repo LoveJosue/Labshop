@@ -10,7 +10,7 @@
             <p class="amout">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
         </div>
         <div class="cart-content" :class="[hasOverflow ? borderPosition : '', { 'hide-scroll': !showScrollbar }]" ref="cartContent">
-            <div class="bg border-top"></div>
+            <div class="bg"></div>
             <div v-for="item in cart" :key="item.productId" class="cart-item">
                 <!-- Image produit -->
                  <div class="item-img-box">
