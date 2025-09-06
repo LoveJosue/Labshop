@@ -325,7 +325,7 @@ position: relative; /* pour que le hint se place dedans */
         top: var(--order-sumary-box-height-minus-1-px);
         transform: translateX(-50%);
         width: 100vw;
-        height: calc(100% - var(--order-sumary-box-height));
+        height: calc(100% - var(--order-sumary-box-height-minus-1-px));
         background-color:rgb(237, 237, 237);
         z-index: -1;
         border-top: 1px solid lightgray;
