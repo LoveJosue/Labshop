@@ -1,8 +1,4 @@
 <template>
-    <!-- {{ calculateItemPrice(item).toLocaleString('fr-FR') }} FCFA -->
-    <!-- <span class="item-qte">
-        Qté : {{ item.qte }} {{ getPackaging(item) }}
-    </span> -->
     <div class="ctn">
         <div class="order-summary">
             <div class="order-bg"></div>
