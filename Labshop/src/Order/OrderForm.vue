@@ -1,32 +1,36 @@
 <template>
-    <form class="form">
+    <form class="form" @submit.prevent="handleSubmit">
         <!-- Contact -->
         <section class="section">
             <h2>Contact</h2>
             <div class="form-inline">
                 <div class="form-group">
                     <label for="nom">Nom</label>
-                    <input type="text" id="nom" placeholder="Votre nom" />
+                    <input type="text" id="nom" v-model="form.name" placeholder="Votre nom"/>
+                    <small v-if="errors.name" class="error">{{ errors.name }}</small>
                 </div>
                 <div class="form-group">
                     <label for="nom">Prenom</label>
-                    <input type="text" id="nom" placeholder="Votre prenom" />
+                    <input type="text" id="nom" v-model="form.prename" placeholder="Votre prenom" />
+                    <small v-if="errors.prename" class="error">{{ errors.prename }}</small>
                 </div>
             </div>
             <div class="form-group">
                 <label for="email">Courriel</label>
-                <input type="email" id="email" placeholder="exemple@mail.com" />
+                <input type="email" id="email" v-model="form.email" placeholder="exemple@mail.com" />
+                <small v-if="errors.email" class="error">{{ errors.email }}</small>
             </div>
             <div class="form-group">
-                <label for="telephone">Téléphone</label>
+                <label for="phone">Téléphone</label>
                 <vue-tel-input
-                    id="telephone"
-                    v-model="phone"
+                    id="phone"
+                    v-model="form.phone"
                     :class="['custom-tel-input', { invalid: !phoneIsValid }]"
                     @validate="onPhoneValidate"
                     :inputOptions="{ placeholder: 'Numéro de téléphone' }"
                 />
-                <small v-if="!phoneIsValid" class="error">Numéro invalide</small>
+                <!-- <small v-if="!phoneIsValid" class="error">Numéro invalide</small> -->
+                <small v-if="errors.phone" class="error">{{ errors.phone }}</small>
             </div>
         </section>
 
@@ -34,12 +38,14 @@
         <section class="section">
             <h2>Livraison</h2>
             <div class="form-group">
-                <label for="adresse">Adresse</label>
-                <input type="text" id="adresse" placeholder="123 rue Exemple" />
+                <label for="addresse">Adresse</label>
+                <input type="text" id="addresse" v-model="form.addresse" placeholder="123 rue Exemple" />
+                <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
             </div>
             <div class="form-group">
-                <label for="ville">Ville</label>
-                <input type="text" id="ville" placeholder="Votre ville" />
+                <label for="city">Ville</label>
+                <input type="text" id="city" v-model="form.city" placeholder="Votre ville" />
+                <small v-if="errors.city" class="error">{{ errors.city }}</small>
             </div>
         </section>
 
@@ -47,17 +53,28 @@
         <section class="section">
             <h2>Paiement</h2>
             <div class="form-group">
-                <label for="carte">Numéro de carte</label>
-                <input type="text" id="carte" placeholder="1234 5678 9012 3456" />
+                <label for="card">Numéro de carte</label>
+
+                <input 
+                    id="card"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="cc-number"
+                    v-model="form.card"
+                    placeholder="1234 5678 9012 3456"
+                    @input="formatCardNumber"/>
+                <small v-if="errors.card" class="error">{{ errors.card }}</small>
             </div>
             <div class="form-inline">
                 <div class="form-group">
                     <label for="expiration">Expiration</label>
-                    <input type="text" id="expiration" placeholder="MM/AA" />
+                    <input type="text" id="expiration" v-model="form.expiration" placeholder="MM/AA" />
+                    <small v-if="errors.expiration" class="error">{{ errors.expiration }}</small>
                 </div>
                 <div class="form-group">
                     <label for="cvv">CVV</label>
-                    <input type="text" id="cvv" placeholder="123" />
+                    <input type="text" id="cvv" v-model="form.cvv" placeholder="123" />
+                    <small v-if="errors.cvv" class="error">{{ errors.cvv }}</small>
                 </div>
             </div>
         </section>
@@ -72,20 +89,83 @@
 <script setup>
 import { ref } from 'vue';
 
-const phone = ref('');
+const form = ref({
+    name: '',
+    prename: '',
+    email: '',
+    phone: '',
+    addresse: '',
+    city: '',
+    card: '',
+    expiration: '',
+    cvv: '',
+});
+const errors = ref({});
 const phoneIsValid = ref(false);
 
-function onPhoneValidate({ valid, number, country, dialCode }) {
+function formatCardNumber(e) {
+    let number = form.value.card.replace(/\D/g, ""); // garder seulement chiffres
+    number = number.slice(0, 16); // max 16 chiffres
+    
+    // Ajout d'espaces tous les 4 chiffres 
+    form.value.card = number.replace(/(.{4})(?=.)/g, "$1 ");
+}
+function onPhoneValidate({ valid, number }) {
     phoneIsValid.value = valid;
-    if (valid) {
-        phone.value = number;
+    if (valid) form.value.phone = number;
+}
+function validateForm() {
+    errors.value = {};
+    let valid = true;
+
+    if (!form.value.name) {
+        errors.value.name = "Le nom est requis";
+        valid = false;
     }
-    console.log('Valid', valid, 'Number', number, 'Country', country, 'Dial', dialCode);
+    if (!form.value.prename) {
+        errors.value.prename = "Le prenom est requis";
+        valid = false;
+    }
+    if (!form.value.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+        errors.value.email = "Adresse courriel invalide";
+        valid = false;
+    }
+    if (!phoneIsValid.value) {
+        errors.value.phone = "Numéro de téléphone invalide";
+        valid = false;
+    }
+    if (!form.value.card) {
+        errors.value.card = "Numéro de carte requis";
+        valid = false;
+    }
+    if (!form.value.expiration) {
+        errors.value.expiration = "Date d'expiration requise";
+        valid = false;
+    }
+    if (!form.value.cvv) {
+        errors.value.cvv = "Code CVV requis";
+        valid = false;
+    }
+
+    return valid;
+}
+
+function handleSubmit() {
+    if(!validateForm()) return;
 }
 </script>
 
 <style scoped>
-/* Section de gauche */
+/* Pour Chrome, Safari, Edge, and Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Pour Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 .section {
   margin-bottom: 30px;
 }
