@@ -174,7 +174,7 @@ onMounted(() => {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 6px;
-  font-size: 0.95em;
+  font-size: 0.85em;
 }
 .form-group input:focus {
   border-color: #333 !important;
@@ -187,11 +187,10 @@ onMounted(() => {
 }
 .custom-tel-input {
     width: 100%;
-    /* padding: 4px; */
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 6px;
-    font-size: 0.95em;
+    font-size: 0.85em;
     max-height: 40.79px;
 }
 .invalid {
