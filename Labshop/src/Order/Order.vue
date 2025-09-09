@@ -2,100 +2,78 @@
     <div class="back-color"></div>
         <div class="main">
             <div class="left">
-                <!-- Section Informations client -->
+                <!-- Contact -->
                 <section class="section">
-                    <h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon">
-                        <path d="M20 21v-2a4 4 0 0 0-3-3.87M4 21v-2a4 4 0 0 1 3-3.87M16 3.13a4 4 0 0 1 0 7.75M8 3.13a4 4 0 0 0 0 7.75"/>
-                    </svg>
-                    Informations client
-                    </h2>
+                    <h2>Contact</h2>
                     <form class="form">
-                    <div class="form-group">
-                        <label for="nom">Nom complet</label>
-                        <input type="text" id="nom" placeholder="Entrez votre nom" />
-                    </div>
-                    <div class="form-group-row">
-                        <div class="form-group">
-                            <label for="nom">Nom</label>
-                            <input type="text" id="nom" placeholder="Entrez votre nom" />
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="nom">Nom</label>
+                                <input type="text" id="nom" placeholder="Votre nom" />
+                            </div>
+                            <div class="form-group">
+                                <label for="nom">Prenom</label>
+                                <input type="text" id="nom" placeholder="Votre prenom" />
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="nom">Prenom</label>
-                            <input type="text" id="nom" placeholder="Entrez votre nom" />
+                            <label for="email">Courriel</label>
+                            <input type="email" id="email" placeholder="exemple@mail.com" />
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Courriel</label>
-                        <input type="email" id="email" placeholder="exemple@mail.com" />
-                    </div>
-                    <div class="form-group">
-                        <label for="telephone">Téléphone</label>
-                        <input type="tel" id="telephone" placeholder="(000) 000-0000" />
-                    </div>
+                        <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <vue-tel-input
+                                id="telephone"
+                                v-model="phone"
+                                :class="['custom-tel-input', { invalid: !phoneIsValid }]"
+                                @validate="onPhoneValidate"
+                                :inputOptions="{ placeholder: 'Numéro de téléphone' }"
+                            />
+                            <small v-if="!phoneIsValid" class="error">Numéro invalide</small>
+                        </div>
+                        <!-- <div class="form-group">
+                            <label for="telephone">Téléphone</label>
+                            <input type="tel" id="telephone" placeholder="(+228) 00 000 00" />
+                        </div> -->
                     </form>
                 </section>
 
                 <!-- Section Livraison -->
                 <section class="section">
-                    <h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon">
-                        <path d="M3 7h18M6 10h12l3 6H3l3-6z"/>
-                        <circle cx="9" cy="19" r="2"/>
-                        <circle cx="15" cy="19" r="2"/>
-                    </svg>
-                    Livraison
-                    </h2>
+                    <h2>Livraison</h2>
                     <form class="form">
-                    <div class="form-group">
-                        <label for="adresse">Adresse</label>
-                        <input type="text" id="adresse" placeholder="123 rue Exemple" />
-                    </div>
-                    <div class="form-group">
-                        <label for="ville">Ville</label>
-                        <input type="text" id="ville" placeholder="Votre ville" />
-                    </div>
+                        <div class="form-group">
+                            <label for="adresse">Adresse</label>
+                            <input type="text" id="adresse" placeholder="123 rue Exemple" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ville">Ville</label>
+                            <input type="text" id="ville" placeholder="Votre ville" />
+                        </div>
                     </form>
                 </section>
 
                 <!-- Section Paiement -->
                 <section class="section">
-                    <h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon">
-                        <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="2" y1="10" x2="22" y2="10"/>
-                    </svg>
-                    Paiement
-                    </h2>
+                    <h2>Paiement</h2>
                     <form class="form">
-                    <div class="form-group">
-                        <label for="carte">Numéro de carte</label>
-                        <input type="text" id="carte" placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div class="form-inline">
                         <div class="form-group">
-                        <label for="expiration">Expiration</label>
-                        <input type="text" id="expiration" placeholder="MM/AA" />
+                            <label for="carte">Numéro de carte</label>
+                            <input type="text" id="carte" placeholder="1234 5678 9012 3456" />
                         </div>
-                        <div class="form-group">
-                        <label for="cvv">CVV</label>
-                        <input type="text" id="cvv" placeholder="123" />
+                        <div class="form-inline">
+                            <div class="form-group">
+                            <label for="expiration">Expiration</label>
+                            <input type="text" id="expiration" placeholder="MM/AA" />
+                            </div>
+                            <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" placeholder="123" />
+                            </div>
                         </div>
-                    </div>
                     </form>
                     <div class="submit-container">
                         <button type="submit" class="btn-submit">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                class="icon">
-                            <path d="M5 12l5 5L20 7" />
-                            </svg>
                             Passer la commande
                         </button>
                     </div>
@@ -111,7 +89,20 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import OrderSummary from './OrderSummary.vue';
+import { ref } from 'vue';
+
 const router = useRouter();
+const phone = ref('');
+const phoneIsValid = ref(false);
+
+const tr = ref(true);
+function onPhoneValidate({ valid, number, country, dialCode }) {
+    phoneIsValid.value = valid;
+    if (valid) {
+        phone.value = number;
+    }
+    console.log('Valid', valid, 'Number', number, 'Country', country, 'Dial', dialCode);
+}
 
 const isCartEmpty = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -157,12 +148,13 @@ onMounted(() => {
 .section h2 {
   display: flex;
   align-items: center;
-  font-size: 1.2em;
+  font-size: 1.3em;
+  font-weight: 900;
   margin-bottom: 15px;
   gap: 8px;
 }
 .icon {
-  color: #333;
+  color: #c51f1f;
 }
 .form-group {
   margin-bottom: 15px;
@@ -171,9 +163,8 @@ onMounted(() => {
   width: 100%;
 }
 .form-group-row {
-  margin-bottom: 15px;
   display: flex;
-  width: 100%;
+  gap: 15px;
 }
 .form-group label {
   font-size: 0.9em;
@@ -185,9 +176,32 @@ onMounted(() => {
   border-radius: 6px;
   font-size: 0.95em;
 }
+.form-group input:focus {
+  border-color: #333 !important;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.1) !important;
+  outline: none !important;
+}
 .form-inline {
   display: flex;
   gap: 10px;
+}
+.custom-tel-input {
+    width: 100%;
+    /* padding: 4px; */
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95em;
+    max-height: 40.79px;
+}
+.invalid {
+  border-color: red !important;
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1) !important;
+}
+.error {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 4px;
 }
 .submit-container {
   margin-top: 20px;
@@ -211,7 +225,14 @@ onMounted(() => {
 .btn-submit .icon {
   stroke: white;
 }
-
+:deep(.vue-tel-input:focus-within) {    
+    border-color: #333 !important;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1) !important;
+}
+:deep(.vue-tel-input.invalid:focus-within) {
+  border-color: red !important;
+  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1) !important;
+}
 @media (max-width: 1000px) {
     .main {
         grid-template-columns: 1fr;
