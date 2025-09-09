@@ -2,11 +2,11 @@
     <div class="back-color"></div>
         <div class="main">
             <div class="left">
-                <!-- Contact -->
-                <section class="section">
-                    <h2>Contact</h2>
-                    <form class="form">
-                        <div class="form-group-row">
+                <form class="form">
+                    <!-- Contact -->
+                    <section class="section">
+                        <h2>Contact</h2>
+                        <div class="form-inline">
                             <div class="form-group">
                                 <label for="nom">Nom</label>
                                 <input type="text" id="nom" placeholder="Votre nom" />
@@ -31,17 +31,11 @@
                             />
                             <small v-if="!phoneIsValid" class="error">Numéro invalide</small>
                         </div>
-                        <!-- <div class="form-group">
-                            <label for="telephone">Téléphone</label>
-                            <input type="tel" id="telephone" placeholder="(+228) 00 000 00" />
-                        </div> -->
-                    </form>
-                </section>
+                    </section>
 
-                <!-- Section Livraison -->
-                <section class="section">
-                    <h2>Livraison</h2>
-                    <form class="form">
+                    <!-- Section Livraison -->
+                    <section class="section">
+                        <h2>Livraison</h2>
                         <div class="form-group">
                             <label for="adresse">Adresse</label>
                             <input type="text" id="adresse" placeholder="123 rue Exemple" />
@@ -50,34 +44,32 @@
                             <label for="ville">Ville</label>
                             <input type="text" id="ville" placeholder="Votre ville" />
                         </div>
-                    </form>
-                </section>
+                    </section>
 
-                <!-- Section Paiement -->
-                <section class="section">
-                    <h2>Paiement</h2>
-                    <form class="form">
+                    <!-- Section Paiement -->
+                    <section class="section">
+                        <h2>Paiement</h2>
                         <div class="form-group">
                             <label for="carte">Numéro de carte</label>
                             <input type="text" id="carte" placeholder="1234 5678 9012 3456" />
                         </div>
                         <div class="form-inline">
                             <div class="form-group">
-                            <label for="expiration">Expiration</label>
-                            <input type="text" id="expiration" placeholder="MM/AA" />
+                                <label for="expiration">Expiration</label>
+                                <input type="text" id="expiration" placeholder="MM/AA" />
                             </div>
                             <div class="form-group">
-                            <label for="cvv">CVV</label>
-                            <input type="text" id="cvv" placeholder="123" />
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" placeholder="123" />
                             </div>
                         </div>
-                    </form>
+                    </section>
+                    
+                    <!-- Bouton de soumission -->
                     <div class="submit-container">
-                        <button type="submit" class="btn-submit">
-                            Passer la commande
-                        </button>
+                        <button type="submit" class="btn-submit">Passer la commande</button>
                     </div>
-                </section>
+                </form>
             </div>
             <div class="right grid-row-1-position">
                 <OrderSummary />
@@ -162,10 +154,6 @@ onMounted(() => {
   flex-direction: column;
   width: 100%;
 }
-.form-group-row {
-  display: flex;
-  gap: 15px;
-}
 .form-group label {
   font-size: 0.9em;
   margin-bottom: 5px;
@@ -195,7 +183,6 @@ onMounted(() => {
 }
 .invalid {
   border-color: red !important;
-  box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1) !important;
 }
 .error {
   color: red;
