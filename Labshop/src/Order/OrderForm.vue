@@ -42,10 +42,17 @@
                 <input type="text" id="addresse" v-model="form.addresse" placeholder="123 rue Exemple" />
                 <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
             </div>
-            <div class="form-group">
-                <label for="city">Ville</label>
-                <input type="text" id="city" v-model="form.city" placeholder="Votre ville" />
-                <small v-if="errors.city" class="error">{{ errors.city }}</small>
+            <div class="form-inline">
+              <div class="form-group">
+                  <label for="city">Ville</label>
+                  <input type="text" id="city" v-model="form.city" placeholder="Votre ville" />
+                  <small v-if="errors.city" class="error">{{ errors.city }}</small>
+              </div>
+              <div class="form-group">
+                  <label for="postal-code">Code Postal</label>
+                  <input type="text" id="postal-code" inputmode="numeric" v-model="form.postalCode" placeholder="12345" maxlength="5" @input="formatPostalCode"/>
+                  <small v-if="errors.postalCode" class="error">{{ errors.postalCode }}</small>
+              </div>
             </div>
         </section>
 
@@ -54,7 +61,6 @@
             <h2>Paiement</h2>
             <div class="form-group">
                 <label for="card">Numéro de carte</label>
-
                 <input 
                     id="card"
                     type="text"
@@ -68,12 +74,12 @@
             <div class="form-inline">
                 <div class="form-group">
                     <label for="expiration">Expiration</label>
-                    <input type="text" id="expiration" v-model="form.expiration" placeholder="MM/AA" />
+                    <input type="text" id="expiration" v-model="form.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
                     <small v-if="errors.expiration" class="error">{{ errors.expiration }}</small>
                 </div>
                 <div class="form-group">
                     <label for="cvv">CVV</label>
-                    <input type="text" id="cvv" v-model="form.cvv" placeholder="123" />
+                    <input type="text" id="cvv" inputmode="numeric" autocomplete="cc-number" v-model="form.cvv" placeholder="Code de sécurité" @input="formatCVV" maxlength="4"/>
                     <small v-if="errors.cvv" class="error">{{ errors.cvv }}</small>
                 </div>
             </div>
@@ -96,6 +102,7 @@ const form = ref({
     phone: '',
     addresse: '',
     city: '',
+    postalCode: '',
     card: '',
     expiration: '',
     cvv: '',
@@ -103,12 +110,29 @@ const form = ref({
 const errors = ref({});
 const phoneIsValid = ref(false);
 
-function formatCardNumber(e) {
-    let number = form.value.card.replace(/\D/g, ""); // garder seulement chiffres
+//  Fonctions de formatage
+function formatExpiration() {
+  const number = keepDigitsOnly(form.value.expiration);
+
+  // Ajoute une barre oblique à chaque 2 chiffres
+  form.value.expiration = number.replace(/(.{2})(?=.)/g, "$1/");
+}
+function formatCVV() {
+  const number = keepDigitsOnly(form.value.cvv);
+  form.value.cvv = number;
+}
+function formatPostalCode() {
+  const number = keepDigitsOnly(form.value.postalCode);
+  form.value.postalCode = number;
+}
+function formatCardNumber() {
+    let number = keepDigitsOnly(form.value.card);
     number = number.slice(0, 16); // max 16 chiffres
-    
     // Ajout d'espaces tous les 4 chiffres 
     form.value.card = number.replace(/(.{4})(?=.)/g, "$1 ");
+}
+function keepDigitsOnly(value) {
+  return value.replace(/\D/g, ""); // garder seulement chiffres
 }
 function onPhoneValidate({ valid, number }) {
     phoneIsValid.value = valid;
