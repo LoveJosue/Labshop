@@ -76,7 +76,7 @@
             <div class="form-inline">
                 <div class="form-group">
                     <label for="expiration">Expiration</label>
-                    <input type="text" id="expiration" v-model="form.card.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
+                    <input type="text" id="expiration" inputmode="numeric" v-model="form.card.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
                     <small v-if="errors.expiration" class="error">{{ errors.expiration }}</small>
                 </div>
                 <div class="form-group">
