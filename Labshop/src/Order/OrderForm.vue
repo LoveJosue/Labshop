@@ -1,6 +1,6 @@
 <template>
     <form class="form" @submit.prevent="handleSubmit">
-        <!-- Contact -->
+        <!-- Section Contact -->
         <section class="section">
             <h2>Contact</h2>
             <div class="form-inline">
@@ -38,6 +38,9 @@
         <section class="section">
             <h2>Livraison</h2>
             <div class="form-group">
+              <SelectReceptionMode :ReceptionType="receptionType" @receptionTypeChanged="handleReceptionTypeChange"/>
+            </div>
+            <div class="form-group">
                 <label for="addresse">Adresse</label>
                 <input type="text" id="addresse" v-model="form.addresse" placeholder="123 rue Exemple" />
                 <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
@@ -65,23 +68,33 @@
                     id="card"
                     type="text"
                     inputmode="numeric"
-                    autocomplete="cc-number"
-                    v-model="form.card"
+                    v-model="form.card.number"
                     placeholder="1234 5678 9012 3456"
                     @input="formatCardNumber"/>
-                <small v-if="errors.card" class="error">{{ errors.card }}</small>
+                <small v-if="errors.cardNumber" class="error">{{ errors.cardNumber }}</small>
             </div>
             <div class="form-inline">
                 <div class="form-group">
                     <label for="expiration">Expiration</label>
-                    <input type="text" id="expiration" v-model="form.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
+                    <input type="text" id="expiration" v-model="form.card.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
                     <small v-if="errors.expiration" class="error">{{ errors.expiration }}</small>
                 </div>
                 <div class="form-group">
                     <label for="cvv">CVV</label>
-                    <input type="text" id="cvv" inputmode="numeric" autocomplete="cc-number" v-model="form.cvv" placeholder="Code de sécurité" @input="formatCVV" maxlength="4"/>
+                    <input type="text" id="cvv" inputmode="numeric" autocomplete="cc-number" v-model="form.card.cvv" placeholder="Code de sécurité" @input="formatCVV" maxlength="4"/>
                     <small v-if="errors.cvv" class="error">{{ errors.cvv }}</small>
                 </div>
+            </div>
+            <div class="form-group">
+                <label for="card">Nom sur la carte</label>
+                <input 
+                    id="card"
+                    type="text"
+                    inputmode="numeric"
+                    v-model="form.card.name"
+                    placeholder="Nom sur la carte"
+                    @input="formatCardName"/>
+                <small v-if="errors.cardName" class="error">{{ errors.cardName }}</small>
             </div>
         </section>
         
@@ -94,7 +107,20 @@
 
 <script setup>
 import { ref } from 'vue';
+import SelectReceptionMode from './SelectReceptionMode.vue';
 
+// const form = ref({
+//     name: '',
+//     prename: '',
+//     email: '',
+//     phone: '',
+//     addresse: '',
+//     city: '',
+//     postalCode: '',
+//     card: '',
+//     expiration: '',
+//     cvv: '',
+// });
 const form = ref({
     name: '',
     prename: '',
@@ -103,33 +129,41 @@ const form = ref({
     addresse: '',
     city: '',
     postalCode: '',
-    card: '',
-    expiration: '',
-    cvv: '',
+    card: { 
+      number: '',
+      expiration: '',
+      cvv: '',
+      name: ''
+    },
 });
+const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
 const errors = ref({});
 const phoneIsValid = ref(false);
 
-//  Fonctions de formatage
+//  Fonctions de formatage des entrées
 function formatExpiration() {
-  const number = keepDigitsOnly(form.value.expiration);
-
+  const number = keepDigitsOnly(form.value.card.expiration);
   // Ajoute une barre oblique à chaque 2 chiffres
-  form.value.expiration = number.replace(/(.{2})(?=.)/g, "$1/");
+  form.value.card.expiration = number.replace(/(.{2})(?=.)/g, "$1/");
 }
 function formatCVV() {
-  const number = keepDigitsOnly(form.value.cvv);
-  form.value.cvv = number;
+  const number = keepDigitsOnly(form.value.card.cvv);
+  form.value.card.cvv = number;
 }
 function formatPostalCode() {
   const number = keepDigitsOnly(form.value.postalCode);
   form.value.postalCode = number;
 }
 function formatCardNumber() {
-    let number = keepDigitsOnly(form.value.card);
+    let number = keepDigitsOnly(form.value.card.number);
     number = number.slice(0, 16); // max 16 chiffres
     // Ajout d'espaces tous les 4 chiffres 
-    form.value.card = number.replace(/(.{4})(?=.)/g, "$1 ");
+    form.value.card.number = number.replace(/(.{4})(?=.)/g, "$1 ");
+}
+function formatCardName() {
+  const cardName = form.value.card.name;
+  const cardNameToUpper = cardName.toUpperCase();
+  form.value.card.name =  cardNameToUpper;
 }
 function keepDigitsOnly(value) {
   return value.replace(/\D/g, ""); // garder seulement chiffres
@@ -141,6 +175,7 @@ function onPhoneValidate({ valid, number }) {
 function validateForm() {
     errors.value = {};
     let valid = true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!form.value.name) {
         errors.value.name = "Le nom est requis";
@@ -150,7 +185,7 @@ function validateForm() {
         errors.value.prename = "Le prenom est requis";
         valid = false;
     }
-    if (!form.value.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    if (!form.value.email || !emailRegex.test(form.value.email)) {
         errors.value.email = "Adresse courriel invalide";
         valid = false;
     }
@@ -158,11 +193,11 @@ function validateForm() {
         errors.value.phone = "Numéro de téléphone invalide";
         valid = false;
     }
-    if (!form.value.card) {
-        errors.value.card = "Numéro de carte requis";
+    if (!form.value.card.number) {
+        errors.value.cardNumber = "Numéro de carte requis";
         valid = false;
     }
-    if (!form.value.expiration) {
+    if (!form.value.card.expiration) {
         errors.value.expiration = "Date d'expiration requise";
         valid = false;
     }
@@ -170,12 +205,18 @@ function validateForm() {
         errors.value.cvv = "Code CVV requis";
         valid = false;
     }
-
+    if (!form.value.card.name) {
+        errors.value.cardName = "Nom sur la carte requis";
+        valid = false;
+    }
     return valid;
 }
 
 function handleSubmit() {
     if(!validateForm()) return;
+}
+function handleReceptionTypeChange(value) {
+  receptionType.value = value;
 }
 </script>
 
@@ -190,6 +231,11 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+select {
+      -webkit-appearance: none; /* For WebKit browsers (Chrome, Safari) */
+      -moz-appearance: none; /* For Mozilla browsers (Firefox) */
+      appearance: none; /* Standard property */
+    }
 .section {
   margin-bottom: 30px;
 }
@@ -226,6 +272,7 @@ input[type="number"] {
   outline: none !important;
 }
 .form-inline {
+  width: 100%;
   display: flex;
   gap: 10px;
 }
