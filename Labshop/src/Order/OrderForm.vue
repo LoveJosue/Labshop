@@ -90,7 +90,6 @@
                 <input 
                     id="card"
                     type="text"
-                    inputmode="numeric"
                     v-model="form.card.name"
                     placeholder="Nom sur la carte"
                     @input="formatCardName"/>
