@@ -57,6 +57,34 @@
                   <small v-if="errors.postalCode" class="error">{{ errors.postalCode }}</small>
               </div>
             </div>
+            <h3>Point de livraison</h3>
+              <div class="form-inline">
+                <div class="form-group">
+                  <label for="latitude">Latitude</label>
+                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 45.5017">
+                  <small v-if="errors.latitude" class="error">{{ errors.latitude }}</small>
+                </div>
+                <div class="form-group">
+                  <label for="longitude">Longitude</label>
+                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -73.5673">
+                  <small v-if="errors.longitude" class="error">{{ errors.longitude }}</small>
+                </div>
+              </div>
+              <div class="option-marker">
+                <div></div>
+                <p>OU</p>
+                <div></div>
+              </div>
+              <div class="form-group">
+                <div class="location-button" @click="getCurrentLocation">
+                  <!--!Font Awesome Free v7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path d="M541.9 139.5C546.4 127.7 543.6 114.3 534.7 105.4C525.8 96.5 512.4 93.6 500.6 98.2L84.6 258.2C71.9 263 63.7 275.2 64 288.7C64.3 302.2 73.1 314.1 85.9 318.3L262.7 377.2L321.6 554C325.9 566.8 337.7 575.6 351.2 575.9C364.7 576.2 376.9 568 381.8 555.4L541.8 139.4z"/>
+                  </svg>
+                  <p>Utilisez ma position actuelle</p>
+                </div>
+                <small v-if="errors.location" class="error">{{ errors.location }}</small>
+              </div>
         </section>
 
         <!-- Section Paiement -->
@@ -75,7 +103,7 @@
             </div>
             <div class="form-inline">
                 <div class="form-group">
-                    <label for="expiration">Expiration</label>
+                    <label for="expiration">Date d'expiration</label>
                     <input type="text" id="expiration" inputmode="numeric" v-model="form.card.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
                     <small v-if="errors.expiration" class="error">{{ errors.expiration }}</small>
                 </div>
@@ -108,18 +136,6 @@
 import { ref } from 'vue';
 import SelectReceptionMode from './SelectReceptionMode.vue';
 
-// const form = ref({
-//     name: '',
-//     prename: '',
-//     email: '',
-//     phone: '',
-//     addresse: '',
-//     city: '',
-//     postalCode: '',
-//     card: '',
-//     expiration: '',
-//     cvv: '',
-// });
 const form = ref({
     name: '',
     prename: '',
@@ -128,6 +144,8 @@ const form = ref({
     addresse: '',
     city: '',
     postalCode: '',
+    latitude: '',
+    longitude: '',
     card: { 
       number: '',
       expiration: '',
@@ -138,6 +156,22 @@ const form = ref({
 const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
 const errors = ref({});
 const phoneIsValid = ref(false);
+const getCurrentLocation = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        form.value.latitude = position.coords.latitude.toFixed(6);
+        form.value.longitude = position.coords.longitude.toFixed(6);
+      },
+      (error) => {
+        errors.value.location = "Impossible de récupérer la position. Saisir manuellement.";
+        if(error.code === 1) errors.value.location = "Autorisez l'utilisation de votre localisation."
+      }
+    );
+  } else {
+    errors.value.location = "La géolocalisation n’est pas supportée par ce navigateur.";
+  }
+}
 
 //  Fonctions de formatage des entrées
 function formatExpiration() {
@@ -192,6 +226,22 @@ function validateForm() {
         errors.value.phone = "Numéro de téléphone invalide";
         valid = false;
     }
+    if (!form.value.addresse) {
+        errors.value.addresse = "Adresse requise";
+        valid = false;
+    }
+    if (!form.value.city) {
+        errors.value.city = "Nom de ville requise";
+        valid = false;
+    }
+    if (!form.value.latitude) {
+        errors.value.latitude = "Donnée de latitude requise";
+        valid = false;
+    }
+    if (!form.value.longitude) {
+        errors.value.longitude = "Donnée de longitude requise";
+        valid = false;
+    }
     if (!form.value.card.number) {
         errors.value.cardNumber = "Numéro de carte requis";
         valid = false;
@@ -220,6 +270,11 @@ function handleReceptionTypeChange(value) {
 </script>
 
 <style scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 /* Pour Chrome, Safari, Edge, and Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -243,6 +298,15 @@ select {
   align-items: center;
   font-size: 1.3em;
   font-weight: 900;
+  margin-bottom: 15px;
+  gap: 8px;
+}
+.section h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1em;
+  font-weight: 900;
+  margin-top: 15px;
   margin-bottom: 15px;
   gap: 8px;
 }
@@ -274,6 +338,39 @@ select {
   width: 100%;
   display: flex;
   gap: 10px;
+}
+.option-marker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: fit-content;
+  margin-bottom: 15px;
+}
+.option-marker div {
+  height: 0.001em;
+  width: 100%;
+  border-top: 1px solid #bbb;
+}
+.option-marker p {
+  margin: 0 10px;
+  color: #bbb;
+  font-size: 0.9rem;
+}
+.location-button {
+  display: flex;
+  justify-content: center;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 8px;
+  gap: 2px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.location-button svg {
+  width: 20px;
+}
+.location-button p {
+  font-size: 0.95rem;
 }
 .custom-tel-input {
     width: 100%;
