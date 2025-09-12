@@ -42,7 +42,7 @@
             </div>
             <div class="form-group">
                 <label for="addresse">Adresse</label>
-                <input type="text" id="addresse" v-model="form.addresse" placeholder="123 rue Exemple" />
+                <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou repère" />
                 <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
             </div>
             <div class="form-inline">
@@ -53,20 +53,19 @@
               </div>
               <div class="form-group">
                   <label for="postal-code">Code Postal</label>
-                  <input type="text" id="postal-code" inputmode="numeric" v-model="form.postalCode" placeholder="12345" maxlength="5" @input="formatPostalCode"/>
-                  <small v-if="errors.postalCode" class="error">{{ errors.postalCode }}</small>
+                  <input type="text" id="postal-code" inputmode="numeric" v-model="form.postalCode" placeholder="12345 (optionnel)" maxlength="5" @input="formatPostalCode"/>
               </div>
             </div>
             <h3>Point de livraison</h3>
               <div class="form-inline">
                 <div class="form-group">
                   <label for="latitude">Latitude</label>
-                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 45.5017">
+                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 6.171015 (optionnel)" @input="form.latitude = sanitizeGpsInput(form.latitude, 'lat')">
                   <small v-if="errors.latitude" class="error">{{ errors.latitude }}</small>
                 </div>
                 <div class="form-group">
                   <label for="longitude">Longitude</label>
-                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -73.5673">
+                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -1.25152 (optionnel)" @input="form.longitude = sanitizeGpsInput(form.longitude, 'lng')">
                   <small v-if="errors.longitude" class="error">{{ errors.longitude }}</small>
                 </div>
               </div>
@@ -123,6 +122,9 @@
                     @input="formatCardName"/>
                 <small v-if="errors.cardName" class="error">{{ errors.cardName }}</small>
             </div>
+            <div class="form-group">
+              <CheckBoxComponent v-model:selected="invoiceAddressAsShippingAddress" :text="CHCK_BOX_TEXT_1"/>
+            </div>
         </section>
         
         <!-- Bouton de soumission -->
@@ -135,6 +137,10 @@
 <script setup>
 import { ref } from 'vue';
 import SelectReceptionMode from './SelectReceptionMode.vue';
+import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
+
+const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse d'expédition";
+const invoiceAddressAsShippingAddress = ref(true);
 
 const form = ref({
     name: '',
@@ -165,7 +171,8 @@ const getCurrentLocation = () => {
       },
       (error) => {
         errors.value.location = "Impossible de récupérer la position. Saisir manuellement.";
-        if(error.code === 1) errors.value.location = "Autorisez l'utilisation de votre localisation."
+        // if(error.code === 1) errors.value.location = "Autorisez l'utilisation de votre localisation."
+        if(error.code === 1) errors.value.location = "Autorisez la géolocalisation, pour calculer vos frais de livraison automatiquement. Sinon, entrez simplement votre adresse de livraison."
       }
     );
   } else {
@@ -198,12 +205,52 @@ function formatCardName() {
   const cardNameToUpper = cardName.toUpperCase();
   form.value.card.name =  cardNameToUpper;
 }
+function sanitizeGpsInput(rawValue, type = "lat") {
+  let value = rawValue;
+
+  // 1. Garder uniquement chiffres, +, -, .
+  value = value.replace(/[^0-9\.\-\+]/g, "");
+
+  // 2. Un seul signe au début
+  value = value.replace(/(?!^)[\+\-]/g, "");
+
+  // 3. Empêcher un point au début ou après un signe sans chiffre avant
+  value = value.replace(/^([+\-]?)\./, "$1"); 
+
+  // 4. Gérer multiples points (garde le premier)
+  let parts = value.split(".");
+  if (parts.length > 2) {
+    value = parts.shift() + "." + parts.join("");
+  }
+
+  // 5. Limiter à 6 décimales
+  if (parts.length === 2) {
+    parts[1] = parts[1].slice(0, 6);
+    value = parts[0] + "." + parts[1];
+  }
+
+  // 6. Vérifier bornes uniquement si nombre complet
+  if (value !== "" && value !== "-" && value !== "+" && !value.endsWith(".")) {
+    let num = parseFloat(value);
+    let min = type === "lat" ? -90 : -180;
+    let max = type === "lat" ? 90 : 180;
+
+    if (num > max) num = max;
+    if (num < min) num = min;
+
+    value = num.toString();
+  }
+
+  return value;
+}
+
+
+function onPhoneValidate({ valid, number }) {
+  phoneIsValid.value = valid;
+  if (valid) form.value.phone = number;
+}
 function keepDigitsOnly(value) {
   return value.replace(/\D/g, ""); // garder seulement chiffres
-}
-function onPhoneValidate({ valid, number }) {
-    phoneIsValid.value = valid;
-    if (valid) form.value.phone = number;
 }
 function validateForm() {
     errors.value = {};
