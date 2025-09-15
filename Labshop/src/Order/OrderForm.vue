@@ -64,13 +64,13 @@
               <div class="form-inline">
                 <div class="form-group">
                   <label for="latitude">Latitude</label>
-                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 6.171015 (optionnel)" @input="form.latitude = sanitizeGpsInput(form.latitude, 'lat')">
-                  <small v-if="errors.latitude" class="error">{{ errors.latitude }}</small>
+                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 6.171015 (optionnelle)" @input="form.latitude = sanitizeGpsInput(form.latitude, 'lat')">
+                  <!-- <small v-if="errors.latitude" class="error">{{ errors.latitude }}</small> -->
                 </div>
                 <div class="form-group">
                   <label for="longitude">Longitude</label>
-                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -1.25152 (optionnel)" @input="form.longitude = sanitizeGpsInput(form.longitude, 'lng')">
-                  <small v-if="errors.longitude" class="error">{{ errors.longitude }}</small>
+                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -1.25152 (optionnelle)" @input="form.longitude = sanitizeGpsInput(form.longitude, 'lng')">
+                  <!-- <small v-if="errors.longitude" class="error">{{ errors.longitude }}</small> -->
                 </div>
               </div>
               <div class="option-marker">
@@ -174,13 +174,12 @@
                   <label for="phone">Téléphone</label>
                   <vue-tel-input
                       id="phone"
-                      v-model="form.phone"
-                      :class="['custom-tel-input', { invalid: !phoneIsValid }]"
-                      @validate="onPhoneValidate"
+                      v-model="form.billing.phone"
+                      :class="['custom-tel-input', { invalid: !billingPhoneIsValid }]"
+                      @validate="onBillingPhoneValidate"
                       :inputOptions="{ placeholder: 'Numéro de téléphone' }"
                   />
-                  <!-- <small v-if="!phoneIsValid" class="error">Numéro invalide</small> -->
-                  <small v-if="errors.phone" class="error">{{ errors.phone }}</small>
+                  <small v-if="errors.billingPhone" class="error">{{ errors.billingPhone }}</small>
               </div>
             </section>
         </section>
@@ -202,6 +201,7 @@ const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de factur
 const invoiceAddressAsShippingAddress = ref(true);
 const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
 const phoneIsValid = ref(false);
+const billingPhoneIsValid = ref(false);
 const form = ref({
     name: '',
     prename: '',
@@ -322,6 +322,10 @@ function onPhoneValidate({ valid, number }) {
   phoneIsValid.value = valid;
   if (valid) form.value.phone = number;
 }
+function onBillingPhoneValidate({ valid, number }) {
+  billingPhoneIsValid.value = valid;
+  if (valid) form.value.billing.phone = number;
+}
 function keepDigitsOnly(value) {
   return value.replace(/\D/g, ""); // garder seulement chiffres
 }
@@ -343,7 +347,7 @@ function validateForm() {
         valid = false;
     }
     if (!phoneIsValid.value) {
-        errors.value.phone = "Numéro de téléphone invalide";
+        errors.value.phone = "Numéro de téléphone requis";
         valid = false;
     }
     if (!form.value.addresse) {
@@ -351,17 +355,17 @@ function validateForm() {
         valid = false;
     }
     if (!form.value.city) {
-        errors.value.city = "Nom de ville requise";
+        errors.value.city = "Nom de ville requis";
         valid = false;
     }
-    if (!form.value.latitude) {
-        errors.value.latitude = "Donnée de latitude requise";
-        valid = false;
-    }
-    if (!form.value.longitude) {
-        errors.value.longitude = "Donnée de longitude requise";
-        valid = false;
-    }
+    // if (!form.value.latitude) {
+    //     errors.value.latitude = "Donnée de latitude requise";
+    //     valid = false;
+    // }
+    // if (!form.value.longitude) {
+    //     errors.value.longitude = "Donnée de longitude requise";
+    //     valid = false;
+    // }
     if (!form.value.card.number) {
         errors.value.cardNumber = "Numéro de carte requis";
         valid = false;
@@ -378,27 +382,38 @@ function validateForm() {
         errors.value.cardName = "Nom sur la carte requis";
         valid = false;
     }
-    if (!form.value.billing.name) {
-        errors.value.billingName = "Le nom est requis";
+    
+    if (!invoiceAddressAsShippingAddress.value) {
+      if (!form.value.billing.name) {
+          errors.value.billingName = "Le nom est requis";
+          valid = false;
+      }
+      if (!form.value.billing.prename) {
+          errors.value.billingPrename = "Le prénom est requis";
+          valid = false;
+      }
+      if (!form.value.billing.addresse) {
+          errors.value.billingAddresse = "Adresse requise";
+          valid = false;
+      }
+      if (!form.value.billing.city) {
+          errors.value.billingCity = "Nom de ville requis";
+          valid = false;
+      }
+      if (!billingPhoneIsValid.value) {
+        errors.value.billingPhone = "Numéro de téléphone requis";
         valid = false;
+      } 
     }
-    if (!form.value.billing.prename) {
-        errors.value.billingPrename = "Le prénom est requis";
-        valid = false;
-    }
-    if (!form.value.billing.addresse) {
-        errors.value.billingAddresse = "Adresse requise";
-        valid = false;
-    }
-    if (!form.value.billing.city) {
-        errors.value.billingCity = "Nom de ville requise";
-        valid = false;
-    }    
     return valid;
 }
 
 function handleSubmit() {
-    if(!validateForm()) return;
+    if(!validateForm()) {
+      return
+    } else {
+      alert('Commande effectuée');
+    };
 }
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
