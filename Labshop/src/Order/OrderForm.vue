@@ -3,24 +3,37 @@
         <!-- Section Contact -->
         <section class="section">
             <h2>Contact</h2>
-            <div class="form-inline">
-                <div class="form-group">
-                    <label for="nom">Nom</label>
-                    <input type="text" id="nom" v-model="form.name" placeholder="Votre nom"/>
-                    <small v-if="errors.name" class="error">{{ errors.name }}</small>
-                </div>
-                <div class="form-group">
-                    <label for="nom">Prenom</label>
-                    <input type="text" id="nom" v-model="form.prename" placeholder="Votre prenom" />
-                    <small v-if="errors.prename" class="error">{{ errors.prename }}</small>
-                </div>
-            </div>
             <div class="form-group">
                 <label for="email">Courriel</label>
                 <input type="email" id="email" v-model="form.email" placeholder="exemple@mail.com" />
                 <small v-if="errors.email" class="error">{{ errors.email }}</small>
             </div>
+        </section>
+
+        <!-- Section Livraison -->
+
+        <section class="section">
+            <h2>Livraison</h2>
             <div class="form-group">
+              <SelectReceptionMode :ReceptionType="receptionType" @receptionTypeChanged="handleReceptionTypeChange"/>
+            </div>
+
+            <!-- Si expédition -->
+
+            <section class="section" v-if="receptionType === 0">
+              <div class="form-inline">
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" v-model="form.name" placeholder="Votre nom" @input="form.name ? errors.name = '': errors.name='a'"/>
+                    <small v-if="errors.name" class="error">{{ errors.name }}</small>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" id="prenom" v-model="form.prename" placeholder="Votre prénom" />
+                    <small v-if="errors.prename" class="error">{{ errors.prename }}</small>
+                </div>
+              </div>
+              <div class="form-group">
                 <label for="phone">Téléphone</label>
                 <vue-tel-input
                     id="phone"
@@ -29,34 +42,25 @@
                     @validate="onPhoneValidate"
                     :inputOptions="{ placeholder: 'Numéro de téléphone' }"
                 />
-                <!-- <small v-if="!phoneIsValid" class="error">Numéro invalide</small> -->
                 <small v-if="errors.phone" class="error">{{ errors.phone }}</small>
             </div>
-        </section>
-
-        <!-- Section Livraison -->
-        <section class="section">
-            <h2>Livraison</h2>
-            <div class="form-group">
-              <SelectReceptionMode :ReceptionType="receptionType" @receptionTypeChanged="handleReceptionTypeChange"/>
-            </div>
-            <div class="form-group">
-                <label for="addresse">Adresse</label>
-                <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou repère" />
-                <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
-            </div>
-            <div class="form-inline">
               <div class="form-group">
-                  <label for="city">Ville</label>
-                  <input type="text" id="city" v-model="form.city" placeholder="Votre ville" />
-                  <small v-if="errors.city" class="error">{{ errors.city }}</small>
+                  <label for="addresse">Adresse</label>
+                  <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou repère" />
+                  <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
               </div>
-              <div class="form-group">
-                  <label for="postal-code">Code Postal</label>
-                  <input type="text" id="postal-code" inputmode="numeric" v-model="form.postalCode" placeholder="12345 (optionnel)" maxlength="5" @input="formatPostalCode"/>
+              <div class="form-inline">
+                <div class="form-group">
+                    <label for="city">Ville</label>
+                    <input type="text" id="city" v-model="form.city" placeholder="Votre ville" />
+                    <small v-if="errors.city" class="error">{{ errors.city }}</small>
+                </div>
+                <div class="form-group">
+                    <label for="postal-code">Code Postal</label>
+                    <input type="text" id="postal-code" inputmode="numeric" v-model="form.postalCode" placeholder="12345 (optionnel)" maxlength="5" @input="formatPostalCode"/>
+                </div>
               </div>
-            </div>
-            <h3>Point de livraison</h3>
+              <h3>Point de livraison</h3>
               <div class="form-inline">
                 <div class="form-group">
                   <label for="latitude">Latitude</label>
@@ -84,6 +88,16 @@
                 </div>
                 <small v-if="errors.location" class="error">{{ errors.location }}</small>
               </div>
+            </section>
+
+            <!-- Si cueillette -->
+
+            <section class="section" v-if="receptionType === 1">
+              <h3>Lieu de cueillette</h3>
+              <div class="form-group">
+              </div>
+              <SelectPickUpLocation />
+            </section>
         </section>
 
         <!-- Section Paiement -->
@@ -122,9 +136,53 @@
                     @input="formatCardName"/>
                 <small v-if="errors.cardName" class="error">{{ errors.cardName }}</small>
             </div>
-            <div class="form-group">
+            <div class="form-group" v-if="receptionType === 0">
               <CheckBoxComponent v-model:selected="invoiceAddressAsShippingAddress" :text="CHCK_BOX_TEXT_1"/>
             </div>
+            <!-- Section adresse de dresse de factuation -->
+            <section class="section" v-if="!invoiceAddressAsShippingAddress || receptionType === 1">
+              <h3>Adresse de facturation</h3>
+              <div class="form-inline">
+                  <div class="form-group">
+                      <label for="nom">Nom</label>
+                      <input type="text" id="nom" v-model="form.billing.name" placeholder="Votre nom"/>
+                      <small v-if="errors.billingName" class="error">{{ errors.billingName }}</small>
+                  </div>
+                  <div class="form-group">
+                      <label for="nom">Prénom</label>
+                      <input type="text" id="nom" v-model="form.billing.prename" placeholder="Votre prénom" />
+                      <small v-if="errors.billingPrename" class="error">{{ errors.billingPrename }}</small>
+                  </div>
+              </div>
+              <div class="form-group">
+                  <label for="addresse">Adresse</label>
+                  <input type="text" id="addresse" v-model="form.billing.Addresse" placeholder="- 123 rue exemple - ou repère" />
+                  <small v-if="errors.billingAddresse" class="error">{{ errors.billingAddresse }}</small>
+              </div>
+              <div class="form-inline">
+                <div class="form-group">
+                    <label for="city">Ville</label>
+                    <input type="text" id="city" v-model="form.billing.city" placeholder="Votre ville" />
+                    <small v-if="errors.billingCity" class="error">{{ errors.billingCity }}</small>
+                </div>
+                <div class="form-group">
+                    <label for="postal-code">Code Postal</label>
+                    <input type="text" id="postal-code" inputmode="numeric" v-model="form.billing.postalCode" placeholder="12345 (optionnel)" maxlength="5" @input="formatPostalCode"/>
+                </div>
+              </div>
+              <div class="form-group">
+                  <label for="phone">Téléphone</label>
+                  <vue-tel-input
+                      id="phone"
+                      v-model="form.phone"
+                      :class="['custom-tel-input', { invalid: !phoneIsValid }]"
+                      @validate="onPhoneValidate"
+                      :inputOptions="{ placeholder: 'Numéro de téléphone' }"
+                  />
+                  <!-- <small v-if="!phoneIsValid" class="error">Numéro invalide</small> -->
+                  <small v-if="errors.phone" class="error">{{ errors.phone }}</small>
+              </div>
+            </section>
         </section>
         
         <!-- Bouton de soumission -->
@@ -135,13 +193,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import SelectReceptionMode from './SelectReceptionMode.vue';
 import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
+import SelectPickUpLocation from './SelectPickUpLocation.vue';
 
-const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse d'expédition";
+const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
 const invoiceAddressAsShippingAddress = ref(true);
-
+const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
+const phoneIsValid = ref(false);
 const form = ref({
     name: '',
     prename: '',
@@ -158,10 +218,23 @@ const form = ref({
       cvv: '',
       name: ''
     },
+    billing : {
+      prename: '',
+      name: '',
+      addresse: '',
+      city: '',
+      postalCode: '',
+      phone: ''
+    }
 });
-const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
 const errors = ref({});
-const phoneIsValid = ref(false);
+const validateName = () => {
+  // Si le champ non a déjà été invalidé
+  if (errors.name) {
+    form.value.name ? errors.value.name = '' : errors.value.name = "Le nom est requis";
+  }
+  
+}
 const getCurrentLocation = () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -262,7 +335,7 @@ function validateForm() {
         valid = false;
     }
     if (!form.value.prename) {
-        errors.value.prename = "Le prenom est requis";
+        errors.value.prename = "Le prénom est requis";
         valid = false;
     }
     if (!form.value.email || !emailRegex.test(form.value.email)) {
@@ -305,6 +378,22 @@ function validateForm() {
         errors.value.cardName = "Nom sur la carte requis";
         valid = false;
     }
+    if (!form.value.billing.name) {
+        errors.value.billingName = "Le nom est requis";
+        valid = false;
+    }
+    if (!form.value.billing.prename) {
+        errors.value.billingPrename = "Le prénom est requis";
+        valid = false;
+    }
+    if (!form.value.billing.addresse) {
+        errors.value.billingAddresse = "Adresse requise";
+        valid = false;
+    }
+    if (!form.value.billing.city) {
+        errors.value.billingCity = "Nom de ville requise";
+        valid = false;
+    }    
     return valid;
 }
 
@@ -314,6 +403,10 @@ function handleSubmit() {
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
 }
+watch(receptionType, (oldVal, newVal) => {
+  // En cas d'expédition
+  if (newVal == 0) invoiceAddressAsShippingAddress.value = true;
+})
 </script>
 
 <style scoped>
@@ -353,7 +446,7 @@ select {
   align-items: center;
   font-size: 1em;
   font-weight: 900;
-  margin-top: 15px;
+  margin-top: 1.5rem;
   margin-bottom: 15px;
   gap: 8px;
 }
