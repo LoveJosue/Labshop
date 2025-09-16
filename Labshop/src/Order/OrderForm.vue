@@ -1,5 +1,5 @@
 <template>
-    <form class="form" @submit.prevent="handleSubmit">
+    <form class="form" @submit.prevent="handleSubmit" @keydown.enter.prevent>
         <!-- Section Contact -->
         <section class="section">
             <h2>Contact</h2>
@@ -204,12 +204,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import SelectReceptionMode from './SelectReceptionMode.vue';
 import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
 import SelectPickUpLocation from './SelectPickUpLocation.vue';
 
 const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
+const ZERO = 0;
+const ONE = 1;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const invoiceAddressAsShippingAddress = ref(true);
@@ -241,7 +243,76 @@ const form = ref({
       phone: ''
     }
 });
-const errors = ref({});
+// const errors = ref({});
+const errors = ref({
+  // Contact
+  email: '',
+
+  // Livraison (expédition)
+  name: '',
+  prename: '',
+  phone: '',
+  addresse: '',
+  city: '',
+  // latitude: '', // optionnel
+  // longitude: '', // optionnel
+
+  // Paiement
+  cardNumber: '',
+  expiration: '',
+  cvv: '',
+  cardName: '',
+
+  // Adresse de facturation
+  billingName: '',
+  billingPrename: '',
+  billingAddress: '',
+  billingCity: '',
+  billingPhone: ''
+});
+
+function resetErrorsForShippingWithInvoiceAddressAsShippingOne() {
+  const preservedKeys = [
+    'email','name', 'prename', 'phone', 'addresse',
+    'city', 'cardNumber', 'expiration', 'cvv', 'cardName',
+  ]
+
+  for (const key in errors.value) {
+    if (!preservedKeys.includes(key)) {
+      errors.value[key] = ''
+    }
+  }
+}
+function resetErrorsForShipping() {
+  const preservedKeys = [
+    'email','cardNumber', 'expiration', 'cvv', 'cardName'
+  ]
+
+  for (const key in errors.value) {
+    if (!preservedKeys.includes(key)) {
+      errors.value[key] = ''
+    }
+  }
+}
+function resetErrorsForPickup() {
+  const preservedKeys = [
+    'email','cardNumber', 'expiration', 'cvv', 'cardName',
+    'billingName', 'billingPrename', 'billingAddresse',
+    'billingCity', 'billingPhone'
+  ]
+
+  for (const key in errors.value) {
+    if (!preservedKeys.includes(key)) {
+      errors.value[key] = ''
+    }
+  }
+}
+
+// Vérifie si le formulaire contient au moins une erreur
+const hasErrors = computed(() =>
+  Object.values(errors.value).some(err => err)
+)
+
 const locationError = ref('');
 const getCurrentLocation = () => {
   if (navigator.geolocation) {
@@ -484,42 +555,42 @@ function isValidCreditCard(number) {
 }
 
 function validateForm() {
-    errors.value = {};
+    // errors.value = {};
     let valid = true;
-    
 
-    if (!form.value.name) {
-        errors.value.name = "Le nom est requis";
-        valid = false;
-    }
-    if (!form.value.prename) {
-        errors.value.prename = "Le prénom est requis";
-        valid = false;
-    }
+
+    // Shipping + pickup
     if (!form.value.email || !emailRegex.test(form.value.email)) {
-        errors.value.email = "Adresse courriel invalide";
-        valid = false;
+          errors.value.email = "Adresse courriel invalide";
+          valid = false;
+      }
+    
+    // Shipping
+    if (receptionType.value === ZERO) {
+      if (!form.value.name) {
+          errors.value.name = "Le nom est requis";
+          valid = false;
+      }
+      if (!form.value.prename) {
+          errors.value.prename = "Le prénom est requis";
+          valid = false;
+      }
+      if (!phoneIsValid.value) {
+          errors.value.phone = "Numéro de téléphone requis";
+          valid = false;
+      }
+      if (!form.value.addresse) {
+          errors.value.addresse = "Adresse requise";
+          valid = false;
+      }
+      if (!form.value.city) {
+          errors.value.city = "Nom de ville requis";
+          valid = false;
+      }
     }
-    if (!phoneIsValid.value) {
-        errors.value.phone = "Numéro de téléphone requis";
-        valid = false;
-    }
-    if (!form.value.addresse) {
-        errors.value.addresse = "Adresse requise";
-        valid = false;
-    }
-    if (!form.value.city) {
-        errors.value.city = "Nom de ville requis";
-        valid = false;
-    }
-    // if (!form.value.latitude) {
-    //     errors.value.latitude = "Donnée de latitude requise";
-    //     valid = false;
-    // }
-    // if (!form.value.longitude) {
-    //     errors.value.longitude = "Donnée de longitude requise";
-    //     valid = false;
-    // }
+
+    // Card
+
     if (!form.value.card.number) {
         errors.value.cardNumber = "Numéro de carte requis";
         valid = false;
@@ -538,7 +609,9 @@ function validateForm() {
         valid = false;
     }
     
-    if (!invoiceAddressAsShippingAddress.value) {
+
+    // Pickup or invoice address différent of shipping address
+    if (!invoiceAddressAsShippingAddress.value || receptionType.value == ONE) {
       if (!form.value.billing.name) {
           errors.value.billingName = "Le nom est requis";
           valid = false;
@@ -562,20 +635,30 @@ function validateForm() {
     }
     return valid;
 }
-
 function handleSubmit() {
-    if(!validateForm()) {
-      return
-    } else {
-      alert('Commande effectuée');
-    };
+  validateForm();
+  if(hasErrors.value) {
+    alert('Formulaire invalide, corrigez les erreurs');
+    return;
+  }
+  alert('✅Formulaire valide, envoi...')
 }
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
 }
-watch(receptionType, (oldVal, newVal) => {
+watch(receptionType, (newVal, oldVal) => {
   // En cas d'expédition
-  if (newVal == 0) invoiceAddressAsShippingAddress.value = true;
+  if (newVal === ZERO) {
+    invoiceAddressAsShippingAddress.value = true;
+    resetErrorsForShipping();
+  }
+  // En cas de cueillette
+  if (newVal === ONE) resetErrorsForPickup();
+})
+watch(invoiceAddressAsShippingAddress, (newVal, oldVal) => {
+  if (newVal === true) {
+    resetErrorsForShippingWithInvoiceAddressAsShippingOne();
+  }
 })
 </script>
 
