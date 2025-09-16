@@ -549,7 +549,7 @@ function validateForm() {
       }
       if (!form.value.billing.address) {
           errors.value.billingAddress = "Adresse requise";
-          valid = false;zazaxzxs
+          valid = false;
       }
       if (!form.value.billing.city) {
           errors.value.billingCity = "Nom de ville requis";
