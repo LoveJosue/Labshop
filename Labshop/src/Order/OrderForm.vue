@@ -5,7 +5,7 @@
             <h2>Contact</h2>
             <div class="form-group">
                 <label for="email">Courriel</label>
-                <input type="email" id="email" v-model="form.email" placeholder="exemple@mail.com" />
+                <input type="email" id="email" v-model="form.email" placeholder="exemple@mail.com" @input="form.email ? errors.email = '' : errors.email = 'Entrez un email'" @blur="isEmailValid"/>
                 <small v-if="errors.email" class="error">{{ errors.email }}</small>
             </div>
         </section>
@@ -24,12 +24,12 @@
               <div class="form-inline">
                 <div class="form-group">
                     <label for="nom">Nom</label>
-                    <input type="text" id="nom" v-model="form.name" placeholder="Votre nom" @input="form.name ? errors.name = '': errors.name='a'"/>
+                    <input type="text" id="nom" v-model="form.name" placeholder="Votre nom" @input="form.name ? errors.name = '' : errors.name='Saisissez votre nom'"/>
                     <small v-if="errors.name" class="error">{{ errors.name }}</small>
                 </div>
                 <div class="form-group">
                     <label for="prenom">Prénom</label>
-                    <input type="text" id="prenom" v-model="form.prename" placeholder="Votre prénom" />
+                    <input type="text" id="prenom" v-model="form.prename" placeholder="Votre prénom" @input="form.prename ? errors.prename = '' : errors.prename='Saisissez votre prénom'"/>
                     <small v-if="errors.prename" class="error">{{ errors.prename }}</small>
                 </div>
               </div>
@@ -43,16 +43,16 @@
                     :inputOptions="{ placeholder: 'Numéro de téléphone' }"
                 />
                 <small v-if="errors.phone" class="error">{{ errors.phone }}</small>
-            </div>
+              </div>
               <div class="form-group">
                   <label for="addresse">Adresse</label>
-                  <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou repère" />
+                  <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou repère" @input="form.addresse ? errors.addresse = '' : errors.addresse='Saisissez votre adresse de livraison'"/>
                   <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
               </div>
               <div class="form-inline">
                 <div class="form-group">
                     <label for="city">Ville</label>
-                    <input type="text" id="city" v-model="form.city" placeholder="Votre ville" />
+                    <input type="text" id="city" v-model="form.city" placeholder="Votre ville" @input="form.city ? errors.city = '' : errors.city='Saisissez votre ville'"/>
                     <small v-if="errors.city" class="error">{{ errors.city }}</small>
                 </div>
                 <div class="form-group">
@@ -86,7 +86,7 @@
                   </svg>
                   <p>Utilisez ma position actuelle</p>
                 </div>
-                <small v-if="errors.location" class="error">{{ errors.location }}</small>
+                <small v-if="locationError" class="error-secondary">{{ locationError }}</small>
               </div>
             </section>
 
@@ -106,23 +106,34 @@
             <div class="form-group">
                 <label for="card">Numéro de carte</label>
                 <input 
-                    id="card"
-                    type="text"
-                    inputmode="numeric"
-                    v-model="form.card.number"
-                    placeholder="1234 5678 9012 3456"
-                    @input="formatCardNumber"/>
+                  id="card"
+                  type="text"
+                  inputmode="numeric"
+                  v-model="form.card.number"
+                  placeholder="1234 5678 9012 3456"
+                  @input="ckeckCardNumber"
+                  @blur="isCardNumberValid"
+                />
                 <small v-if="errors.cardNumber" class="error">{{ errors.cardNumber }}</small>
             </div>
             <div class="form-inline">
                 <div class="form-group">
                     <label for="expiration">Date d'expiration</label>
-                    <input type="text" id="expiration" inputmode="numeric" v-model="form.card.expiration" placeholder="MM/AA" maxlength="5" @input="formatExpiration"/>
+                    <input 
+                      type="text" 
+                      id="expiration" 
+                      inputmode="numeric" 
+                      v-model="form.card.expiration" 
+                      placeholder="MM/AA" 
+                      maxlength="5" 
+                      @input="checkExpireDate" 
+                      @blur="isExpireDateValid"
+                    />
                     <small v-if="errors.expiration" class="error">{{ errors.expiration }}</small>
                 </div>
                 <div class="form-group">
                     <label for="cvv">CVV</label>
-                    <input type="text" id="cvv" inputmode="numeric" autocomplete="cc-number" v-model="form.card.cvv" placeholder="Code de sécurité" @input="formatCVV" maxlength="4"/>
+                    <input type="text" id="cvv" inputmode="numeric" autocomplete="cc-number" v-model="form.card.cvv" placeholder="Code de sécurité" maxlength="4" @input="checkCVVNumber" @blur="isCvvValid"/>
                     <small v-if="errors.cvv" class="error">{{ errors.cvv }}</small>
                 </div>
             </div>
@@ -133,7 +144,8 @@
                     type="text"
                     v-model="form.card.name"
                     placeholder="Nom sur la carte"
-                    @input="formatCardName"/>
+                    @input="checkCardName"
+                    />
                 <small v-if="errors.cardName" class="error">{{ errors.cardName }}</small>
             </div>
             <div class="form-group" v-if="receptionType === 0">
@@ -145,24 +157,24 @@
               <div class="form-inline">
                   <div class="form-group">
                       <label for="nom">Nom</label>
-                      <input type="text" id="nom" v-model="form.billing.name" placeholder="Votre nom"/>
+                      <input type="text" id="nom" v-model="form.billing.name" placeholder="Votre nom" @input="form.billing.name ? errors.billingName = '' : errors.billingName = 'Saisissez votre nom'"/>
                       <small v-if="errors.billingName" class="error">{{ errors.billingName }}</small>
                   </div>
                   <div class="form-group">
                       <label for="nom">Prénom</label>
-                      <input type="text" id="nom" v-model="form.billing.prename" placeholder="Votre prénom" />
+                      <input type="text" id="nom" v-model="form.billing.prename" placeholder="Votre prénom" @input="form.billing.prename ? errors.billingPrename = '' : errors.billingPrename = 'Saisissez votre prénom'"/>
                       <small v-if="errors.billingPrename" class="error">{{ errors.billingPrename }}</small>
                   </div>
               </div>
               <div class="form-group">
                   <label for="addresse">Adresse</label>
-                  <input type="text" id="addresse" v-model="form.billing.Addresse" placeholder="- 123 rue exemple - ou repère" />
-                  <small v-if="errors.billingAddresse" class="error">{{ errors.billingAddresse }}</small>
+                  <input type="text" id="addresse" v-model="form.billing.address" placeholder="- 123 rue exemple - ou repère" @input="form.billing.address ? errors.billingAddress = '' : errors.billingAddress = 'Saisissez votre adresse de facturation'"/>
+                  <small v-if="errors.billingAddress" class="error">{{ errors.billingAddress }}</small>
               </div>
               <div class="form-inline">
                 <div class="form-group">
                     <label for="city">Ville</label>
-                    <input type="text" id="city" v-model="form.billing.city" placeholder="Votre ville" />
+                    <input type="text" id="city" v-model="form.billing.city" placeholder="Votre ville" @input="form.billing.city ? errors.billingCity = '' : errors.billingCity = 'Saisissez le nom de la ville'"/>
                     <small v-if="errors.billingCity" class="error">{{ errors.billingCity }}</small>
                 </div>
                 <div class="form-group">
@@ -198,6 +210,8 @@ import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
 import SelectPickUpLocation from './SelectPickUpLocation.vue';
 
 const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const invoiceAddressAsShippingAddress = ref(true);
 const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
 const phoneIsValid = ref(false);
@@ -221,20 +235,14 @@ const form = ref({
     billing : {
       prename: '',
       name: '',
-      addresse: '',
+      address: '',
       city: '',
       postalCode: '',
       phone: ''
     }
 });
 const errors = ref({});
-const validateName = () => {
-  // Si le champ non a déjà été invalidé
-  if (errors.name) {
-    form.value.name ? errors.value.name = '' : errors.value.name = "Le nom est requis";
-  }
-  
-}
+const locationError = ref('');
 const getCurrentLocation = () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -243,22 +251,104 @@ const getCurrentLocation = () => {
         form.value.longitude = position.coords.longitude.toFixed(6);
       },
       (error) => {
-        errors.value.location = "Impossible de récupérer la position. Saisir manuellement.";
-        // if(error.code === 1) errors.value.location = "Autorisez l'utilisation de votre localisation."
-        if(error.code === 1) errors.value.location = "Autorisez la géolocalisation, pour calculer vos frais de livraison automatiquement. Sinon, entrez simplement votre adresse de livraison."
+        locationError.value = "Impossible de récupérer la position. Saisir manuellement.";
+        if(error.code === 1) locationError.value = "Autorisez la géolocalisation, pour calculer vos frais de livraison automatiquement. Sinon, entrez simplement votre adresse de livraison."
       }
     );
   } else {
-    errors.value.location = "La géolocalisation n’est pas supportée par ce navigateur.";
+    locationError.value = "La géolocalisation n’est pas supportée par ce navigateur.";
+  }
+}
+// Fonctions de validations réactive des champs du formulaire (onBlur)
+function isEmailValid() {
+  const email = form.value.email;
+  if (email) {
+    !emailRegex.test(email) ? errors.value.email = "Saisissez une adresse courriel valide" : "";
+  }
+}
+function isCardNumberValid() {
+  const cardNumber = form.value.card.number;
+  if (cardNumber) {
+    !isValidCreditCard(cardNumber) ? errors.value.cardNumber = 'Saisissez un numéro de carte valide' : "";
+  }
+}
+function isExpireDateValid() {
+  const exp = form.value.card.expiration;
+
+  if (!exp || exp.length !== 5 || exp.indexOf("/") !== 2) {
+    errors.value.expiration = "Format invalide (MM/AA)";
+    return false;
+  }
+
+  let [month, year] = exp.split("/");
+  month = parseInt(month, 10);
+  year = parseInt(year, 10);
+
+  // Convertir AA → AAAA
+  year += 2000;
+
+  // Vérification du mois
+  if (isNaN(month) || month < 1 || month > 12) {
+    errors.value.expiration = "Mois invalide";
+    return false;
+  }
+
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  // Carte expirée ?
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    errors.value.expiration = "Carte expirée";
+    return false;
+  }
+
+  errors.value.expiration = "";
+  return true;
+}
+
+function isCvvValid() {
+  const cvv = form.value.card.cvv;
+  const cardNumber = form.value.card.number.replace(/\D/g, "");
+  const four = 4;
+  
+  if (cvv) {
+    if (cardNumber.length >= four) {
+      // Détection du type de carte
+      let isAmex = cardNumber.startsWith("34") || cardNumber.startsWith("37");
+  
+      // Vérification du format
+      (isAmex && cvv.length !== four) ? errors.value.cvv = "CVV doit contenir 4 chiffres pour Amex" : "";
+      (!isAmex && cvv.length !== 3) ? errors.value.cvv = "CVV doit contenir 3 chiffres" : "";
+    // } else if (!cardNumber || cardNumber.length < four) {
+    } else {
+      (cvv.length < 3) ? errors.value.cvv = "CVV doit contenir au moins 3 chiffres" : errors.value.cvv = "";
+    }
   }
 }
 
+
+
 //  Fonctions de formatage des entrées
 function formatExpiration() {
-  const number = keepDigitsOnly(form.value.card.expiration);
-  // Ajoute une barre oblique à chaque 2 chiffres
-  form.value.card.expiration = number.replace(/(.{2})(?=.)/g, "$1/");
+  let number = keepDigitsOnly(form.value.card.expiration);
+
+  // Max 4 chiffres (MMYY)
+  number = number.slice(0, 4);
+
+  // Si seulement 1 chiffre et >1 → on préfixe par "0"
+  if (number.length === 1 && parseInt(number) > 1) {
+    number = "0" + number;
+  }
+
+  // Ajoute un "/" après 2 chiffres
+  if (number.length > 2) {
+    number = number.slice(0, 2) + "/" + number.slice(2);
+  }
+
+  form.value.card.expiration = number;
 }
+
 function formatCVV() {
   const number = keepDigitsOnly(form.value.card.cvv);
   form.value.card.cvv = number;
@@ -316,23 +406,87 @@ function sanitizeGpsInput(rawValue, type = "lat") {
 
   return value;
 }
-
-
-function onPhoneValidate({ valid, number }) {
-  phoneIsValid.value = valid;
-  if (valid) form.value.phone = number;
-}
-function onBillingPhoneValidate({ valid, number }) {
-  billingPhoneIsValid.value = valid;
-  if (valid) form.value.billing.phone = number;
-}
 function keepDigitsOnly(value) {
   return value.replace(/\D/g, ""); // garder seulement chiffres
 }
+function onPhoneValidate({ valid, number }) {
+  phoneIsValid.value = valid;
+  if (valid) {
+    errors.value.phone = '';
+    form.value.phone = number;
+  } else {
+    errors.value.phone = 'Entrez un numéro de téléphone valide';
+  }
+}
+function onBillingPhoneValidate({ valid, number }) {
+  billingPhoneIsValid.value = valid;
+  if (valid) {
+    errors.value.billingPhone = '';
+    form.value.billing.phone = number;
+  } else {
+    errors.value.billingPhone = 'Entrez un numéro de téléphone valide';
+  }
+}
+function ckeckCardNumber() {
+  formatCardNumber();
+  // Validation réactive (affichage réactive d'erreur)
+  form.value.card.number ? errors.value.cardNumber = '' : errors.value.cardNumber='Saisissez le numéro de votre carte';
+}
+function checkCVVNumber() {
+  formatCVV();
+  // Validation réacive (affichage réactive d'erreur)
+  form.value.card.cvv ? errors.value.cvv = '' : errors.value.cvv = 'Saisissez le code CVV de votre carte';
+}
+function checkExpireDate() {
+  formatExpiration();
+  // Validation réacive (affichage réactive d'erreur)
+  form.value.card.expiration ? errors.value.expiration = '' : errors.value.expiration = "Saisissez la date d'expiration de votre carte";
+}
+function checkCardName() {
+  formatCardName();
+  // Validation réacive (affichage réactive d'erreur)
+  form.value.card.name ? errors.value.cardName = '' : errors.value.cardName = "Saisissez le nom sur votre carte tel quel";
+}
+function isValidCreditCard(number) {
+  number = number.replace(/\D/g, "");
+
+  if (number.length < 13 || number.length > 19) return false;
+
+  const firstOne = parseInt(number[0]);
+  const firstTwo = parseInt(number.substring(0, 2));
+  const firstThree = parseInt(number.substring(0, 3));
+  const firstFour = parseInt(number.substring(0, 4));
+  const firstSix = parseInt(number.substring(0, 6));
+
+  let validPrefix = false;
+  if (firstOne === 4) validPrefix = true; // Visa
+  if (firstTwo >= 51 && firstTwo <= 55) validPrefix = true; // Mastercard
+  if (firstTwo === 34 || firstTwo === 37) validPrefix = true; // Amex
+  if (firstFour === 6011 || firstTwo === 65 || (firstThree >= 644 && firstThree <= 649)) validPrefix = true; // Discover
+  if (firstSix >= 222100 && firstSix <= 272099) validPrefix = true; // Mastercard nouveau range
+
+  if (!validPrefix) return false;
+
+  // Luhn
+  let sum = 0;
+  let shouldDouble = false;
+  for (let i = number.length - 1; i >= 0; i--) {
+    let digit = parseInt(number.charAt(i), 10);
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+
+  return sum % 10 === 0;
+}
+
 function validateForm() {
     errors.value = {};
     let valid = true;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
 
     if (!form.value.name) {
         errors.value.name = "Le nom est requis";
@@ -374,8 +528,9 @@ function validateForm() {
         errors.value.expiration = "Date d'expiration requise";
         valid = false;
     }
-    if (!form.value.cvv) {
+    if (!form.value.card.cvv) {
         errors.value.cvv = "Code CVV requis";
+        
         valid = false;
     }
     if (!form.value.card.name) {
@@ -392,9 +547,9 @@ function validateForm() {
           errors.value.billingPrename = "Le prénom est requis";
           valid = false;
       }
-      if (!form.value.billing.addresse) {
-          errors.value.billingAddresse = "Adresse requise";
-          valid = false;
+      if (!form.value.billing.address) {
+          errors.value.billingAddress = "Adresse requise";
+          valid = false;zazaxzxs
       }
       if (!form.value.billing.city) {
           errors.value.billingCity = "Nom de ville requis";
@@ -441,10 +596,10 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 select {
-      -webkit-appearance: none; /* For WebKit browsers (Chrome, Safari) */
-      -moz-appearance: none; /* For Mozilla browsers (Firefox) */
-      appearance: none; /* Standard property */
-    }
+  -webkit-appearance: none; /* For WebKit browsers (Chrome, Safari) */
+  -moz-appearance: none; /* For Mozilla browsers (Firefox) */
+  appearance: none; /* Standard property */
+}
 .section {
   margin-bottom: 30px;
 }
@@ -540,6 +695,11 @@ select {
 }
 .error {
   color: red;
+  font-size: 0.8em;
+  margin-top: 4px;
+}
+.error-secondary {
+  color: #333;
   font-size: 0.8em;
   margin-top: 4px;
 }
