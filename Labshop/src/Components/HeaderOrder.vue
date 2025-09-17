@@ -29,16 +29,15 @@ const goToHomePage = () => {
 
 <style scoped>
 .ctn {
+    position: relative;
     width: 100%;
     top: 0%;
     font-size: smaller;
     font-weight: 300;
-    background: rgba(255, 255, 255, 0.8);
+    background: #fff;
+    z-index: 10;
     color: #333;
-    /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); */
-    /* border-bottom: 1px solid rgba(0, 0, 0, 0.005); */
     border-bottom: 1px solid lightgray;
-    /* transition: box-shadow 2.3s ease-in-out, background 2.3s ease-in-out; */
 }
 .nav {
     display: flex;

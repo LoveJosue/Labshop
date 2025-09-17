@@ -1,13 +1,14 @@
 <template>
-    <div class="back-color"></div>
-        <div class="main">
-            <div class="left">
-                <OrderForm />
-            </div>
-            <div class="right grid-row-1-position">
+    <div class="main">
+        <div class="left">
+            <OrderForm />
+        </div>
+        <div class="right grid-row-1-position">
+            <div class="wrap">
                 <OrderSummary />
             </div>
         </div>
+    </div>
 </template>
 
 <script setup>
@@ -16,7 +17,6 @@ import OrderSummary from './OrderSummary.vue';
 
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
 
 const router = useRouter();
 
@@ -31,15 +31,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.back-color {
-    top: 71px;
+.main::before {
+    content: "";
+    position: fixed;
+    top: 0;
     right: 0;
-    position: absolute;
-    width: 50%;
-    height: calc(100%);
-    background-color: rgb(237, 237, 237);
+    width: 50vw;
+    height: 100vh;
+    background-color: var(--orderPageBackBgColor);
     z-index: -1;
-}
+    border-left: 1px solid lightgray;
+ }
 .main {
     width: 75%;
     max-width: 1000px;
@@ -50,14 +52,21 @@ onMounted(() => {
 }
 .left {
     height: 100lvh;
-    border-right: 1px solid lightgray;
     padding: 2.5rem 2.5rem 2.5rem 0;
 }
 .right {
-    background-color: rgb(237, 237, 237);
     padding:2.5rem 0 2.5rem 2.5rem;
 }
+.wrap {
+    position: sticky;
+    top: 40px;
+    background-color: var(--orderPageBackBgColor);
+}
 @media (max-width: 1000px) {
+    .main::before {
+        display: none;
+        content: none;
+    }
     .main {
         grid-template-columns: 1fr;
     }
