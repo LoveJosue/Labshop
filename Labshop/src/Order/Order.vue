@@ -90,7 +90,7 @@ onMounted(() => {
         grid-row-start: 1;
     }
     .right {
-        padding: 0 5%;
+        padding: 2% 5%;
     }
     .left {
         padding: 0 5%;
