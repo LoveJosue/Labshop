@@ -47,7 +47,7 @@ onMounted(() => {
     border-left: 1px solid lightgray;
  }
 .main {
-    width: 75%;
+    width: 100%;
     max-width: 1000px;
     margin: 0 auto;
     display: grid;
@@ -73,8 +73,9 @@ onMounted(() => {
     }
     .main {
         grid-template-columns: 1fr;
-        width: 90%;
-        margin: 0 auto;
+        width: 100%;
+        padding: 0 5%;
+        
     }
     .left {
         border-right: none;
