@@ -90,4 +90,10 @@ onMounted(() => {
         grid-row-start: 1;
     }
 }
+
+@media (max-width: 350px) {
+    .left, .right {
+        padding: 2% 5%;
+    }
+}
 </style>
