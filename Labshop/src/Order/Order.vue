@@ -89,11 +89,11 @@ onMounted(() => {
     .grid-row-1-position {
         grid-row-start: 1;
     }
-    .left, .right {
-        padding: 2% 5%;
-    }
     .right {
-        padding-top: 0;
+        padding: 0 5%;
+    }
+    .left {
+        padding: 0 5%;
     }
 }
 </style>

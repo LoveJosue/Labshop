@@ -1,4 +1,5 @@
 <template>
+  <div class="ctn">
     <form class="form" @submit.prevent="handleSubmit" @keydown.enter.prevent>
         <!-- Section Contact -->
         <section class="section">
@@ -201,6 +202,7 @@
             <button type="submit" class="btn-submit">Passer la commande</button>
         </div>
     </form>
+  </div>
 </template>
 
 <script setup>
@@ -721,6 +723,7 @@ select {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.85em;
+  width: 100%;
 }
 .form-group input:focus {
   border-color: #333 !important;
