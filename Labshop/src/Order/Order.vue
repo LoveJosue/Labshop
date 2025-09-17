@@ -84,16 +84,16 @@ onMounted(() => {
     }
     .right {
         padding: 0;
-        border-top: 1px solid lightgray;
+        /* border-top: 1px solid lightgray; */
     }
     .grid-row-1-position {
         grid-row-start: 1;
     }
-}
-
-@media (max-width: 350px) {
     .left, .right {
         padding: 2% 5%;
+    }
+    .right {
+        padding-top: 0;
     }
 }
 </style>
