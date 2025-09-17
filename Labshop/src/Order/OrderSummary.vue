@@ -155,14 +155,14 @@ onMounted(() => {
     display: none;
 }
 .cart-content {
-position: relative; /* pour que le hint se place dedans */
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  justify-content: flex-start;
-  box-sizing: content-box;
-  padding-right: 0;
-  padding-top: 10px;
+    position: relative; /* pour que le hint se place dedans */
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    justify-content: flex-start;
+    box-sizing: content-box;
+    padding-right: 0;
+    padding-top: 10px;
 }
 .cart-item {
     display: grid;

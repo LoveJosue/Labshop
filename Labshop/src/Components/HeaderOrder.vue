@@ -45,7 +45,6 @@ const goToHomePage = () => {
     align-items: center;
     width: 75%;
     max-width: 1000px;
-    /* border: 1px solid red; */
     margin: 0 auto;
     height: 70px;
 }

@@ -31,6 +31,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.ctn {
+    position: relative;
+    width: 100%;
+}
 .main::before {
     content: "";
     position: fixed;
@@ -69,9 +73,8 @@ onMounted(() => {
     }
     .main {
         grid-template-columns: 1fr;
-    }
-    .back-color {
-        display: none;
+        width: 90%;
+        margin: 0 auto;
     }
     .left {
         border-right: none;
@@ -80,11 +83,6 @@ onMounted(() => {
     }
     .right {
         padding: 0;
-    }
-    .main {
-        display: grid;
-        grid-row: 1fr;
-        grid-template-rows: auto;
     }
     .grid-row-1-position {
         grid-row-start: 1;
