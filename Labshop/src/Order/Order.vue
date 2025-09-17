@@ -53,6 +53,7 @@ onMounted(() => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     height: 100%;
+    border-top: 1px solid lightgray;
 }
 .left {
     height: 100lvh;
@@ -74,8 +75,7 @@ onMounted(() => {
     .main {
         grid-template-columns: 1fr;
         width: 100%;
-        padding: 0 5%;
-        
+        border-top: none;
     }
     .left {
         border-right: none;
@@ -84,6 +84,7 @@ onMounted(() => {
     }
     .right {
         padding: 0;
+        border-top: 1px solid lightgray;
     }
     .grid-row-1-position {
         grid-row-start: 1;

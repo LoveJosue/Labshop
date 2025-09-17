@@ -37,7 +37,6 @@ const goToHomePage = () => {
     background: #fff;
     z-index: 10;
     color: #333;
-    border-bottom: 1px solid lightgray;
 }
 .nav {
     display: flex;
