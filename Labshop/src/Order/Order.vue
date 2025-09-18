@@ -4,9 +4,11 @@
             <OrderForm />
         </div>
         <div class="right grid-row-1-position">
-            <div class="wrap">
-                <OrderSummary />
-            </div>
+            <Transition >
+                <div class="wrap">
+                    <OrderSummary />
+                </div>
+            </Transition>
         </div>
     </div>
 </template>

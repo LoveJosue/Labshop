@@ -46,6 +46,8 @@ const goToHomePage = () => {
     max-width: 1000px;
     margin: 0 auto;
     height: 70px;
+
+    
 }
 .logo-ctn {
     height: 100%;

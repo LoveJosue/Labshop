@@ -1,67 +1,71 @@
 <template>
     <div class="ctn">
-        <div class="order-summary">
+        <div class="order-summary" @click="toggleSummary">
             <div class="order-bg"></div>
             <p>Résumé d'achat</p>
             <p class="amout">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
         </div>
-        <div class="cart-content" :class="[hasOverflow ? borderPosition : '', { 'hide-scroll': !showScrollbar }]" ref="cartContent">
-            <div class="bg"></div>
-            <div v-for="item in cart" :key="item.productId" class="cart-item">
-                <!-- Image produit -->
-                 <div class="item-img-box">
-                     <img :src="item.imgUrl" :alt="item.name" />
-                     <div class="notif-icon">
-                        {{ item.qte }}
-                     </div>
-                 </div>
-                <div class="item-details">
-                    <div class="item-infos">
-                        <div class="chld-1">
-                            <span class="item-name">{{ item.name }}</span>
-                            <span class="item-type">
-                                Achat en {{ item.purchaseType === ONE ? 'gros' : 'détail' }}
-                            </span>
+        <Transition :name="viewPortWidth < 1000 ? 'slide' : ''">
+            <div v-if="showSummary || viewPortWidth >= 1000" class="summary-ctn">
+                <div class="cart-content" :class="[hasOverflow ? borderPosition : '', { 'hide-scroll': !showScrollbar }]" ref="cartContent">
+                    <div class="bg"></div>
+                    <div v-for="item in cart" :key="item.productId" class="cart-item">
+                        <!-- Image produit -->
+                        <div class="item-img-box">
+                            <img :src="item.imgUrl" :alt="item.name" />
+                            <div class="notif-icon">
+                                {{ item.qte }}
+                            </div>
+                        </div>
+                        <div class="item-details">
+                            <div class="item-infos">
+                                <div class="chld-1">
+                                    <span class="item-name">{{ item.name }}</span>
+                                    <span class="item-type">
+                                        Achat en {{ item.purchaseType === ONE ? 'gros' : 'détail' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="item-price">
+                                {{ calculateItemPrice(item).toLocaleString('fr-FR') }} FCFA
+                            </p>
                         </div>
                     </div>
-                    <p class="item-price">
-                        {{ calculateItemPrice(item).toLocaleString('fr-FR') }} FCFA
-                    </p>
+                    <div v-if="hasOverflow && !isAtBottom" class="scroll-hint">
+                        Faites défiler pour voir plus ↓
+                    </div>
+                </div>
+                <!-- Bill summary-->
+                <div class="bill-ctn">
+                    <div class="bg"></div>
+                    <div class="flex-element">
+                        <p>Sous-total · <span>{{ itemsQtySum }}</span> article{{ itemsQtySum > 1 ? 's' : '' }}</p>
+                        <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
+                    </div>
+                    <div class="flex-element">
+                        <p>Récupération en boutique</p>
+                        <p>GRATUIT</p>
+                    </div class="flex-element">
+                    <div class="flex-element">
+                        <p>Taxes</p>
+                        <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
+                    </div>
+                </div>
+                <!-- Purchase total -->
+                <div class="total-ctn">
+                    <p>Total</p>
+                    <div class="total-amout gap-x-2">
+                        <p class="currenty">XOF</p>
+                        <p class="value">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
+                    </div>
                 </div>
             </div>
-            <div v-if="hasOverflow && !isAtBottom" class="scroll-hint">
-                Faites défiler pour voir plus ↓
-            </div>
-        </div>
-        <!-- Bill summary-->
-        <div class="bill-ctn">
-            <div class="bg"></div>
-            <div class="flex-element">
-                <p>Sous-total · <span>{{ itemsQtySum }}</span> article{{ itemsQtySum > 1 ? 's' : '' }}</p>
-                <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
-            </div>
-            <div class="flex-element">
-                <p>Récupération en boutique</p>
-                <p>GRATUIT</p>
-            </div class="flex-element">
-            <div class="flex-element">
-                <p>Taxes</p>
-                <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
-            </div>
-        </div>
-        <!-- Purchase total -->
-         <div class="total-ctn">
-            <p>Total</p>
-            <div class="total-amout gap-x-2">
-                <p class="currenty">XOF</p>
-                <p class="value">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
-            </div>
-         </div>
+        </Transition>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 
 const CART = 'cart';
 const ONE = 1;
@@ -72,10 +76,17 @@ const hasOverflow = ref(false);
 const showScrollbar = ref(true);
 const isAtBottom = ref(false);
 const itemsQtySum = ref(0);
+const showSummary = ref(false);
+const viewPortWidth = ref(window.innerWidth);
 let scrollTimeout;
 let hideTimeout;
 
-const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [] ;
+
+const toggleSummary = () => showSummary.value = !showSummary.value;
+const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [];
+const updateViewPortWidth = () => {
+    viewPortWidth.value = window.innerWidth;
+};
 const calculateItemPrice = (item) => item.purchaseType === ONE ? (item.unitPrice * item.unitPerBox * item.qte) : item.unitPrice * item.qte;
 const subTotal = computed(() => {
     let sum = 0;
@@ -89,7 +100,7 @@ const TVA = computed(() => {
 });
 const totalWithTVA = computed(() => {
     return subTotal.value + TVA.value;
-})
+});
 const updateItemsQtySum = () => {
   let qtySum = 0;
   cart.value.forEach((item) => { qtySum += item.qte });
@@ -127,6 +138,7 @@ function handleScroll() {
     else if (atBottom) borderPosition.value = 'top';
   }, 500);
 }
+
 onMounted(() => {
     cart.value = loadCart();
     checkOverflow();
@@ -134,7 +146,12 @@ onMounted(() => {
         cartContent.value.addEventListener('scroll', handleScroll);
     }
     updateItemsQtySum();
+    window.addEventListener('resize', updateViewPortWidth);
 });
+
+onUnmounted(() => {
+    window.removeEventListener('resize', updateViewPortWidth);
+})
 
 </script>
 
@@ -275,10 +292,27 @@ onMounted(() => {
     height: 100%;
 }
 @media (max-width: 1000px) {
+    .slide-enter-active,
+    .slide-leave-active {
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        overflow: hidden;
+    }
+    .slide-enter-from, 
+    .slide-leave-to {
+        opacity: 0;
+        max-height: 0;
+    }
+    .slide-enter-to,
+    .slide-leave-from {
+        max-height: 2000px;
+        opacity: 1;
+    }
+    .summary-ctn {
+        transition: .5s;
+    }
     .ctn {
         gap: 1.2rem;
     }
-    
     .cart-content {
         overflow-y:unset;
     }
