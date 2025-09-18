@@ -62,7 +62,7 @@
     </div>
 
     <!-- Overlay -->
-    <div class="overlay" @click="$emit('close')"></div>
+    <!-- <div class="overlay" @click="$emit('close')"></div> -->
 </template>
 
 <script setup>
@@ -256,7 +256,7 @@ onMounted(() => {
     background: linear-gradient(to right, #007bff, #0062cc)
 }
 
-.overlay {
+/* .overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -264,7 +264,7 @@ onMounted(() => {
   width: calc(100% - var(--cartWidth));
   background-color: rgba(17, 24, 39, 0.5);
   transition: opacity 0.4s ease;
-}
+} */
 @media(max-width: 549px) {
     .cart {
         width: 100%;

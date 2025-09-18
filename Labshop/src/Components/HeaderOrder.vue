@@ -7,12 +7,19 @@
            </div>
            <img src="@/images/shop-bag-full.svg" @click="toggleCart()">
         </div>
-        <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
+        <SlideTransition>
+          <Cart v-show="isCardOpen" @close="isCardOpen = false"/>
+        </SlideTransition>
+        
+        <!-- overlay (maintenu hors du Transition, pour ne pas être animé) -->
+        <div v-if="isCardOpen" class="cart-overlay" @click="isCardOpen = false"></div>
     </div>
 </template>
 
 <script setup>
 import Cart from './Cart.vue';
+import SlideTransition from './Transition/SlideTransition.vue';
+
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
 
@@ -37,6 +44,16 @@ const goToHomePage = () => {
     background: #fff;
     z-index: 10;
     color: #333;
+}
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(17, 24, 39, 0.5);
+  transition: opacity 0.4s ease;
+  z-index: 2;
 }
 .nav {
     display: flex;
