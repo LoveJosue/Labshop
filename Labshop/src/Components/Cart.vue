@@ -57,19 +57,20 @@
                 <span>Total :</span>
                 <span class="total-price">{{ total.toLocaleString('fr-FR') }} FCFA</span>
             </div>
-            <button class="checkout-btn">Commander</button>
+            <button v-if="!isOrderPage()" class="checkout-btn" @click="order()">Commander</button>
         </div>
     </div>
 
     <!-- Overlay -->
-    <div class="overlay" @click="$emit('close')"></div>
+    <!-- <div class="overlay" @click="$emit('close')"></div> -->
 </template>
 
 <script setup>
 import { onMounted, ref, computed, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 
 const CART = 'cart';
 
@@ -88,6 +89,7 @@ const getPackaging = (item) => {
     }
 }
 
+// Calcule le coût de l'item en fonction du type d'achat
 const calculateItemPrice = (item) => item.purchaseType === ONE ? (item.unitPrice * item.unitPerBox * item.qte) : item.unitPrice * item.qte;
 
 const imgClicked = (item) => {
@@ -98,15 +100,19 @@ const goProductPage = (item) => {
     console.log(item.productUrl)
     router.push(item.productUrl);
 }
+const order = () => {
+    router.push('/order');
+}
+const isOrderPage = () => {
+    return route.name === 'order';
+}
 function loadCart() {
     return JSON.parse(localStorage.getItem(CART)) || [];
 }
-
 function removeItem(itemId) {
     cart.value = cart.value.filter(item => item.id !== itemId);
     localStorage.setItem(CART, JSON.stringify(cart.value));
 }
-
 const total = computed(() => {
     let sum = 0;
     cart.value.forEach((item) => {
@@ -122,12 +128,12 @@ onMounted(() => {
 
 <style scoped>
 .cart {
-    position: absolute;
+    position: fixed;
     top:0;
     right: 0;
     display: flex;
     flex-direction: column;
-    height: 100lvh;
+    height: 100vh;
     width: var(--cartWidth);
     padding: 1.5rem;
     background-color: #fdfdfd;
@@ -250,15 +256,15 @@ onMounted(() => {
     background: linear-gradient(to right, #007bff, #0062cc)
 }
 
-.overlay {
-  position: absolute;
+/* .overlay {
+  position: fixed;
   top: 0;
   left: 0;
-  height: 100lvh;
+  height: 100vh;
   width: calc(100% - var(--cartWidth));
   background-color: rgba(17, 24, 39, 0.5);
   transition: opacity 0.4s ease;
-}
+} */
 @media(max-width: 549px) {
     .cart {
         width: 100%;

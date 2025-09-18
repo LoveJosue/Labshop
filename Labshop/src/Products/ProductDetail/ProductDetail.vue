@@ -207,8 +207,7 @@ import Spinner from '@/Components/Spinner.vue';
 import axios from 'axios';
 import { apiUrl } from '@/config';
 
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watchEffect, onUnmounted } from 'vue';
 import { computed } from 'vue';
 import { onBeforeRouteUpdate, useRoute } from 'vue-router';
 
@@ -229,6 +228,8 @@ const retailQte = ref(1);
 
 const route = useRoute();
 const product = ref({});
+
+const initialPageTitle = ref(document.title);
 
 const maxStars = 5;
 const comments = ref([
@@ -414,14 +415,14 @@ function buildRetailItem () {
 function getCurrentUrlPath () {
     return window.location.pathname;
 }
-
 function updateTitle() {
     // Attendre que les données produit soient chargées avant d'utiliser product.value.name
-    watch(product, (newVal) => {
-        if (newVal && newVal.name) {
-            document.title = newVal.name;
-        }
-    }, { immediate: false });
+    watchEffect(() => {
+        document.title = product.value.name;
+    });
+}
+function setInitialTitle() {
+    document.title = initialPageTitle.value;
 }
 
 function setOptionSelected() {
@@ -499,7 +500,9 @@ async function getProductInfos(id) {
 onMounted(() => {
     initializeProduct(route.params.id);
 })
-
+onUnmounted(() => {
+    setInitialTitle();
+})
 // À chaque changement d'ID sans recréer le composant
 onBeforeRouteUpdate((to, from, next) => {
     initializeProduct(to.params.id);
