@@ -20,7 +20,7 @@
           <p class="address">{{ place.address }}</p>
           <a 
             class="mapLink" 
-            :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ', ' + place.address)}`" 
+            :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.lat + ', ' + place.lon)}`" 
             target="_blank"
             @click.stop
           >
