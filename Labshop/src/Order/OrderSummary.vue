@@ -2,7 +2,25 @@
     <div class="ctn">
         <div class="order-summary" @click="toggleSummary">
             <div class="order-bg"></div>
-            <p>Résumé d'achat</p>
+            <p>
+                Résumé d'achat
+                <!-- Flèche SVG -->
+                <svg
+                    class="arrow"
+                    :class="{ open: showSummary }"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </p>            
             <p class="amout">{{ totalWithTVA.toLocaleString('fr-FR') }} FCFA</p>
         </div>
         <Transition :name="viewPortWidth < 1000 ? 'slide' : ''">
@@ -171,6 +189,14 @@ onUnmounted(() => {
 .order-summary {
     display: none;
 }
+.summary-ctn {
+    transition: .5s;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    justify-content: space-between;
+    letter-spacing: -0.01em;
+    }
 .cart-content {
     position: relative; /* pour que le hint se place dedans */
     display: flex;
@@ -309,6 +335,11 @@ onUnmounted(() => {
     }
     .summary-ctn {
         transition: .5s;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        justify-content: space-between;
+        letter-spacing: -0.01em;
     }
     .ctn {
         gap: 1.2rem;
@@ -327,8 +358,18 @@ onUnmounted(() => {
         cursor: pointer;
         /* height: 64px; */
         height: var(--order-sumary-box-height);
-        border-bottom: 1px solid lightgray;
+        /* border-bottom: 1px solid lightgray; */
         background-color: #F5F5F5;
+    }
+    .order-summary .arrow {
+        margin-left: 8px;
+        transition: transform 0.3s ease;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .order-summary .arrow.open {
+        transform: rotate(180deg); /* flèche vers le haut */
     }
     .order-summary .amout {
         font-size: 19px;
@@ -358,7 +399,7 @@ onUnmounted(() => {
         height: calc(100% - var(--order-sumary-box-height-minus-1-px));
         background-color:rgb(237, 237, 237);
         z-index: -1;
-        border-top: 1px solid lightgray;
+        /* border-top: 1px solid lightgray; */
     }
 }
 @media (min-width: 1001px) {
@@ -379,7 +420,7 @@ onUnmounted(() => {
         border-top: 1px solid lightgray;
     }
     .cart-content.bottom {
-        border-bottom: 1px solid lightgray;
+        /* border-bottom: 1px solid lightgray; */
     }
     .cart-content.hide-scroll::-webkit-scrollbar {
         display: none;

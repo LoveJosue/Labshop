@@ -4,11 +4,9 @@
             <OrderForm />
         </div>
         <div class="right grid-row-1-position">
-            <Transition >
-                <div class="wrap">
-                    <OrderSummary />
-                </div>
-            </Transition>
+            <div class="wrap">
+                <OrderSummary />
+            </div>
         </div>
     </div>
 </template>
@@ -91,11 +89,23 @@ onMounted(() => {
     .grid-row-1-position {
         grid-row-start: 1;
     }
-    .right {
-        padding: 2% 5%;
+    .left, .right {
+        padding-left: 5%;
+        padding-right: 5%;
     }
+}
+@media (min-width: 1001px) {
     .left {
-        padding: 0 5%;
+        padding-left: 2.5rem; 
+        padding-right: 2.5rem;
+    }
+    .right {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+    }
+    .nav {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
     }
 }
 </style>

@@ -42,13 +42,24 @@ const goToHomePage = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    height: 70px;
+    padding: 0 2.5rem;
+}
+/* .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 75%;
     max-width: 1000px;
     margin: 0 auto;
     height: 70px;
 
     
-}
+} */
 .logo-ctn {
     height: 100%;
     width: 120px;
@@ -85,5 +96,16 @@ const goToHomePage = () => {
         width: 25px;
         height: 25px;
     }
+}
+@media (max-width: 1000px) {
+    .nav {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        height: 60px;
+        padding-left: 5%;
+        padding-right: 5%;
+    }
+    
 }
 </style>
