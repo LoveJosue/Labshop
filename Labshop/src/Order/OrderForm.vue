@@ -1,6 +1,6 @@
 <template>
   <div class="ctn">
-    <form class="form" @submit.prevent="handleSubmit" @keydown.enter.prevent>
+    <form class="form padding-btm-5" @submit.prevent="handleSubmit" @keydown.enter.prevent>
         <!-- Section Contact -->
         <section class="section">
             <h2>Contact</h2>
@@ -139,9 +139,9 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="card">Nom sur la carte</label>
+                <label for="cardName">Nom sur la carte</label>
                 <input 
-                    id="card"
+                    id="cardName"
                     type="text"
                     v-model="form.card.name"
                     placeholder="Nom sur la carte"
@@ -152,35 +152,36 @@
             <div class="form-group" v-if="receptionType === 0">
               <CheckBoxComponent v-model:selected="invoiceAddressAsShippingAddress" :text="CHCK_BOX_TEXT_1"/>
             </div>
+
             <!-- Section adresse de dresse de factuation -->
             <section class="section" v-if="!invoiceAddressAsShippingAddress || receptionType === 1">
               <h3>Adresse de facturation</h3>
               <div class="form-inline">
                   <div class="form-group">
-                      <label for="nom">Nom</label>
-                      <input type="text" id="nom" v-model="form.billing.name" placeholder="Votre nom" @input="form.billing.name ? errors.billingName = '' : errors.billingName = 'Saisissez votre nom'"/>
+                      <label for="billingName">Nom</label>
+                      <input type="text" id="billingName" v-model="form.billing.name" placeholder="Votre nom" @input="form.billing.name ? errors.billingName = '' : errors.billingName = 'Saisissez votre nom'"/>
                       <small v-if="errors.billingName" class="error">{{ errors.billingName }}</small>
                   </div>
                   <div class="form-group">
-                      <label for="nom">Prénom</label>
-                      <input type="text" id="nom" v-model="form.billing.prename" placeholder="Votre prénom" @input="form.billing.prename ? errors.billingPrename = '' : errors.billingPrename = 'Saisissez votre prénom'"/>
+                      <label for="billingPrename">Prénom</label>
+                      <input type="text" id="billingPrename" v-model="form.billing.prename" placeholder="Votre prénom" @input="form.billing.prename ? errors.billingPrename = '' : errors.billingPrename = 'Saisissez votre prénom'"/>
                       <small v-if="errors.billingPrename" class="error">{{ errors.billingPrename }}</small>
                   </div>
               </div>
               <div class="form-group">
-                  <label for="addresse">Adresse</label>
-                  <input type="text" id="addresse" v-model="form.billing.address" placeholder="- 123 rue exemple - ou repère" @input="form.billing.address ? errors.billingAddress = '' : errors.billingAddress = 'Saisissez votre adresse de facturation'"/>
+                  <label for="billingAddress">Adresse</label>
+                  <input type="text" id="billingAddress" v-model="form.billing.address" placeholder="- 123 rue exemple - ou repère" @input="form.billing.address ? errors.billingAddress = '' : errors.billingAddress = 'Saisissez votre adresse de facturation'"/>
                   <small v-if="errors.billingAddress" class="error">{{ errors.billingAddress }}</small>
               </div>
               <div class="form-inline">
                 <div class="form-group">
-                    <label for="city">Ville</label>
-                    <input type="text" id="city" v-model="form.billing.city" placeholder="Votre ville" @input="form.billing.city ? errors.billingCity = '' : errors.billingCity = 'Saisissez le nom de la ville'"/>
+                    <label for="billingCity">Ville</label>
+                    <input type="text" id="billingCity" v-model="form.billing.city" placeholder="Votre ville" @input="form.billing.city ? errors.billingCity = '' : errors.billingCity = 'Saisissez le nom de la ville'"/>
                     <small v-if="errors.billingCity" class="error">{{ errors.billingCity }}</small>
                 </div>
                 <div class="form-group">
-                    <label for="postal-code">Code Postal</label>
-                    <input type="text" id="postal-code" inputmode="numeric" v-model="form.billing.postalCode" placeholder="12345 (optionnel)" maxlength="5" @input="formatPostalCode"/>
+                    <label for="billingPostalCode">Code Postal</label>
+                    <input type="text" id="billingPostalCode" inputmode="numeric" v-model="form.billing.postalCode" placeholder="12345 (optionnel)" maxlength="5" @input="formatPostalCode"/>
                 </div>
               </div>
               <div class="form-group">
@@ -196,26 +197,60 @@
               </div>
             </section>
         </section>
+
+        <section class="section summary">
+          <h2 class="summay-header">
+            Résumé d'achat 
+            <p v-if="!cartHasOneItem" @click="toggleSummary">
+              {{!showSummary ? 'Afficher' : 'Réduire'}}
+              <svg
+                    class="arrow"
+                    :class="{ open: showSummary }"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </p>
+          </h2>
+          <div class="form-group margin-btm-0">
+            <OrderSummaryV2 :showSummary="showSummary"/>
+          </div>
+        </section>
         
         <!-- Bouton de soumission -->
-        <div class="submit-container">
-            <button type="submit" class="btn-submit">Passer la commande</button>
-        </div>
+        <section class="section">
+          <div class="form-group margin-btm-0">
+            <button type="submit" class="btn-submit">Payer</button>
+          </div>
+        </section>
     </form>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import SelectReceptionMode from './SelectReceptionMode.vue';
 import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
 import SelectPickUpLocation from './SelectPickUpLocation.vue';
+import OrderSummaryV2 from './OrderSummaryV2.vue';
 
 const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
 const ZERO = 0;
 const ONE = 1;
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CART = 'cart';
 
+const showSummary = ref(false);
+const cart = ref([]);
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const invoiceAddressAsShippingAddress = ref(true);
 const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
 const phoneIsValid = ref(false);
@@ -299,7 +334,7 @@ function resetErrorsForShipping() {
 function resetErrorsForPickup() {
   const preservedKeys = [
     'email','cardNumber', 'expiration', 'cvv', 'cardName',
-    'billingName', 'billingPrename', 'billingAddresse',
+    'billingName', 'billingPrename', 'billingAddress',
     'billingCity', 'billingPhone'
   ]
 
@@ -314,7 +349,8 @@ function resetErrorsForPickup() {
 const hasErrors = computed(() =>
   Object.values(errors.value).some(err => err)
 )
-
+const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [];
+const cartHasOneItem = computed(() => cart.value.length === 1);
 const locationError = ref('');
 const getCurrentLocation = () => {
   if (navigator.geolocation) {
@@ -399,8 +435,6 @@ function isCvvValid() {
     }
   }
 }
-
-
 
 //  Fonctions de formatage des entrées
 function formatExpiration() {
@@ -648,6 +682,9 @@ function handleSubmit() {
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
 }
+function toggleSummary() {
+  showSummary.value = !showSummary.value;
+}
 watch(receptionType, (newVal, oldVal) => {
   // En cas d'expédition
   if (newVal === ZERO) {
@@ -661,6 +698,9 @@ watch(invoiceAddressAsShippingAddress, (newVal, oldVal) => {
   if (newVal === true) {
     resetErrorsForShippingWithInvoiceAddressAsShippingOne();
   }
+})
+onMounted(() => {
+  cart.value = loadCart();
 })
 </script>
 
@@ -789,27 +829,48 @@ select {
   font-size: 0.8em;
   margin-top: 4px;
 }
-.submit-container {
-  margin-top: 20px;
+.summary {
+  display: none;
+}
+.summay-header {
+  display: flex;
+  justify-content: space-between;
+}
+.summay-header p {
+  font-weight: normal;
+  font-size: 14px;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+}
+.summay-header svg {
+  stroke: #000;
+}
+.summary .arrow {
+  margin-left: 2px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+  vertical-align: middle;
+}
+.summary .arrow.open {
+  transform: rotate(180deg); /* flèche vers le haut */
+}
+.margin-btm-0 {
+  margin-bottom: 0;
+}
+.padding-btm-5 {
+  padding-bottom: 5px;
 }
 .btn-submit {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  text-align: center;
   padding: 12px 20px;
-  background-color: #333;
+  background-color: #000;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 1em;
   cursor: pointer;
   transition: background-color 0.2s ease;
-}
-.btn-submit:hover {
-  background-color: #555;
-}
-.btn-submit .icon {
-  stroke: white;
+  font-weight: bold;
 }
 :deep(.vue-tel-input:focus-within) {    
     border-color: #333 !important;
@@ -818,5 +879,10 @@ select {
 :deep(.vue-tel-input.invalid:focus-within) {
   border-color: red !important;
   box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.1) !important;
+}
+@media (max-width: 1000px) {
+.summary {
+  display: block;
+}
 }
 </style>

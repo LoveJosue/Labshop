@@ -40,7 +40,7 @@
                                 <div class="chld-1">
                                     <span class="item-name">{{ item.name }}</span>
                                     <span class="item-type">
-                                        Achat en {{ item.purchaseType === ONE ? 'gros' : 'détail' }}
+                                        En {{ item.purchaseType === ONE ? 'gros' : 'détail' }}
                                     </span>
                                 </div>
                             </div>
