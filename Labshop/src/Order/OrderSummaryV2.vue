@@ -42,10 +42,14 @@
                     <p>Sous-total · <span>{{ itemsQtySum }}</span> article{{ itemsQtySum > 1 ? 's' : '' }}</p>
                     <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
                 </div>
-                <div class="flex-element">
+                <div v-if="isExpedition" class="flex-element">
+                        <p>Expédition</p>
+                        <p>{{ shippingInfosAvailable ? `${expeditionCosts.toLocaleString('fr-FR')} FCFA` : 'Entrez une adresse de livraison' }}</p>
+                </div>
+                <div v-if="!isExpedition" class="flex-element">
                     <p>Récupération en boutique</p>
                     <p>GRATUIT</p>
-                </div class="flex-element">
+                </div>
                 <div class="flex-element">
                     <p>Taxes</p>
                     <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
@@ -64,11 +68,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 const props = defineProps({
     showSummary: {
         type: Boolean,
         default: false
+    },
+    receptionType: {
+        type: Number,
+        default: 0
     }
 })
 
@@ -76,6 +84,10 @@ const CART = 'cart';
 const ONE = 1;
 const cart = ref([]);
 
+const isExpedition = computed (() => {
+    return props.receptionType === 0; // 0 -> Expédition 1 -> Cueillette
+})
+const shippingInfosAvailable = ref(true);
 const itemsQtySum = ref(0);
 
 const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [];
@@ -89,10 +101,22 @@ const subTotal = computed(() => {
     return sum;
 });
 const TVA = computed(() => {
-    return Math.ceil(subTotal.value * 0.18); // Arrondir à l'entier FCFA supérieur
+    let sum = 0
+    let TVAvalue = 0;
+    sum += subTotal.value;
+    sum += isExpedition.value && expeditionCosts.value;
+    TVAvalue = Math.ceil(sum * 0.18); // Arrondir à l'entier FCFA supérieur
+    return TVAvalue;
 });
+const expeditionCosts = computed(() => {
+    return Math.ceil(1000); // Arrondir à l'entier FCFA supérieur
+})
 const totalWithTVA = computed(() => {
-    return subTotal.value + TVA.value;
+    let total = 0;
+    total += subTotal.value;
+    total += isExpedition.value && expeditionCosts.value;
+    total += TVA.value;
+    return total;
 });
 const updateItemsQtySum = () => {
   let qtySum = 0;
@@ -104,6 +128,10 @@ onMounted(() => {
     cart.value = loadCart();
     updateItemsQtySum();
 });
+
+watch(isExpedition.value, (newVal, oldVal) => {
+    alert(newVal);
+})
 
 </script>
 

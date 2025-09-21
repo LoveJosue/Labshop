@@ -26,7 +26,7 @@
         </div>
         
         <SlideTransition>
-          <Cart v-show="isCardOpen" @close="isCardOpen = false"/>
+          <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
         </SlideTransition>
         
         <!-- overlay (maintenu hors du Transition, pour ne pas être animé) -->
@@ -51,7 +51,7 @@
 import Cart from './Cart.vue';
 import SlideTransition from './Transition/SlideTransition.vue';
 
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const ONE_SEC = 1000;

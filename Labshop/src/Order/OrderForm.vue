@@ -221,7 +221,7 @@
             </p>
           </h2>
           <div class="form-group margin-btm-0">
-            <OrderSummaryV2 :showSummary="showSummary"/>
+            <OrderSummaryV2 :showSummary="showSummary" :receptionType="receptionType"/>
           </div>
         </section>
         
@@ -249,6 +249,8 @@ const CART = 'cart';
 
 const showSummary = ref(false);
 const cart = ref([]);
+
+const emit = defineEmits(['receptionTypeChanged']);
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const invoiceAddressAsShippingAddress = ref(true);
@@ -681,6 +683,7 @@ function handleSubmit() {
 }
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
+  emit('receptionTypeChanged', value);
 }
 function toggleSummary() {
   showSummary.value = !showSummary.value;
