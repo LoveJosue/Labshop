@@ -68,7 +68,11 @@
                         <p>Récupération en boutique</p>
                         <p>GRATUIT</p>
                     </div>
-                    <div class="flex-element">
+                    <div v-if="!isExpedition" class="flex-element">
+                        <p>Taxes</p>
+                        <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
+                    </div>
+                    <div v-else-if="isExpedition && shippingInfosAvailable" class="flex-element">
                         <p>Taxes</p>
                         <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
                     </div>
@@ -112,7 +116,6 @@ const viewPortWidth = ref(window.innerWidth);
 const isExpedition = computed (() => {
     return props.receptionType === 0; // 0 -> Expédition 1 -> Cueillette
 })
-// const shippingInfosAvailable = ref(true);
 const shippingInfosAvailable = ref(false);
 
 let scrollTimeout;
@@ -132,21 +135,21 @@ const subTotal = computed(() => {
     return sum;
 });
 const TVA = computed(() => {
-    let sum = 0
-    let TVAvalue = 0;
+    let sum = 0;
     sum += subTotal.value;
     sum += isExpedition.value && expeditionCosts.value;
-    TVAvalue = Math.ceil(sum * 0.18); // Arrondir à l'entier FCFA supérieur
-    return TVAvalue;
+    return Math.ceil(sum * 0.18); // Arrondir à l'entier FCFA supérieur
 });
 const expeditionCosts = computed(() => {
     return Math.ceil(1000); // Arrondir à l'entier FCFA supérieur
 })
+// Quand c'est une livraison, le calcul du total avec TVA se fait après disponibilité des données de livraison
 const totalWithTVA = computed(() => {
     let total = 0;
     total += subTotal.value;
-    total += isExpedition.value && expeditionCosts.value;
-    total += TVA.value;
+    total += (isExpedition.value && shippingInfosAvailable.value) ? expeditionCosts.value : 0;
+    total += (isExpedition.value && shippingInfosAvailable.value) ? TVA.value : 0;
+    total += !isExpedition.value && TVA.value;
     return total;
 });
 const updateItemsQtySum = () => {
