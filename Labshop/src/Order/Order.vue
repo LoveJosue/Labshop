@@ -1,11 +1,11 @@
 <template>
     <div class="main">
         <div class="left">
-            <OrderForm @receptionTypeChanged="updateReceptionType"/>
+            <OrderForm @receptionTypeChanged="updateReceptionType" @gpsCoordinatesChanged="updateShippingInfos"/>
         </div>
         <div class="right grid-row-1-position">
             <div class="wrap">
-                <OrderSummary :receptionType="receptionType"/>
+                <OrderSummary :receptionType="receptionType" v-model:shippingInfos="shippingInfos"/>
             </div>
         </div>
     </div>
@@ -21,6 +21,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const receptionType = ref(0);
+const shippingInfos = ref({});
 
 const isCartEmpty = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -28,6 +29,10 @@ const isCartEmpty = () => {
 }
 function updateReceptionType(value) {
     receptionType.value = value;
+}
+function updateShippingInfos(value) {
+    shippingInfos.value = value;
+    // Value : {infoType: A | B, coords : {lat, lng}};
 }
 onMounted(() => {
     // Si le panier est vide, revenir à la page d'accueil

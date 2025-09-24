@@ -97,8 +97,17 @@ const props = defineProps({
     receptionType: {
         type: Number,
         default: 0
+    },
+    shippingInfos: {
+        infoType: '',
+        coords: {
+            lat: 0,
+            lng: 0
+        }
     }
 })
+
+const emit = defineEmits(['update:shippingInfos']);
 
 const CART = 'cart';
 const ONE = 1;
@@ -116,7 +125,10 @@ const viewPortWidth = ref(window.innerWidth);
 const isExpedition = computed (() => {
     return props.receptionType === 0; // 0 -> Expédition 1 -> Cueillette
 })
-const shippingInfosAvailable = ref(false);
+// const shippingInfosAvailable = ref(false);
+const shippingInfosAvailable = computed(() => {
+    return props.shippingInfos && props.shippingInfos.coords && props.shippingInfos.coords.lat && props.shippingInfos.coords.lng ? true : false;
+});
 
 let scrollTimeout;
 let hideTimeout;
@@ -189,7 +201,20 @@ function handleScroll() {
     else if (atBottom) borderPosition.value = 'top';
   }, 500);
 }
-
+function setGPSCoordinatesPriority(newVal, oldVal) {
+    if (newVal.infoType === 'A') {
+        if (oldVal && oldVal.infoType === 'B') { // Si des coordonnées de livraisons ont été générés par géocodage bien avant l'obtention de la position actuelle
+            emit('update:shippingInfos', oldVal);
+        }
+    }
+}
+watch(() => props.shippingInfos, (newVal, oldVal) => {
+    console.log('Shipping address changed')
+    if (!(newVal.coords?.lat && newVal.coords?.lng)) { emit('update:shippingInfos', {}) };
+    setGPSCoordinatesPriority(newVal, oldVal);
+    console.log(props.shippingInfos.coords.lat)
+    }, { deep: true }
+);
 onMounted(() => {
     cart.value = loadCart();
     checkOverflow();
@@ -202,7 +227,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.removeEventListener('resize', updateViewPortWidth);
-})
+});
 
 </script>
 
