@@ -99,12 +99,9 @@ const props = defineProps({
         default: 0
     },
     shippingInfos: {
-        infoType: '',
-        coords: {
-            lat: 0,
-            lng: 0
-        }
-    }
+    type: Object,
+    default: () => ({})
+  }
 })
 
 const emit = defineEmits(['update:shippingInfos']);
@@ -201,19 +198,27 @@ function handleScroll() {
     else if (atBottom) borderPosition.value = 'top';
   }, 500);
 }
-function setGPSCoordinatesPriority(newVal, oldVal) {
-    if (newVal.infoType === 'A') {
-        if (oldVal && oldVal.infoType === 'B') { // Si des coordonnées de livraisons ont été générés par géocodage bien avant l'obtention de la position actuelle
-            emit('update:shippingInfos', oldVal);
-        }
+watch(
+  () => props.shippingInfos,
+  (newVal, oldVal) => {
+    // Cas 1 : shippingInfos vides → reset
+    if (!(newVal?.coords?.lat && newVal?.coords?.lng)) {
+      if (oldVal && (oldVal.coords?.lat && oldVal.coords?.lng)) {
+        // Seulement si ça change vraiment → sinon boucle
+        emit('update:shippingInfos', {});
+      }
+      return;
     }
-}
-watch(() => props.shippingInfos, (newVal, oldVal) => {
-    console.log('Shipping address changed')
-    if (!(newVal.coords?.lat && newVal.coords?.lng)) { emit('update:shippingInfos', {}) };
-    setGPSCoordinatesPriority(newVal, oldVal);
-    console.log(props.shippingInfos.coords.lat)
-    }, { deep: true }
+
+    // Cas 2 : appliquer la priorité entre A et B
+    if (newVal.infoType === 'A' && oldVal?.infoType === 'B') {
+      // Seulement si c'est différent → sinon boucle
+      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+        emit('update:shippingInfos', oldVal);
+      }
+    }
+  },
+  { deep: true }
 );
 onMounted(() => {
     cart.value = loadCart();

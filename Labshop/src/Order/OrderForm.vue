@@ -230,7 +230,11 @@
             </p>
           </h2>
           <div class="form-group margin-btm-0">
-            <OrderSummaryV2 :showSummary="showSummary" :receptionType="receptionType"/>
+            <OrderSummaryV2 
+              :showSummary="showSummary" 
+              :receptionType="receptionType" 
+              :shippingInfos="shippingInfos
+            "/>
           </div>
         </section>
         
@@ -251,6 +255,13 @@ import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
 import SelectPickUpLocation from './SelectPickUpLocation.vue';
 import OrderSummaryV2 from './OrderSummaryV2.vue';
 
+const props = defineProps({
+  shippingInfos: {
+    type: Object,
+    default: () => ({})
+  }
+});
+
 const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
 const ZERO = 0;
 const ONE = 1;
@@ -259,7 +270,7 @@ const CART = 'cart';
 const showSummary = ref(false);
 const cart = ref([]);
 
-const emit = defineEmits(['receptionTypeChanged', 'gpsCoordinatesChanged']);
+const emit = defineEmits(['receptionTypeChanged', 'update:shippingInfos']);
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const invoiceAddressAsShippingAddress = ref(true);
@@ -369,7 +380,16 @@ const getCurrentLocation = () => {
       (position) => {
         form.value.latitude = position.coords.latitude.toFixed(6);
         form.value.longitude = position.coords.longitude.toFixed(6);
-        emit('gpsCoordinatesChanged', { infoType: 'B', coords: { lat: form.value.latitude, lng: form.value.longitude } })
+
+        const gpsCoordinates = {
+          infoType: 'B',
+          coords: {
+            lat: parseFloat(form.value.latitude),
+            lng: parseFloat(form.value.longitude)
+          }
+        };
+        // On émet la nouvelle valeur au parent (v-model)
+        emit('update:shippingInfos', gpsCoordinates);
       },
       (error) => {
         locationError.value = "Impossible de récupérer la position. Saisir manuellement.";
@@ -447,7 +467,6 @@ function isCvvValid() {
     }
   }
 }
-
 //  Fonctions de formatage des entrées
 function formatExpiration() {
   let number = keepDigitsOnly(form.value.card.expiration);
@@ -571,17 +590,19 @@ async function checkFullShippingAddresse() {
     try {
       const fullAddresse = formatShippingFullAddresse();
       const coords = await getCoordinatesOSM(fullAddresse);
-      emit('gpsCoordinatesChanged', { infoType: 'A', coords });
+      const gpsCoordinates = { infoType: 'A', coords }
+      // Emission vers parent (et donc vers OrderSummary)
+      emit('update:shippingInfos', gpsCoordinates);
       cleanFullAddressErrors();
     } catch (err) {
-      const addresseErrorMessage = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
-      errors.value.addresse = addresseErrorMessage;
-      errors.value.city = addresseErrorMessage;
-      emit('gpsCoordinatesChanged', {}); // Remettre les coordonnées à zéro
+      // on vide en émettant un objet vide
+      emit('update:shippingInfos', defaultShippingInfos());
+      errors.value.addresse = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
+      errors.value.city = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
       throw new Error("Adresse introuvable");
     }
   } else {
-    emit('gpsCoordinatesChanged', {}); // Remettre les coordonnées à zéro
+    emit('update:shippingInfos', defaultShippingInfos());
   }
 }
 function cleanFullAddressErrors() {
@@ -751,6 +772,9 @@ function handleReceptionTypeChange(value) {
 }
 function toggleSummary() {
   showSummary.value = !showSummary.value;
+}
+function defaultShippingInfos() {
+  return { infoType: null, coords: { lat: null, lng: null } };
 }
 watch(receptionType, (newVal, oldVal) => {
   // En cas d'expédition

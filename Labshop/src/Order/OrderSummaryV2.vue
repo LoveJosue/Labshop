@@ -81,8 +81,14 @@ const props = defineProps({
     receptionType: {
         type: Number,
         default: 0
+    },
+    shippingInfos: {
+        type: Object,
+        default: () => ({})
     }
-})
+});
+
+const emit = defineEmits(['update:shippingInfos']);
 
 const CART = 'cart';
 const ONE = 1;
@@ -91,9 +97,23 @@ const cart = ref([]);
 const isExpedition = computed (() => {
     return props.receptionType === 0; // 0 -> Expédition 1 -> Cueillette
 })
-const shippingInfosAvailable = ref(false);
-const itemsQtySum = ref(0);
+// const shippingInfosAvailable = ref(false);
+const shippingInfosAvailable = computed(() => {
+    return props.shippingInfos && props.shippingInfos.coords && props.shippingInfos.coords.lat && props.shippingInfos.coords.lng ? true : false;
+});
+// computed "bidirectionnel" mais qui n'émet que si la valeur change réellement
+const localShippingInfos = computed({
+  get: () => props.shippingInfos ?? {},
+  set: (val) => {
+    // simple comparaison (stringify) pour éviter émetter inutilement
+    if (JSON.stringify(val) !== JSON.stringify(props.shippingInfos)) {
+      // émet une copie pour éviter références partagées
+      emit('update:shippingInfos', { ...val });
+    }
+  }
+});
 
+const itemsQtySum = ref(0);
 const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [];
 const cartHasOneItem = computed(() => cart.value.length === 1);
 const calculateItemPrice = (item) => item.purchaseType === ONE ? (item.unitPrice * item.unitPerBox * item.qte) : item.unitPrice * item.qte;
@@ -127,16 +147,32 @@ const updateItemsQtySum = () => {
   cart.value.forEach((item) => { qtySum += item.qte });
   itemsQtySum.value = qtySum;
 };
+watch(
+  () => props.shippingInfos,
+  (newVal, oldVal) => {
+    // Cas 1 : shippingInfos vides → reset
+    if (!(newVal?.coords?.lat && newVal?.coords?.lng)) {
+      if (oldVal && (oldVal.coords?.lat && oldVal.coords?.lng)) {
+        // Seulement si ça change vraiment → sinon boucle
+        emit('update:shippingInfos', {});
+      }
+      return;
+    }
 
+    // Cas 2 : appliquer la priorité entre A et B
+    if (newVal.infoType === 'A' && oldVal?.infoType === 'B') {
+      // Seulement si c'est différent → sinon boucle
+      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+        emit('update:shippingInfos', oldVal);
+      }
+    }
+  },
+  { deep: true }
+);
 onMounted(() => {
     cart.value = loadCart();
     updateItemsQtySum();
 });
-
-watch(isExpedition.value, (newVal, oldVal) => {
-    alert(newVal);
-})
-
 </script>
 
 <style scoped>
