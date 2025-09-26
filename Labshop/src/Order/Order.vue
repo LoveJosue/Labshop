@@ -5,7 +5,7 @@
         </div>
         <div class="right grid-row-1-position">
             <div class="wrap">
-                <!-- <OrderSummary v-model:shippingInfos="shippingInfos" :receptionType="receptionType" /> -->
+                <OrderSummary v-model:shippingInfos="shippingInfos" :receptionType="receptionType" />
             </div>
         </div>
     </div>

@@ -207,7 +207,7 @@
             </section>
         </section>
 
-        <section class="section summary">
+        <!-- <section class="section summary">
           <h2 class="summay-header">
             Résumé d'achat 
             <p v-if="!cartHasOneItem" @click="toggleSummary">
@@ -229,14 +229,14 @@
                 </svg>
             </p>
           </h2>
-          <!-- <div class="form-group margin-btm-0">
+          <div class="form-group margin-btm-0">
             <OrderSummaryV2 
               :showSummary="showSummary" 
               :receptionType="receptionType" 
               :shippingInfos="shippingInfos
             "/>
-          </div> -->
-        </section>
+          </div>
+        </section> -->
         
         <!-- Bouton de soumission -->
         <section class="section">
