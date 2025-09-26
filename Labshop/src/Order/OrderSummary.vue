@@ -214,14 +214,6 @@ function handleScroll() {
     else if (atBottom) borderPosition.value = 'top';
   }, 500);
 }
-// async function calculateExpeditionCosts(shippingInfos) {
-//     const origin = { lat: shippingSrc.value.lat, lng: shippingSrc.value.lng };
-//     const destination = { lat: shippingInfos.coords.lat, lng: shippingInfos.coords.lng };
-//     const distance = await getDrivingDistance(origin, destination);
-//     let cost = Math.round(distance * pricePerKm.value); // Arrondir à l'entier le plus près;
-//     cost = Math.max(basicAmount.value, cost); // Préserver le montant de base
-//     expeditionCosts.value = cost;
-// }
 async function calculateExpeditionCosts(shippingInfos) {
   try {
     const origin = { lat: shippingSrc.value.lat, lng: shippingSrc.value.lng };
@@ -294,25 +286,6 @@ watch(
     },
     { deep: true, immediate: true }
 );
-// Watcher qui fait le calcul du coût d'expédition au chargement/changement d'adresse d'expédition
-// watch(
-//     () => props.shippingInfos,
-//     async (newVal) => {
-//         try {
-//             if (newVal?.coords?.lat && newVal?.coords?.lng) {
-//                 await calculateExpeditionCosts(newVal);
-//             } else {
-//                 expeditionCosts.value = 0;
-//                 shippingInfosAvailable.value = false;
-//                 emit('update:shippingInfos', {});
-//             }
-//         } catch(err) {
-//                 emit('update:shippingInfos', {});
-//         }
-//     },
-//     { deep: true, immediate: true }
-// );
-
 onMounted(() => {
     cart.value = loadCart();
     checkOverflow();
