@@ -233,27 +233,6 @@ async function calculateExpeditionCosts(shippingInfos) {
   }
 }
 watch(
-  () => props.shippingInfos,
-  (newVal, oldVal) => {
-    // Cas 1 : shippingInfos vides → reset
-    if (!(newVal?.coords?.lat && newVal?.coords?.lng)) {
-      if (oldVal && (oldVal.coords?.lat && oldVal.coords?.lng)) {
-        // Seulement si ça change vraiment → sinon boucle
-        emit('update:shippingInfos', {});
-      }
-      return;
-    }
-    // Cas 2 : appliquer la priorité. B -> localisation actuelle est toujours choisie, même si le géocodage vient après
-    if (newVal.infoType === 'A' && oldVal?.infoType === 'B') {
-      // Seulement si c'est différent → sinon boucle
-      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-        emit('update:shippingInfos', oldVal);
-      }
-    }
-  },
-  { deep: true }
-);
-watch(
     () => props.shippingInfos,
     async (newVal, oldVal) => {
         // Cas 1 : shippingInfos vides → reset
