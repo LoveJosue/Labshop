@@ -229,13 +229,13 @@
                 </svg>
             </p>
           </h2>
-          <div class="form-group margin-btm-0">
+          <!-- <div class="form-group margin-btm-0">
             <OrderSummaryV2 
               :showSummary="showSummary" 
               :receptionType="receptionType" 
               :shippingInfos="shippingInfos
             "/>
-          </div>
+          </div> -->
         </section>
         
         <!-- Bouton de soumission -->
