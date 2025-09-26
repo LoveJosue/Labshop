@@ -262,23 +262,40 @@ watch(
   { deep: true }
 );
 // Watcher qui fait le calcul du coût d'expédition au chargement/changement d'adresse d'expédition
-watch(
-    () => props.shippingInfos,
-    async (newVal) => {
-        try {
-            if (newVal?.coords?.lat && newVal?.coords?.lng) {
-                await calculateExpeditionCosts(newVal);
-            } else {
-                expeditionCosts.value = 0;
-                shippingInfosAvailable.value = false;
-                emit('update:shippingInfos', {});
-            }
-        } catch(err) {
-                emit('update:shippingInfos', {});
-        }
-    },
-    { deep: true, immediate: true }
-);
+// watch(
+//     () => props.shippingInfos,
+//     async (newVal) => {
+//         try {
+//             if (newVal?.coords?.lat && newVal?.coords?.lng) {
+//                 await calculateExpeditionCosts(newVal);
+//             } else {
+//                 expeditionCosts.value = 0;
+//                 shippingInfosAvailable.value = false;
+//                 emit('update:shippingInfos', {});
+//             }
+//         } catch(err) {
+//                 emit('update:shippingInfos', {});
+//         }
+//     },
+//     { deep: true, immediate: true }
+// );
+// watch(
+//     () => props.shippingInfos,
+//     async (newVal, oldVal) => {
+//         try {
+//             if (newVal?.coords?.lat && newVal?.coords?.lng) {
+//                 await calculateExpeditionCosts(newVal);
+//             } else {
+//                 expeditionCosts.value = 0;
+//                 shippingInfosAvailable.value = false;
+//                 emit('update:shippingInfos', {});
+//             }
+//         } catch(err) {
+//                 emit('update:shippingInfos', {});
+//         }
+//     },
+//     { deep: true, immediate: true }
+// );
 onMounted(() => {
     cart.value = loadCart();
     checkOverflow();
