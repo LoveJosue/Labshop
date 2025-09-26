@@ -214,14 +214,6 @@ function handleScroll() {
     else if (atBottom) borderPosition.value = 'top';
   }, 500);
 }
-// async function calculateExpeditionCosts(shippingInfos) {
-//     const origin = { lat: shippingSrc.value.lat, lng: shippingSrc.value.lng };
-//     const destination = { lat: shippingInfos.coords.lat, lng: shippingInfos.coords.lng };
-//     const distance = await getDrivingDistance(origin, destination);
-//     let cost = Math.round(distance * pricePerKm.value); // Arrondir à l'entier le plus près;
-//     cost = Math.max(basicAmount.value, cost); // Préserver le montant de base
-//     expeditionCosts.value = cost;
-// }
 async function calculateExpeditionCosts(shippingInfos) {
   try {
     const origin = { lat: shippingSrc.value.lat, lng: shippingSrc.value.lng };
@@ -241,30 +233,24 @@ async function calculateExpeditionCosts(shippingInfos) {
   }
 }
 watch(
-  () => props.shippingInfos,
-  (newVal, oldVal) => {
-    // Cas 1 : shippingInfos vides → reset
-    if (!(newVal?.coords?.lat && newVal?.coords?.lng)) {
-      if (oldVal && (oldVal.coords?.lat && oldVal.coords?.lng)) {
-        // Seulement si ça change vraiment → sinon boucle
-        emit('update:shippingInfos', {});
-      }
-      return;
-    }
-    // Cas 2 : appliquer la priorité. B -> localisation actuelle est toujours choisie, même si le géocodage vient après
-    if (newVal.infoType === 'A' && oldVal?.infoType === 'B') {
-      // Seulement si c'est différent → sinon boucle
-      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-        emit('update:shippingInfos', oldVal);
-      }
-    }
-  },
-  { deep: true }
-);
-// Watcher qui fait le calcul du coût d'expédition au chargement/changement d'adresse d'expédition
-watch(
     () => props.shippingInfos,
-    async (newVal) => {
+    async (newVal, oldVal) => {
+        // Cas 1 : shippingInfos vides → reset
+        if (!(newVal?.coords?.lat && newVal?.coords?.lng)) {
+            if (oldVal && (oldVal.coords?.lat && oldVal.coords?.lng)) {
+                // Seulement si ça change vraiment → sinon boucle
+                emit('update:shippingInfos', {});
+            }
+            return;
+        }
+        // Cas 2 : appliquer la priorité. B -> localisation actuelle est toujours choisie, même si le géocodage vient après
+        if (newVal.infoType === 'A' && oldVal?.infoType === 'B') {
+            // Seulement si c'est différent → sinon boucle
+            if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+                emit('update:shippingInfos', oldVal);
+            }
+        }
+        // Calcul du coût d'expédition au chargement/changement d'adresse d'expédition
         try {
             if (newVal?.coords?.lat && newVal?.coords?.lng) {
                 await calculateExpeditionCosts(newVal);

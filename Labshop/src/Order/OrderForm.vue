@@ -207,7 +207,7 @@
             </section>
         </section>
 
-        <section class="section summary">
+        <!-- <section class="section summary">
           <h2 class="summay-header">
             Résumé d'achat 
             <p v-if="!cartHasOneItem" @click="toggleSummary">
@@ -236,7 +236,7 @@
               :shippingInfos="shippingInfos
             "/>
           </div>
-        </section>
+        </section> -->
         
         <!-- Bouton de soumission -->
         <section class="section">
