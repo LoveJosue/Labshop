@@ -127,9 +127,6 @@ const isExpedition = computed (() => {
     return props.receptionType === 0; // 0 -> Expédition 1 -> Cueillette
 })
 const shippingInfosAvailable = ref(false);
-// const shippingInfosAvailable = computed(() => {
-//     return props.shippingInfos && props.shippingInfos.coords && props.shippingInfos.coords.lat && props.shippingInfos.coords.lng ? true : false;
-// });
 
 let scrollTimeout;
 let hideTimeout;
@@ -148,10 +145,12 @@ const subTotal = computed(() => {
     return sum;
 });
 const TVA = computed(() => {
-    let sum = 0;
-    sum += subTotal.value;
-    sum += isExpedition.value && expeditionCosts.value;
-    return Math.round(sum * 0.18); // Arrondir à l'entier le plus près
+    // Au Togo, quand la société aura un chiffre d'affaire >= 100 000 000 XOF, la TVA pourra être perçue
+    // let sum = 0;
+    // sum += subTotal.value;
+    // sum += isExpedition.value && expeditionCosts.value;
+    // return Math.round(sum * 0.18); // Arrondir à l'entier le plus près
+    return 0;
 });
 async function getDrivingDistance(origin, destination) {
     const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=false`;
