@@ -595,10 +595,11 @@ async function checkFullShippingAddresse() {
       emit('update:shippingInfos', gpsCoordinates);
       cleanFullAddressErrors();
     } catch (err) {
+      const errorMsg = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
       // on vide en émettant un objet vide
       emit('update:shippingInfos', defaultShippingInfos());
-      errors.value.addresse = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
-      errors.value.city = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
+      errors.value.addresse = errorMsg;
+      errors.value.city = errorMsg;
       throw new Error("Adresse introuvable");
     }
   } else {
