@@ -1,28 +1,33 @@
 <template>
     <div class="main">
         <div class="left">
-            <OrderForm />
+            <OrderForm v-model:shippingInfos="shippingInfos" @receptionTypeChanged="updateReceptionType"/>
         </div>
         <div class="right grid-row-1-position">
             <div class="wrap">
-                <OrderSummary />
+                <OrderSummary v-model:shippingInfos="shippingInfos" :receptionType="receptionType" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import OrderForm from './OrderForm.vue';
 import OrderSummary from './OrderSummary.vue';
 
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-
 const router = useRouter();
+
+const receptionType = ref(0);
+const shippingInfos = ref({});
 
 const isCartEmpty = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     return cart.length === 0;
+}
+function updateReceptionType(value) {
+    receptionType.value = value;
 }
 onMounted(() => {
     // Si le panier est vide, revenir à la page d'accueil

@@ -60,11 +60,19 @@
                         <p>Sous-total · <span>{{ itemsQtySum }}</span> article{{ itemsQtySum > 1 ? 's' : '' }}</p>
                         <p>{{ subTotal.toLocaleString('fr-FR') }} FCFA</p>
                     </div>
-                    <div class="flex-element">
+                    <div v-if="isExpedition" class="flex-element">
+                        <p>Expédition</p>
+                        <p>{{ shippingInfosAvailable ? `${expeditionCosts.toLocaleString('fr-FR')} FCFA` : 'Entrez une adresse de livraison' }}</p>
+                    </div>
+                    <div v-if="!isExpedition" class="flex-element">
                         <p>Récupération en boutique</p>
                         <p>GRATUIT</p>
-                    </div class="flex-element">
-                    <div class="flex-element">
+                    </div>
+                    <div v-if="!isExpedition" class="flex-element">
+                        <p>Taxes</p>
+                        <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
+                    </div>
+                    <div v-else-if="isExpedition && shippingInfosAvailable" class="flex-element">
                         <p>Taxes</p>
                         <p>{{ TVA.toLocaleString('fr-FR') }} FCFA</p>
                     </div>
@@ -83,10 +91,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+
+const props = defineProps({
+    receptionType: {
+        type: Number,
+        default: 0
+    },
+    shippingInfos: {
+    type: Object,
+    default: () => ({})
+  }
+})
+
+const emit = defineEmits(['update:shippingInfos']);
 
 const CART = 'cart';
 const ONE = 1;
+
 const cart = ref([]);
 const borderPosition = ref('bottom');
 const cartContent = ref(null);
@@ -96,9 +118,21 @@ const isAtBottom = ref(false);
 const itemsQtySum = ref(0);
 const showSummary = ref(false);
 const viewPortWidth = ref(window.innerWidth);
+const expeditionCosts = ref(0);
+const shippingSrc = ref({ name: "Boutique dabadakondji", lat: 6.17370, lng: 1.27972, distance: null, address: "Rue dabadakondji, Lomé" });
+const pricePerKm = ref(500);
+const basicAmount = ref(2000);
+
+const isExpedition = computed (() => {
+    return props.receptionType === 0; // 0 -> Expédition 1 -> Cueillette
+})
+const shippingInfosAvailable = ref(false);
+// const shippingInfosAvailable = computed(() => {
+//     return props.shippingInfos && props.shippingInfos.coords && props.shippingInfos.coords.lat && props.shippingInfos.coords.lng ? true : false;
+// });
+
 let scrollTimeout;
 let hideTimeout;
-
 
 const toggleSummary = () => showSummary.value = !showSummary.value;
 const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [];
@@ -114,10 +148,34 @@ const subTotal = computed(() => {
     return sum;
 });
 const TVA = computed(() => {
-    return Math.ceil(subTotal.value * 0.18); // Arrondir à l'entier FCFA supérieur
+    let sum = 0;
+    sum += subTotal.value;
+    sum += isExpedition.value && expeditionCosts.value;
+    return Math.round(sum * 0.18); // Arrondir à l'entier le plus près
 });
+async function getDrivingDistance(origin, destination) {
+    const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=false`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.routes && data.routes.length > 0) {
+        const distanceMeters = data.routes[0].distance;
+        return parseFloat((distanceMeters / 1000).toFixed(2)); // km
+    } else {
+        alert('Aucun itinéraire trouvé pour effectuer la livraison à votre position actuelle en voiture. Choisissez un autre lieu.');
+        throw new Error("Aucun itinéraire trouvé");
+    }
+}
+// Quand c'est une livraison, le calcul du total avec TVA se fait après disponibilité des données de livraison
 const totalWithTVA = computed(() => {
-    return subTotal.value + TVA.value;
+  let total = subTotal.value;
+  if (isExpedition.value && shippingInfosAvailable.value) {
+    total += expeditionCosts.value;
+    total += TVA.value;
+  } else if (!isExpedition.value) {
+    total += TVA.value;
+  }
+  return total;
 });
 const updateItemsQtySum = () => {
   let qtySum = 0;
@@ -156,7 +214,71 @@ function handleScroll() {
     else if (atBottom) borderPosition.value = 'top';
   }, 500);
 }
+// async function calculateExpeditionCosts(shippingInfos) {
+//     const origin = { lat: shippingSrc.value.lat, lng: shippingSrc.value.lng };
+//     const destination = { lat: shippingInfos.coords.lat, lng: shippingInfos.coords.lng };
+//     const distance = await getDrivingDistance(origin, destination);
+//     let cost = Math.round(distance * pricePerKm.value); // Arrondir à l'entier le plus près;
+//     cost = Math.max(basicAmount.value, cost); // Préserver le montant de base
+//     expeditionCosts.value = cost;
+// }
+async function calculateExpeditionCosts(shippingInfos) {
+  try {
+    const origin = { lat: shippingSrc.value.lat, lng: shippingSrc.value.lng };
+    const destination = { lat: shippingInfos.coords.lat, lng: shippingInfos.coords.lng };
+    const distance = await getDrivingDistance(origin, destination);
 
+    let cost = Math.round(distance * pricePerKm.value);
+    cost = Math.max(basicAmount.value, cost);
+    expeditionCosts.value = cost;
+
+    shippingInfosAvailable.value = true; // itinéraire trouvé
+  } catch (err) {
+    console.log("Erreur itinéraire :", err);
+    expeditionCosts.value = 0;
+    shippingInfosAvailable.value = false; // pas d’itinéraire → infos non dispo
+    emit("update:shippingInfos", {}); // reset propre
+  }
+}
+watch(
+  () => props.shippingInfos,
+  (newVal, oldVal) => {
+    // Cas 1 : shippingInfos vides → reset
+    if (!(newVal?.coords?.lat && newVal?.coords?.lng)) {
+      if (oldVal && (oldVal.coords?.lat && oldVal.coords?.lng)) {
+        // Seulement si ça change vraiment → sinon boucle
+        emit('update:shippingInfos', {});
+      }
+      return;
+    }
+    // Cas 2 : appliquer la priorité. B -> localisation actuelle est toujours choisie, même si le géocodage vient après
+    if (newVal.infoType === 'A' && oldVal?.infoType === 'B') {
+      // Seulement si c'est différent → sinon boucle
+      if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+        emit('update:shippingInfos', oldVal);
+      }
+    }
+  },
+  { deep: true }
+);
+// Watcher qui fait le calcul du coût d'expédition au chargement/changement d'adresse d'expédition
+watch(
+    () => props.shippingInfos,
+    async (newVal) => {
+        try {
+            if (newVal?.coords?.lat && newVal?.coords?.lng) {
+                await calculateExpeditionCosts(newVal);
+            } else {
+                expeditionCosts.value = 0;
+                shippingInfosAvailable.value = false;
+                emit('update:shippingInfos', {});
+            }
+        } catch(err) {
+                emit('update:shippingInfos', {});
+        }
+    },
+    { deep: true, immediate: true }
+);
 onMounted(() => {
     cart.value = loadCart();
     checkOverflow();
@@ -169,7 +291,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.removeEventListener('resize', updateViewPortWidth);
-})
+});
 
 </script>
 

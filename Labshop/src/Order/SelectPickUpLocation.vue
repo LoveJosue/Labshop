@@ -40,9 +40,7 @@
 import { ref, onMounted } from "vue";
 
 const pickupPlaces = ref([
-  { name: "Boutique Lomé-Centre", lat: 6.1375, lon: 1.2123, distance: null, address: "Avenue de la Libération, Lomé" },
-  { name: "Boutique Adidogomé", lat: 6.1915, lon: 1.1556, distance: null, address: "Route d’Adidogomé, Lomé" },
-  { name: "Boutique Avenou", lat: 6.1720, lon: 1.2250, distance: null, address: "Boulevard de l’Oti, Lomé" }
+  { name: "Boutique dabadakondji", lat: 6.17370, lon: 1.27972, distance: null, address: "Rue dabadakondji, Lomé" }
 ]);
 
 const selectedPlace = ref(null);

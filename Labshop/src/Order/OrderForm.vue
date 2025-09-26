@@ -47,13 +47,13 @@
               </div>
               <div class="form-group">
                   <label for="addresse">Adresse</label>
-                  <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou repère" @input="form.addresse ? errors.addresse = '' : errors.addresse='Saisissez votre adresse de livraison'"/>
+                  <input type="text" id="addresse" v-model="form.addresse" placeholder="- 123 rue exemple - ou - repère proche -" @input="form.addresse ? errors.addresse = '' : errors.addresse='Saisissez votre adresse de livraison'" @blur="checkFullShippingAddresse"/>
                   <small v-if="errors.addresse" class="error">{{ errors.addresse }}</small>
               </div>
               <div class="form-inline">
                 <div class="form-group">
                     <label for="city">Ville</label>
-                    <input type="text" id="city" v-model="form.city" placeholder="Votre ville" @input="form.city ? errors.city = '' : errors.city='Saisissez votre ville'"/>
+                    <input type="text" id="city" v-model="form.city" placeholder="Votre ville" @input="form.city ? errors.city = '' : errors.city='Saisissez votre ville'" @blur="checkFullShippingAddresse"/>
                     <small v-if="errors.city" class="error">{{ errors.city }}</small>
                 </div>
                 <div class="form-group">
@@ -65,12 +65,12 @@
               <div class="form-inline">
                 <div class="form-group">
                   <label for="latitude">Latitude</label>
-                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 6.171015 (optionnelle)" @input="form.latitude = sanitizeGpsInput(form.latitude, 'lat')">
+                  <input type="text" id="latitude" v-model="form.latitude" placeholder="Ex: 6.171015 (optionnelle)" @input="form.latitude = sanitizeGpsInput(form.latitude, 'lat')" disabled>
                   <!-- <small v-if="errors.latitude" class="error">{{ errors.latitude }}</small> -->
                 </div>
                 <div class="form-group">
                   <label for="longitude">Longitude</label>
-                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -1.25152 (optionnelle)" @input="form.longitude = sanitizeGpsInput(form.longitude, 'lng')">
+                  <input type="text" id="longitude" v-model="form.longitude" placeholder="Ex: -1.25152 (optionnelle)" @input="form.longitude = sanitizeGpsInput(form.longitude, 'lng')" disabled>
                   <!-- <small v-if="errors.longitude" class="error">{{ errors.longitude }}</small> -->
                 </div>
               </div>
@@ -134,7 +134,16 @@
                 </div>
                 <div class="form-group">
                     <label for="cvv">CVV</label>
-                    <input type="text" id="cvv" inputmode="numeric" autocomplete="cc-number" v-model="form.card.cvv" placeholder="Code de sécurité" maxlength="4" @input="checkCVVNumber" @blur="isCvvValid"/>
+                    <input 
+                      type="text" 
+                      id="cvv" 
+                      inputmode="numeric" 
+                      autocomplete="cc-number" 
+                      v-model="form.card.cvv" 
+                      placeholder="Code de sécurité" 
+                      maxlength="4" 
+                      @input="checkCVVNumber" 
+                      @blur="isCvvValid"/>
                     <small v-if="errors.cvv" class="error">{{ errors.cvv }}</small>
                 </div>
             </div>
@@ -221,7 +230,11 @@
             </p>
           </h2>
           <div class="form-group margin-btm-0">
-            <OrderSummaryV2 :showSummary="showSummary"/>
+            <OrderSummaryV2 
+              :showSummary="showSummary" 
+              :receptionType="receptionType" 
+              :shippingInfos="shippingInfos
+            "/>
           </div>
         </section>
         
@@ -242,6 +255,13 @@ import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
 import SelectPickUpLocation from './SelectPickUpLocation.vue';
 import OrderSummaryV2 from './OrderSummaryV2.vue';
 
+const props = defineProps({
+  shippingInfos: {
+    type: Object,
+    default: () => ({})
+  }
+});
+
 const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
 const ZERO = 0;
 const ONE = 1;
@@ -249,6 +269,8 @@ const CART = 'cart';
 
 const showSummary = ref(false);
 const cart = ref([]);
+
+const emit = defineEmits(['receptionTypeChanged', 'update:shippingInfos']);
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const invoiceAddressAsShippingAddress = ref(true);
@@ -358,6 +380,16 @@ const getCurrentLocation = () => {
       (position) => {
         form.value.latitude = position.coords.latitude.toFixed(6);
         form.value.longitude = position.coords.longitude.toFixed(6);
+
+        const gpsCoordinates = {
+          infoType: 'B',
+          coords: {
+            lat: parseFloat(form.value.latitude),
+            lng: parseFloat(form.value.longitude)
+          }
+        };
+        // On émet la nouvelle valeur au parent (v-model)
+        emit('update:shippingInfos', gpsCoordinates);
       },
       (error) => {
         locationError.value = "Impossible de récupérer la position. Saisir manuellement.";
@@ -435,7 +467,6 @@ function isCvvValid() {
     }
   }
 }
-
 //  Fonctions de formatage des entrées
 function formatExpiration() {
   let number = keepDigitsOnly(form.value.card.expiration);
@@ -554,6 +585,63 @@ function checkCardName() {
   // Validation réacive (affichage réactive d'erreur)
   form.value.card.name ? errors.value.cardName = '' : errors.value.cardName = "Saisissez le nom sur votre carte tel quel";
 }
+async function checkFullShippingAddresse() {
+  if (form.value.addresse && form.value.city) {
+    try {
+      const fullAddresse = formatShippingFullAddresse();
+      const coords = await getCoordinatesOSM(fullAddresse);
+      const gpsCoordinates = { infoType: 'A', coords }
+      // Emission vers parent (et donc vers OrderSummary)
+      emit('update:shippingInfos', gpsCoordinates);
+      cleanFullAddressErrors();
+    } catch (err) {
+      const errorMsg = 'Adresse introuvable. Merci de vérifier l’orthographe ou d’ajouter un repère (ex. marché, église, carrefour...)';
+      // on vide en émettant un objet vide
+      emit('update:shippingInfos', defaultShippingInfos());
+      errors.value.addresse = errorMsg;
+      errors.value.city = errorMsg;
+      throw new Error("Adresse introuvable");
+    }
+  } else {
+    emit('update:shippingInfos', defaultShippingInfos());
+  }
+}
+function cleanFullAddressErrors() {
+  errors.value.addresse = '';
+  errors.value.city = '';
+}
+function formatShippingFullAddresse() {
+  const country = form.value.country || 'Togo';
+  const addresse = form.value.addresse;
+  const city = form.value.city;
+  
+  // Nettoyer l’adresse (enlever espaces multiples)
+  const cleanAddress = addresse.trim().replace(/\s+/g, " ");
+  const cleanCity = city.trim();
+  return `${cleanAddress}, ${cleanCity}, ${country}`;
+}
+async function getCoordinatesOSM(fullAddresse) {
+  const appName = 'Labstore'
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddresse)}`;
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": `${appName}/1.0`
+    }
+  });
+  const data = await response.json();
+
+  if (data.length > 0) {
+    return {
+      lat: parseFloat(data[0].lat),
+      lng: parseFloat(data[0].lon)
+    };
+  } else {
+    throw new Error("Adresse introuvable");
+  }
+}
+
+
 function isValidCreditCard(number) {
   number = number.replace(/\D/g, "");
 
@@ -681,9 +769,13 @@ function handleSubmit() {
 }
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
+  emit('receptionTypeChanged', value);
 }
 function toggleSummary() {
   showSummary.value = !showSummary.value;
+}
+function defaultShippingInfos() {
+  return { infoType: null, coords: { lat: null, lng: null } };
 }
 watch(receptionType, (newVal, oldVal) => {
   // En cas d'expédition
