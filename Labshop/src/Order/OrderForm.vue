@@ -97,7 +97,7 @@
               <h3>Lieu de cueillette</h3>
               <div class="form-group">
               </div>
-              <SelectPickUpLocation />
+              <SelectPickUpLocation @pickupPlaceChanged="handlePickUpPlaceChange"/>
             </section>
         </section>
 
@@ -254,6 +254,8 @@ import SelectReceptionMode from './SelectReceptionMode.vue';
 import CheckBoxComponent from '@/Components/CheckBoxComponent.vue';
 import SelectPickUpLocation from './SelectPickUpLocation.vue';
 import OrderSummaryV2 from './OrderSummaryV2.vue';
+import axios from 'axios';
+import { apiUrl } from '@/config';
 
 const props = defineProps({
   shippingInfos: {
@@ -263,9 +265,9 @@ const props = defineProps({
 });
 
 const CHCK_BOX_TEXT_1 = "Utiliser l'adresse de livraison comme adresse de facturation.";
+const CART = 'cart';
 const ZERO = 0;
 const ONE = 1;
-const CART = 'cart';
 
 const showSummary = ref(false);
 const cart = ref([]);
@@ -275,6 +277,7 @@ const emit = defineEmits(['receptionTypeChanged', 'update:shippingInfos']);
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const invoiceAddressAsShippingAddress = ref(true);
 const receptionType = ref(0); // 0 -> Expédition 1 -> Pickup
+const pickUpPlace = ref('');
 const phoneIsValid = ref(false);
 const billingPhoneIsValid = ref(false);
 const form = ref({
@@ -759,13 +762,92 @@ function validateForm() {
     }
     return valid;
 }
-function handleSubmit() {
+async function handleSubmit() {
   validateForm();
   if(hasErrors.value) {
     alert('Formulaire invalide, corrigez les erreurs');
     return;
   }
+  // Quand le formulaire est valide
   alert('✅Formulaire valide, envoi...')
+  await placeOrder();
+}
+function getFormData() {
+  const formData = {};
+
+  // Infos du client
+  formData.client = { email: form.value.email }
+
+  // Méthode de paiement
+  formData.payment = {
+    cardNumber: form.value.card.number,
+    cardOwner: form.value.card.name,
+    cardCvv: form.value.card.cvv,
+    cardExpiration: form.value.card.expiration
+  }
+
+  // Infos du contenu de la commande
+
+  if (receptionType.value === ZERO) { // Si expédition
+    formData.client.name = form.value.name;
+    formData.client.prename = form.value.prename;
+    formData.client.phone = form.value.phone;
+
+    // Adressage de l'expédition
+    const expeditionAddresse = {
+      location: { latitude: form.value.latitude, longitude: form.value.longitude },
+      address: form.value.addresse,
+      country: form.value.country || 'Togo',
+      city: form.value.city,
+      postalCode: form.value.postalCode,
+      name: form.value.name,
+      prename: form.value.prename,
+      phone: form.value.phone
+    }
+    formData.expedition = expeditionAddresse;
+
+    // Adresse de factuation
+    formData.billing = invoiceAddressAsShippingAddress.value ? expeditionAddresse : getBillingAddresse();
+    
+  }
+  if (receptionType.value === ONE) { // Si cueuillette
+    // Adresse de facturation
+    formData.billing = getBillingAddresse();
+    
+    // Autres infos du client
+    formData.client.name = formData.billing.name;
+    formData.client.prename = formData.billing.prename;
+    formData.client.phone = formData.billing.phone;
+
+    // Lieu de cueuillette
+    formData.pickup = {
+      storeName: pickUpPlace.value.name,
+      address: pickUpPlace.value.address,
+      location: { latitude: pickUpPlace.value.lat, longitude: pickUpPlace.value.lon }
+    }   
+  }
+
+  return formData;
+}
+function getBillingAddresse() {
+  return {
+      addresse: form.value.billing.address,
+      country: form.value.country || 'Togo',
+      city: form.value.billing.city,
+      postalCode: form.value.billing.postalCode,
+      name: form.value.billing.name,
+      prename: form.value.billing.prename,
+      phone: form.value.billing.phone,
+    };
+}
+async function placeOrder() {
+  const formData = getFormData();
+  try {
+    // const response = await axios.post(`${apiUrl}/order`, formData);
+    console.log(formData);
+  } catch (error) {
+    throw new Error("Erreur lors de la passation de commande.");
+  }
 }
 function handleReceptionTypeChange(value) {
   receptionType.value = value;
@@ -773,6 +855,9 @@ function handleReceptionTypeChange(value) {
 }
 function toggleSummary() {
   showSummary.value = !showSummary.value;
+}
+function handlePickUpPlaceChange(value) {
+  pickUpPlace.value = value;
 }
 function defaultShippingInfos() {
   return { infoType: null, coords: { lat: null, lng: null } };

@@ -40,7 +40,8 @@
 import { ref, onMounted } from "vue";
 
 const pickupPlaces = ref([
-  { name: "Boutique dabadakondji", lat: 6.17370, lon: 1.27972, distance: null, address: "Rue dabadakondji, Lomé" }
+  { name: "Boutique dabadakondji", lat: 6.17370, lon: 1.27972, distance: null, address: "Rue dabadakondji, Lomé" },
+  { name: "Boutique la province", lat: 6.17370, lon: 1.27000, distance: null, address: "Rue dabadakondji, Lomé" }
 ]);
 
 const selectedPlace = ref(null);
