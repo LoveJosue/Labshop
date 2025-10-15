@@ -5,6 +5,7 @@
     --lightgray: #e5e5e5;
     --blue: #2f79ce;
     --primaryColor : #007bff;
+    --orderPageBackBgColor: rgb(237, 237, 237);
 
     /* Profil avatar */
     --avatar-size: 55px;
@@ -17,4 +18,7 @@
     --website-max-width: 1300px;
     --website-section-width: 95%;
     --cartWidth: 444px;
+    --orderPageWidth: 1060px;
+    --order-sumary-box-height: 64px;
+    --order-sumary-box-height-minus-1-px: 63px;
 }

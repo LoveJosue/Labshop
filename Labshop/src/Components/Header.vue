@@ -25,8 +25,12 @@
           </div>
         </div>
         
+        <SlideTransition>
+          <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
+        </SlideTransition>
         
-        <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
+        <!-- overlay (maintenu hors du Transition, pour ne pas être animé) -->
+        <div v-if="isCardOpen" class="cart-overlay" @click="isCardOpen = false"></div>
 
 
         <div v-if="isSideBarVisible === true" class="side-bar">
@@ -45,7 +49,9 @@
 
 <script setup>
 import Cart from './Cart.vue';
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import SlideTransition from './Transition/SlideTransition.vue';
+
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const ONE_SEC = 1000;
@@ -114,6 +120,16 @@ onUnmounted(() => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
+}
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(17, 24, 39, 0.5);
+  transition: opacity 0.4s ease;
+  z-index: 2;
 }
  .nav {
   display: flex;
@@ -251,5 +267,8 @@ onUnmounted(() => {
   .icons > *:nth-child(2) {
     display: none;
   }
+}
+@media (max-width: 1000px) {
+
 }
 </style>
