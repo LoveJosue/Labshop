@@ -261,6 +261,10 @@ const props = defineProps({
   shippingInfos: {
     type: Object,
     default: () => ({})
+  },
+  billInfos : {
+    type: Object,
+    default: () => ({})
   }
 });
 
@@ -774,6 +778,7 @@ async function handleSubmit() {
 }
 function getFormData() {
   const formData = {};
+  const items = loadCart();
 
   // Infos du client
   formData.client = { email: form.value.email }
@@ -787,11 +792,25 @@ function getFormData() {
   }
 
   // Infos du contenu de la commande
+  formData.items = items;
+  formData.subTotal = props.billInfos.subTotal;
+  if (receptionType.value === ZERO) formData.expeditionCosts = props.billInfos.expeditionCosts; 
+  formData.TVA = props.billInfos.TVA;
+  formData.totalWithTVA = props.billInfos.totalWithTVA;
+  formData.orderDate = new Date();
 
   if (receptionType.value === ZERO) { // Si expédition
-    formData.client.name = form.value.name;
-    formData.client.prename = form.value.prename;
-    formData.client.phone = form.value.phone;
+    // Qui est considéré comme client quand l'adresse de livraison est différente ou similaire à l'adresse de facturation
+    if (invoiceAddressAsShippingAddress.value) {
+      formData.client.name = form.value.name;
+      formData.client.prename = form.value.prename;
+      formData.client.phone = form.value.phone;
+    } else {
+      formData.client.name = form.value.billing.name;
+      formData.client.prename = form.value.billing.prename;
+      formData.client.phone = form.value.billing.phone;  
+    }
+    
 
     // Adressage de l'expédition
     const expeditionAddresse = {
@@ -832,7 +851,7 @@ function getFormData() {
 function getBillingAddresse() {
   return {
       addresse: form.value.billing.address,
-      country: form.value.country || 'Togo',
+      country: form.value.billing.country || 'Togo',
       city: form.value.billing.city,
       postalCode: form.value.billing.postalCode,
       name: form.value.billing.name,

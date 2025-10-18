@@ -1,11 +1,11 @@
 <template>
     <div class="main">
         <div class="left">
-            <OrderForm v-model:shippingInfos="shippingInfos" @receptionTypeChanged="updateReceptionType"/>
+            <OrderForm v-model:shippingInfos="shippingInfos" :billInfos="billInfos" @receptionTypeChanged="updateReceptionType"/>
         </div>
         <div class="right grid-row-1-position">
             <div class="wrap">
-                <OrderSummary v-model:shippingInfos="shippingInfos" :receptionType="receptionType" />
+                <OrderSummary v-model:shippingInfos="shippingInfos" :receptionType="receptionType" @billInfosChanged="handleBillInfos"/>
             </div>
         </div>
     </div>
@@ -21,6 +21,7 @@ const router = useRouter();
 
 const receptionType = ref(0);
 const shippingInfos = ref({});
+const billInfos = ref({});
 
 const isCartEmpty = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -28,6 +29,9 @@ const isCartEmpty = () => {
 }
 function updateReceptionType(value) {
     receptionType.value = value;
+}
+function handleBillInfos(value) {
+    billInfos.value = value;
 }
 onMounted(() => {
     // Si le panier est vide, revenir à la page d'accueil

@@ -104,7 +104,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:shippingInfos']);
+const emit = defineEmits(['update:shippingInfos', 'billInfosChanged']);
 
 const CART = 'cart';
 const ONE = 1;
@@ -174,6 +174,7 @@ const totalWithTVA = computed(() => {
   } else if (!isExpedition.value) {
     total += TVA.value;
   }
+  emit('billInfosChanged', getBillInfos(total));
   return total;
 });
 const updateItemsQtySum = () => {
@@ -188,6 +189,14 @@ function checkOverflow() {
         cartContent.value.scrollHeight > cartContent.value.clientHeight;
     }
   });
+}
+function getBillInfos(total) {
+    const billInfos = {};
+    billInfos.subTotal = subTotal.value;
+    if (isExpedition && shippingInfosAvailable) billInfos.expeditionCosts = expeditionCosts.value;
+    billInfos.TVA = TVA.value;
+    billInfos.totalWithTVA = total;
+    return billInfos;
 }
 function handleScroll() {
   if (!cartContent.value) return;
