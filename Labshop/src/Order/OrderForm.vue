@@ -850,7 +850,7 @@ function getFormData() {
 }
 function getBillingAddresse() {
   return {
-      addresse: form.value.billing.address,
+      address: form.value.billing.address,
       country: form.value.billing.country || 'Togo',
       city: form.value.billing.city,
       postalCode: form.value.billing.postalCode,
@@ -862,8 +862,8 @@ function getBillingAddresse() {
 async function placeOrder() {
   const formData = getFormData();
   try {
-    // const response = await axios.post(`${apiUrl}/order`, formData);
-    console.log(formData);
+    const response = await axios.post(`${apiUrl}/order`, formData);
+    console.log(response);
   } catch (error) {
     throw new Error("Erreur lors de la passation de commande.");
   }
