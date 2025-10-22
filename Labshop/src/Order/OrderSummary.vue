@@ -45,7 +45,7 @@
                                 </div>
                             </div>
                             <p class="item-price">
-                                {{ calculateItemPrice(item).toLocaleString('fr-FR') }} FCFA
+                                {{ item.cost.toLocaleString('fr-FR') }} FCFA
                             </p>
                         </div>
                     </div>

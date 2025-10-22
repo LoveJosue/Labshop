@@ -385,6 +385,7 @@ function buildWholeSaleItem () {
         "qte": wholeSaleQte.value,
         "unitPerBox": p.unitPerBox,
         "unitPrice": unitPrice,
+        "cost": (unitPrice * p.unitPerBox * wholeSaleQte.value),
         "productUrl": currentFullUrl,
     };
 
@@ -407,6 +408,7 @@ function buildRetailItem () {
         "qte": retailQte.value,
         "unitType": p.unitType,
         "unitPrice": unitPrice,
+        "cost": (unitPrice * retailQte.value),
         "productUrl": currentFullUrl
     }
     return retailItem;
