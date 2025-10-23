@@ -863,7 +863,8 @@ async function placeOrder() {
   const formData = getFormData();
   try {
     const response = await axios.post(`${apiUrl}/order`, formData);
-    console.log(response);
+    const orderNumber = response.data.orderNumber;
+    alert(`Commande effectée avec succès. Voici votre numéro de commande : ${orderNumber}`);
   } catch (error) {
     throw new Error("Erreur lors de la passation de commande.");
   }

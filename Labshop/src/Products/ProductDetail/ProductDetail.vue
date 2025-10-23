@@ -318,7 +318,7 @@ const addToCart = () => {
         cart[index] = existingItem;
         saveCart(cart);
     } else {
-        item.id = createItemID(cart);
+        item.itemCartId = createItemID(cart);
         cart.push(item);
         saveCart(cart);
     }    

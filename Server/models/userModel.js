@@ -4,7 +4,7 @@ const { Schema, model } = mongoose;
 const userSchema = new Schema({
     name: String,
     prename: String,
-    phone: String
+    phone: String,
     email: { type: String, unique: true, required: true },
     password: String,
     signUpDate: { type: Date, default: Date.now },
