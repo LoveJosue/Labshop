@@ -773,7 +773,6 @@ async function handleSubmit() {
     return;
   }
   // Quand le formulaire est valide
-  alert('✅Formulaire valide, envoi...')
   await placeOrder();
 }
 function getFormData() {
