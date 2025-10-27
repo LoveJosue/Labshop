@@ -50,10 +50,6 @@ async function createOrder(order, client) {
     };
 
     orderData.billing = {
-        location: {
-            latitude: order.billing?.location?.latitude ?? '',
-            longitude: order.billing?.location?.longitude ?? ''
-        },
         address: order.billing.address,
         country: order.billing.country,
         city: order.billing.city,
@@ -80,26 +76,24 @@ async function createOrder(order, client) {
             prename: order.expedition.prename,
             phone: order.expedition.phone
         };
-    }
-    
-    if (order?.expedition?.location) {
-        orderData.expedition.location = {
-            latitude: order.expedition?.location?.latitude ?? '',
-            longitude: order.expedition?.location?.longitude ?? ''
+        if (order.expedition.location) {
+            orderData.expedition.location = {
+                latitude: order.expedition?.location?.latitude ?? '',
+                longitude: order.expedition?.location?.longitude ?? ''
+            }
         }
     }
-
+    
     if (order.pickup) {
         orderData.pickup = {
             storeName: order.pickup.storeName,
             address: order.pickup.address,
         };
-    }
-
-    if (order?.pickup?.location) {
-        orderData.pickup.location = {
-            latitude: order.expedition?.location?.latitude,
-            longitude: order.expedition?.location?.longitude
+        if (order.pickup.location) {
+            orderData.pickup.location = {
+                latitude: order.pickup?.location?.latitude,
+                longitude: order.pickup?.location?.longitude
+            }
         }
     }
 
