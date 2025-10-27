@@ -39,7 +39,7 @@
                 </div>
 
                 <!-- Bouton supprimer -->
-                <button class="delete-btn" @click="removeItem(item.id)">
+                <button class="delete-btn" @click="removeItem(item.itemCartId)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" 
                          viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" 
@@ -110,7 +110,7 @@ function loadCart() {
     return JSON.parse(localStorage.getItem(CART)) || [];
 }
 function removeItem(itemId) {
-    cart.value = cart.value.filter(item => item.id !== itemId);
+    cart.value = cart.value.filter(item => item.itemCartId !== itemId);
     localStorage.setItem(CART, JSON.stringify(cart.value));
 }
 const total = computed(() => {

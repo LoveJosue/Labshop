@@ -318,7 +318,7 @@ const addToCart = () => {
         cart[index] = existingItem;
         saveCart(cart);
     } else {
-        item.id = createItemID(cart);
+        item.itemCartId = createItemID(cart);
         cart.push(item);
         saveCart(cart);
     }    
@@ -385,7 +385,8 @@ function buildWholeSaleItem () {
         "qte": wholeSaleQte.value,
         "unitPerBox": p.unitPerBox,
         "unitPrice": unitPrice,
-        "productUrl": currentFullUrl
+        "cost": (unitPrice * p.unitPerBox * wholeSaleQte.value),
+        "productUrl": currentFullUrl,
     };
 
     return wholeSaleItem;
@@ -407,6 +408,7 @@ function buildRetailItem () {
         "qte": retailQte.value,
         "unitType": p.unitType,
         "unitPrice": unitPrice,
+        "cost": (unitPrice * retailQte.value),
         "productUrl": currentFullUrl
     }
     return retailItem;
