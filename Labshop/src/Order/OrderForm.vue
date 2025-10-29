@@ -1,6 +1,6 @@
 <template>
   <div class="ctn">
-    <form class="form padding-btm-5" @submit.prevent="handleSubmit" @keydown.enter.prevent>
+    <form class="form padding-btm-5" @submit.prevent="handleSubmit" @keydown.enter.prevent novalidate>
         <!-- Section Contact -->
         <section class="section">
             <h2>Contact</h2>
