@@ -379,6 +379,7 @@ const hasErrors = computed(() =>
   Object.values(errors.value).some(err => err)
 )
 const loadCart = () => JSON.parse(localStorage.getItem(CART)) || [];
+const clearCart = () => localStorage.removeItem(CART);
 const cartHasOneItem = computed(() => cart.value.length === 1);
 const locationError = ref('');
 const getCurrentLocation = () => {
@@ -774,6 +775,7 @@ async function handleSubmit() {
   }
   // Quand le formulaire est valide
   await placeOrder();
+  clearCart();
 }
 function getFormData() {
   const formData = {};
