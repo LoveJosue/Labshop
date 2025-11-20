@@ -13,10 +13,12 @@ Labshop est une application e-commerce de vente de produits de laboratoire dont 
 * Authentification
 
 ## Architecture du projet
+```bash
 Labshop/
-* │── Labshop/         Frontend Vue.js
-* │── Server/          Backend Express.js
-* │── vercel.json      Configuration du déploiement
+├── Labshop/
+├── Server/
+└── vercel.json
+```
 
 ## Technologies utilisées
 ### Frontend
