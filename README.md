@@ -50,10 +50,14 @@ npm install
 npm run dev
 
 ```
-Le front-end s'exécute à l'url suivant : http://localhost:5173
+Le frontend s'exécutera localement à l'url suivant : http://localhost:5173
 
 ## Configuration des variables d'environnement
 ### Frontend
 Ayez un fichier .env à la racine du répertoire Labshop/ dans lequel vous collez cette ligne :
-``` VITE_API_URL=http://localhost:3000/api ```
+```
+VITE_API_URL=http://localhost:3000/api
+```
+
+
 
