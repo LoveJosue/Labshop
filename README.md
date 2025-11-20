@@ -58,6 +58,7 @@ Ayez un fichier .env à la racine du répertoire Labshop/ dans lequel vous colle
 ```
 VITE_API_URL=http://localhost:3000/api
 ```
-
-
+## 📸 Captues d'écran
+Voici quelques aperçus de l'application :
+<img width="585" height="1266" alt="mobile-desktop" src="https://github.com/user-attachments/assets/f68c2a70-d76c-4f8e-a3a8-608bb41c7665" />
 
