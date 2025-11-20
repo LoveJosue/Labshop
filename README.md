@@ -1,5 +1,5 @@
 # Description
-Labstore est une application e-commerce de vente de produits de laboratoire dont le frontend est développé en Vue.js et déployé sur Vercel, puis le backend en Express.js  et déployé sur Render.
+Labshop est une application e-commerce de vente de produits de laboratoire dont le frontend est développé en Vue.js et déployé sur Vercel, puis le backend en Express.js  et déployé sur Render.
 
 ## Fonctionnalités
 ### Déjà présentes
@@ -30,6 +30,22 @@ Labshop/
 ### Déploiement
 * Vercel -> Frontend
 * Render -> API
-### DNS & Client e-mail
-* Hébergeur DNS : Namecheep
+### DNS
+* Hébergeur DNS : Namecheap
 * Client e-mail : Zoho
+
+##Installation et exécution locale
+###Backend
+```
+cd Server
+npm install
+npm run dev
+```
+###Frontend
+```
+cd Labshop
+npm install
+npm run dev
+
+```
+
