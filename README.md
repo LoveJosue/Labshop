@@ -88,3 +88,16 @@ VITE_API_URL=http://localhost:3000/api
 npm run dev
 ```
 Le frontend s'exécutera localement au : http://localhost:5173 et l'application sera prête à utiliser.
+
+## API Documentation
+>POST /orders  
+
+Créer une nouvelle commande  
+
+>GET /products  
+
+Retourner la liste des produits  
+
+>GET /products/:id
+
+Retourner les détails sur un produit spécifique
