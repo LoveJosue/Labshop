@@ -4,9 +4,7 @@ Labshop est une application e-commerce de vente de produits de laboratoire dont 
 ## 📸 Captues d'écran
 Voici quelques aperçus de l'application :
 ### Sur mobile 
->L'apparence de l'application sur desktop est présentée à la fin 👇
 <img width="190" height="600" alt="mobile-home" src="https://github.com/user-attachments/assets/7081fbc5-2180-48fa-b847-222e6b28617e" />
-<img width="190" height="600" alt="mobile-products-list" src="https://github.com/user-attachments/assets/c7582211-d7c7-4e9d-9dec-ae6b71442a8f" />
 <img width="190" height="600" alt="mobile-product-details " src="https://github.com/user-attachments/assets/c1c044ab-3db5-490d-9890-01513c537467" />
 <img width="190" height="600" alt="mobile-cart" src="https://github.com/user-attachments/assets/df4ac1ad-9ce3-4d0a-9d2a-0b7021364604" />
 <img width="190" height="600" alt="mobile-checkout" src="https://github.com/user-attachments/assets/a9ea8010-ad84-4055-805d-8bca9c908a93" />
@@ -47,31 +45,59 @@ Labshop/
 * Client e-mail : Zoho
 
 ## Installation et exécution locale
+> Attention : Faites l'installation dans l'odre d'apparition des éléments de cette section. ⚠️
 ### Backend
+1. Tout d'abord, exécutez les commandes suivantes pour installer les dépendances:
 ```
 cd Server
 npm install
+```
+2. Installez et démarrez une base de données MongoDB localement en tant que service. L'installation de MongoDB Compass vous permet d'avoir une interface graphique pour visualiser les bases de données créées, les collections et les documents.
+3. Dans ./Server/ ayez un fichier .env à la racine du répertoire dans lequel vous renseignez les variables d'environnement suivantes :
+> Veillez à ajouter le **"/labstore-local"** après le **"mongodb_connection_string"** ⚠️
+```
+# API
+PORT=3000
+
+# DATABASE
+MONGO_URI=mongodb_connection_string/labstore-local
+
+# MAIL SERVER
+SMTP_HOST=smtp_host
+SMTP_PORT=465
+SMTP_USER=email_username
+SMTP_APP_PASS=email_application_password
+```
+4. Lancez maintenant le serveur d'API avec la commande suivante :
+```
 npm run dev
 ```
+
 ### Frontend
+1. À la racine du répertoire de projet, exécutez ces commandes suivantes pour installer les dépendances :
 ```
 cd Labshop
 npm install
-npm run dev
-
 ```
-Le frontend s'exécutera localement à l'url suivant : http://localhost:5173
-
-## Configuration des variables d'environnement
-### Frontend
-Ayez un fichier .env à la racine du répertoire Labshop/ dans lequel vous collez cette ligne :
+2. Créez un fichier .env à la racine du répertoire Labshop/ dans lequel vous collez l'url de l'API comme variable d'environnement :
 ```
 VITE_API_URL=http://localhost:3000/api
 ```
+3. Exécutez la commande :
+```
+npm run dev
+```
+Le frontend s'exécutera localement au : http://localhost:5173 et l'application sera prête à utiliser.
 
-## Autres captures d'écran 
-### Sur desktop
-<img width="600" height="600" alt="desktop-home" src="https://github.com/user-attachments/assets/5d104af7-5926-415c-9d32-0bea3966a821" />
-<img width="600" height="600" alt="desktop-products-list" src="https://github.com/user-attachments/assets/7d0cbca4-8ebe-4d6a-93e3-30ee93cba84a" />
-<img width="600" height="600" alt="desktop-cart" src="https://github.com/user-attachments/assets/61d75ded-b92c-4ec5-81f5-61b9dfd8d19f" />
-<img width="600" height="600" alt="desktop-checkout" src="https://github.com/user-attachments/assets/f18fbe31-1122-40b8-85c3-2c10a9b37851" />
+## API Documentation
+>POST /orders  
+
+Créer une nouvelle commande  
+
+>GET /products  
+
+Retourner la liste des produits  
+
+>GET /products/:id
+
+Retourner les détails sur un produit spécifique
