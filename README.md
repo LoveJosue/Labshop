@@ -47,27 +47,49 @@ Labshop/
 * Client e-mail : Zoho
 
 ## Installation et exécution locale
+> Attention : Faites l'installation dans l'odre d'apparition des éléments de cette section. ⚠️
 ### Backend
+1. Tout d'abord, exécutez les commandes suivantes pour installer les dépendances:
 ```
 cd Server
 npm install
+```
+2. Installez et démarrez une base de données MongoDB localement en tant que service. L'installation de MongoDB Compass vous permet d'avoir une interface graphique pour visualiser les bases de données créées, les collections et les documents.
+3. Dans ./Server/ ayez un fichier .env à la racine du répertoire dans lequel vous renseignez les variables d'environnement suivantes :
+> Veillez à ajouter le **"/labstore-local"** après le **"mongodb_connection_string"** ⚠️
+```
+# API
+PORT=3000
+
+# DATABASE
+MONGO_URI=mongodb_connection_string/labstore-local
+
+# MAIL SERVER
+SMTP_HOST=smtp_host
+SMTP_PORT=465
+SMTP_USER=email_username
+SMTP_APP_PASS=email_application_password
+```
+4. Lancez maintenant le serveur d'API avec la commande suivante :
+```
 npm run dev
 ```
+
 ### Frontend
+1. À la racine du répertoire de projet, exécutez ces commandes suivantes pour installer les dépendances :
 ```
 cd Labshop
 npm install
-npm run dev
-
 ```
-Le frontend s'exécutera localement à l'url suivant : http://localhost:5173
-
-## Configuration des variables d'environnement
-### Frontend
-Ayez un fichier .env à la racine du répertoire Labshop/ dans lequel vous collez cette ligne :
+2. Créez un fichier .env à la racine du répertoire Labshop/ dans lequel vous collez l'url de l'API comme variable d'environnement :
 ```
 VITE_API_URL=http://localhost:3000/api
 ```
+3. Exécutez la commande :
+```
+npm run dev
+```
+Le frontend s'exécutera localement au : http://localhost:5173 et l'application sera prête à utiliser.f
 
 ## Autres captures d'écran 
 ### Sur desktop
