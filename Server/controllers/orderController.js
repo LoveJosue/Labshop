@@ -1,6 +1,63 @@
 import Order from '../models/orderModel.js';
 import Client from '../models/clientModel.js'
+import nodemailer from 'nodemailer';
+import hbs from "nodemailer-express-handlebars";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT || 465,
+    secure: true,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_APP_PASS,
+    },
+    tls: {
+        rejectUnauthorized: true
+    }
+});
+// Configure handlebars plugin
+const hbsOptions = {
+    viewEngine: {
+        extname: ".hbs",
+        partialsDir: "views",
+        layoutsDir: "views",
+        defaultLayout: "baseMessage",
+        helpers: {
+            isEqual: function (a, b, options) {
+                return (a === b) ? options.fn(this) : options.inverse(this);
+            },
+            isPlural: function (a, options) {
+                return (a > 1) ? options.fn(this) : options.inverse(this);
+            }
+        }
+    },
+    viewPath: "views",
+    extName: ".hbs",
+}
+
+transporter.use('compile', hbs(hbsOptions));
+
+async function sendMail(to, subject, template, mongooseObject) {
+    const context = mongooseObject.toObject();
+    const mailOptions = {
+        from: `"Labstore" <contact@labstore.ca>`,
+        to,
+        subject,
+        template,
+        context
+    }
+    await transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.log('Error: ', err); 
+        } else {
+            console.log('Mail sent!')
+        }
+    });
+}
 
 export async function placeOrder(req, res, next) {
     try {
@@ -8,15 +65,18 @@ export async function placeOrder(req, res, next) {
         const orderClient = order.client;
         const existingClient = await Client.findOne({ email:  orderClient.email});
 
-        if (!existingClient) { 
+        if (!existingClient) {
             const newVisitorClient = await createVisitorClient(orderClient);
             const newOrder = await createOrder(order, newVisitorClient);
+            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', newOrder);
             return res.status(201).json({ orderNumber: newOrder.orderNumber });
         } else {
             const newOrder = await createOrder(order, existingClient);
+            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', newOrder);
             return res.status(201).json({ orderNumber: newOrder.orderNumber });
         }
     } catch (err) {
+        // En cas d'erreur faire un roll back de toutes les transactions faites dans la BD avant
         console.error(err);
         next(err); // Laisser passer à un middlewawe d'erreur
     }
@@ -112,4 +172,3 @@ async function createOrder(order, client) {
     const newOrder = await Order.create(orderData);
     return newOrder;
 }
-
