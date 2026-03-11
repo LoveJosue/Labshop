@@ -3,6 +3,7 @@ import products from './routes/products.js';
 import order from './routes/order.js';
 import express from 'express';
 import logger from './middleware/logger.js'
+import language from './middleware/language.js';
 import cors from 'cors';
 import connectDB from './db.js';
 import mongoose from 'mongoose';
@@ -29,6 +30,7 @@ app.use(express.urlencoded({extended: false}));
 
 // Logger middleware
 app.use(logger);
+app.use(language);
 
 // Routes
 app.use('/api/products', products);

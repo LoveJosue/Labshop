@@ -34,7 +34,7 @@ const orderSchema = new Schema({
         phone: String,
         email: String
     },
-    orderDate: { type: Date, default: Date.now },
+    orderDate: { type: Number },
     statut: { type: String, enum: ["en attente", "payée", "expédiée", "livrée", "annulée"], default: "en attente" },
     payment: {
         cardNumber: String,

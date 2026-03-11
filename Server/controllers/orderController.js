@@ -32,6 +32,19 @@ const hbsOptions = {
             },
             isPlural: function (a, options) {
                 return (a > 1) ? options.fn(this) : options.inverse(this);
+            },
+            getLocalFormattedDate: function(date, options) {
+                const locale = options.data.root.locale || 'fr-TG';
+                let newDate = new Date(date);
+                const formatOptions = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                let formattedDate = newDate.toLocaleDateString(locale, formatOptions);
+                formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+                return formattedDate
             }
         }
     },
