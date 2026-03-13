@@ -99,7 +99,6 @@
                 <!-- COLONE 3 -->
                 <td width="33%" style="padding:10px;">
                   <p style="font-weight:600;margin:0;">Méthode de paiement</p>
-                  <p style="margin:5px 0 0 0;">{{payment.method}}</p>
                   <p style="margin:5px 0 0 0;font-weight:600;">Mastercard</p>
                 </td>
               </tr>
@@ -111,35 +110,47 @@
         </tr>
 
         <!-- ORDER ITEMS -->
+        
         <tr>
           <td style="padding:20px 30px;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0">
               {{#each items}}
-              <tr>
-                <td width="25%" align="center" style="padding:10px;">
-                  <img src="{{this.imgUrl}}" width="100" style="display:block;border:none;" alt="Produit">
-                </td>
-                <td width="50%" style="padding:10px;vertical-align:top;">
-                  <p style="font-weight:700;font-size:15px;margin:0;">{{this.name}}</p>
-                  {{#isEqual purchaseType 1 }}
-                    <p style="margin:3px 0;">En gros</p>
-                    <p style="margin:3px 0;"> Qté : {{this.qte}} carton{{#isPlural this.qte}}s{{/isPlural}}</p>
-                    {{else}}
-                      {{#isEqual purchaseType 2}}
-                        <p style="margin:3px 0;">En détail</p>
-                        <p style="margin:3px 0;"> Qté : {{this.qte}} {{this.unitType}}{{#isPlural this.qte}}s{{/isPlural}}</p>
+                {{#isNotOvered @index}}
+                  <tr>
+                    <td width="25%" align="center" style="padding:10px;">
+                      <img src="{{this.imgUrl}}" width="100" style="display:block;border:none;" alt="Produit">
+                    </td>
+                    <td width="50%" style="padding:10px;vertical-align:top;">
+                      <p style="font-weight:700;font-size:15px;margin:0;">{{this.name}}</p>
+                      {{#isEqual purchaseType 1 }}
+                        <p style="margin:3px 0;">En gros</p>
+                        <p style="margin:3px 0;"> Qté : {{this.qte}} carton{{#isPlural this.qte}}s{{/isPlural}}</p>
+                        {{else}}
+                          {{#isEqual purchaseType 2}}
+                            <p style="margin:3px 0;">En détail</p>
+                            <p style="margin:3px 0;"> Qté : {{this.qte}} {{this.unitType}}{{#isPlural this.qte}}s{{/isPlural}}</p>
+                          {{/isEqual}}
                       {{/isEqual}}
-                  {{/isEqual}}
-                  {{!-- <p style="margin:3px 0;"> Qté : {{this.qte}} {{this.unitType}}{{#isPlural this.qte}}s{{/isPlural}}</p> --}}
-                </td>
-                <td width="25%" align="right" style="padding:10px;vertical-align:top;">
-                  <p style="font-weight:700;font-size:15px;margin:0;">{{this.cost}} FCFA</p>
-                </td>
-              </tr>
+                    </td>
+                    <td width="25%" align="right" style="padding:10px;vertical-align:top;">
+                      <p style="font-weight:700;font-size:15px;margin:0;">{{this.cost}} FCFA</p>
+                    </td>
+                  </tr>
+                {{/isNotOvered}}
               {{/each}}
+              {{#isOvered items}}
+                <tr>
+                  <td colspan="3" style="text-align:center;">
+                    + {{getRemainingItemsCount items}} item{{#isRemainingItemsCountPlural items}}s{{/isRemainingItemsCountPlural}} | 
+                    <span style="display: inline-block; background-color: #f5f5f5; border: 1px solid #e4e4e4; border-radius: 20px; padding: 8px 16px; color: #666; font-size: 13px;"><a style="text-decoration: none;" href="#">Voir plus +</a></span>
+                  </td>
+              </tr>
+              {{/isOvered}}
             </table>
           </td>
         </tr>
+        
+
 
         <!-- BILLING -->
         <tr>

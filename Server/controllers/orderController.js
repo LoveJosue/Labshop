@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const MAIL_ITEMS_LIMIT = 3;
+
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -33,6 +35,15 @@ const hbsOptions = {
             isPlural: function (a, options) {
                 return (a > 1) ? options.fn(this) : options.inverse(this);
             },
+            isOvered: function (array, options) {
+                return (array.length > MAIL_ITEMS_LIMIT) ? options.fn(this) : options.inverse(this);
+            },
+            isNotOvered: function (index, options) {
+                return (index <= MAIL_ITEMS_LIMIT - 1) ? options.fn(this) : options.inverse(this);
+            },
+            getRemainingItemsCount: function(items) {
+                return items.length - MAIL_ITEMS_LIMIT;
+            },
             getLocalFormattedDate: function(date, options) {
                 const locale = options.data.root.locale || 'fr-TG';
                 let newDate = new Date(date);
@@ -45,6 +56,9 @@ const hbsOptions = {
                 let formattedDate = newDate.toLocaleDateString(locale, formatOptions);
                 formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
                 return formattedDate
+            },
+            isRemainingItemsCountPlural: function(items, options) {
+                return (items.length - MAIL_ITEMS_LIMIT > 1) ? options.fn(this) : options.inverse(this);
             }
         }
     },
