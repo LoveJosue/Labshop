@@ -22,14 +22,26 @@
         <!-- MESSAGE -->
         <tr>
           <td align="center" style="padding:15px 30px 10px 30px;">
+          {{#if expedition}}
             <p style="font-size:14px;line-height:1.6;margin:0 0 12px 0;">
               Votre commande est en cours de traitement. Dès son expédition, nous vous enverrons un courriel de confirmation.
             </p>
             <p style="font-size:14px;line-height:1.6;margin:0;">
               Consultez la page du statut de votre commande pour rester informé de tout changement.
             </p>
+            {{else}}
+            <p style="font-size:14px;line-height:1.6;margin:0 0 20px 0;">
+              Votre commande est bien réservée. Nos équipes s'occupent de la mettre de côté.
+            </p>
+            <p style="font-size:14px;line-height:1.6;margin:0 0 20px 0;">
+              Dès qu'elle sera prête à être ramassée, nous vous aviserons par email.
+            </p>
+            <p style="font-size:14px;line-height:1.6;margin:0;">
+              Consultez la page du statut de votre commande pour rester informé de tout changement.
+            </p>
+          {{/if}}          
           </td>
-        </tr>
+        </tr>        
 
         <!-- ORDER INFOS -->
         <tr>
