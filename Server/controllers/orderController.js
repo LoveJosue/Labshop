@@ -44,8 +44,14 @@ const hbsOptions = {
             getRemainingItemsCount: function(items) {
                 return items.length - MAIL_ITEMS_LIMIT;
             },
+            getLocalYear: function(options) {
+                const locale = options.data.root.userLocality;
+                const today = new Date();
+                const thisYear = today.toLocaleDateString(locale, { year: 'numeric'} )
+                return thisYear;
+            },
             getLocalFormattedDate: function(date, options) {
-                const locale = options.data.root.locale || 'fr-TG';
+                const locale = options.data.root.userLocality;
                 let newDate = new Date(date);
                 const formatOptions = {
                     weekday: 'long',
@@ -55,7 +61,7 @@ const hbsOptions = {
                 };
                 let formattedDate = newDate.toLocaleDateString(locale, formatOptions);
                 formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-                return formattedDate
+                return formattedDate;
             },
             isRemainingItemsCountPlural: function(items, options) {
                 return (items.length - MAIL_ITEMS_LIMIT > 1) ? options.fn(this) : options.inverse(this);
@@ -68,38 +74,23 @@ const hbsOptions = {
 
 transporter.use('compile', hbs(hbsOptions));
 
-async function sendMail(to, subject, template, mongooseObject) {
-    const context = mongooseObject.toObject();
-    const mailOptions = {
-        from: `"Labstore" <contact@labstore.ca>`,
-        to,
-        subject,
-        template,
-        context
-    }
-    await transporter.sendMail(mailOptions, (err, info) => {
-        if (err) {
-            console.log('Error: ', err); 
-        } else {
-            console.log('Mail sent!')
-        }
-    });
-}
-
 export async function placeOrder(req, res, next) {
     try {
         const order = req.body;
         const orderClient = order.client;
         const existingClient = await Client.findOne({ email:  orderClient.email});
+        const userLocality = req.headers["accept-language"]?.split(",")[0] || "fr-TG";
 
         if (!existingClient) {
             const newVisitorClient = await createVisitorClient(orderClient);
             const newOrder = await createOrder(order, newVisitorClient);
-            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', newOrder);
+            const context = {...newOrder.toObject(), userLocality: userLocality}
+            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', context);
             return res.status(201).json({ orderNumber: newOrder.orderNumber });
         } else {
             const newOrder = await createOrder(order, existingClient);
-            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', newOrder);
+            const context = {...newOrder.toObject(), userLocality: userLocality}
+            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', context);
             return res.status(201).json({ orderNumber: newOrder.orderNumber });
         }
     } catch (err) {
@@ -117,6 +108,22 @@ async function createVisitorClient(orderClient) {
         dateCreation: Date.now()
     });
     return newClient;
+}
+async function sendMail(to, subject, template, context) {
+    const mailOptions = {
+        from: `"Labstore" <contact@labstore.ca>`,
+        to,
+        subject,
+        template,
+        context
+    }
+    await transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+            console.log('Error: ', err); 
+        } else {
+            console.log('Mail sent!')
+        }
+    });
 }
 async function createOrder(order, client) {
     const orderData = {}; // objet vide que tu remplis graduellement
