@@ -1,4 +1,4 @@
-import {config} from 'dotenv';
+import dotenv from 'dotenv';
 import products from './routes/products.js';
 import order from './routes/order.js';
 import express from 'express';
@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
 
 const port = process.env.PORT || 3000;
 
-config();
+dotenv.config();
 
 const app = express();
 
