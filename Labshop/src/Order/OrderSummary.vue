@@ -65,7 +65,7 @@
                         <p>{{ shippingInfosAvailable ? `${expeditionCosts.toLocaleString('fr-FR')} FCFA` : 'Entrez une adresse de livraison' }}</p>
                     </div>
                     <div v-if="!isExpedition" class="flex-element">
-                        <p>Récupération en boutique</p>
+                        <p>Cueillette en boutique</p>
                         <p>GRATUIT</p>
                     </div>
                     <div v-if="!isExpedition" class="flex-element">

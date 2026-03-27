@@ -1,0 +1,216 @@
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f7f7f7;padding:30px 0;">
+  <tr>
+    <td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border:1px solid #e4e4e4;border-radius:4px;font-family:'Poppins',Arial,sans-serif;color:#333;">
+        <tr>
+          <td align="center">
+              <img src="https://biolabo.nc/wp-content/uploads/2024/08/biolabo3.webp" 
+                   style="display: block;width: 100%;height: 240px;"
+                   alt="Banner"
+              />
+          </td>
+        </tr>
+        <!-- HEADER / BRAND -->
+        <tr>
+          <td align="center" style="padding:30px 20px 10px 20px;">
+            <h1 style="font-size:20px;line-height:1.6;font-weight:700;margin:0;">
+              Merci pour votre commande
+            </h1>
+          </td>
+        </tr>
+
+        <!-- MESSAGE -->
+        <tr>
+          <td align="center" style="padding:15px 30px 10px 30px;">
+          {{#if expedition}}
+            <p style="font-size:14px;line-height:1.6;margin:0 0 12px 0;">
+              Votre commande est en cours de traitement. Dès son expédition, nous vous enverrons un courriel de confirmation.
+            </p>
+            <p style="font-size:14px;line-height:1.6;margin:0;">
+              Consultez la page du statut de votre commande pour rester informé de tout changement.
+            </p>
+            {{else}}
+            <p style="font-size:14px;line-height:1.6;margin:0 0 20px 0;">
+              Votre commande est bien réservée. Nos équipes s'occupent de la mettre de côté.
+            </p>
+            <p style="font-size:14px;line-height:1.6;margin:0 0 20px 0;">
+              Dès qu'elle sera prête à être ramassée, nous vous aviserons par email.
+            </p>
+            <p style="font-size:14px;line-height:1.6;margin:0;">
+              Consultez la page du statut de votre commande pour rester informé de tout changement.
+            </p>
+          {{/if}}          
+          </td>
+        </tr>        
+
+        <!-- ORDER INFOS -->
+        <tr>
+          <td style="padding:20px 30px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f5f5;padding:20px;">
+              
+              <!-- RANGEE 1 -->
+              <tr valign="top">
+
+                <!-- COLONE 1 -->
+                <td width="33%" style="padding:10px;">
+                  <p style="font-weight:600;margin:0;">Numéro de commande</p>
+                  <p style="color:green;font-weight:600;margin:5px 0 0 0;">{{orderNumber}}</p>
+                </td>
+
+                <!-- COLONE 2 -->
+                <td width="33%" style="padding:10px;">
+                  <p style="font-weight:600;margin:0;">Date de commande</p>
+                  <p style="color:green;font-weight:600;margin:5px 0 0 0;">{{getLocalFormattedDate orderDate}}</p>
+                </td>
+
+                <!-- COLONE 3 -->
+                <td width="33%" style="padding:10px;">
+                  <p style="font-weight:600;margin:0;">Mode de récupération</p>
+                  {{#if pickup}}
+                    <p style="color:green;font-weight:600;margin:5px 0 0 0;">Cueillette</p>
+                    {{else}}
+                      {{#if expedition}}
+                        <p style="color:green;font-weight:600;margin:5px 0 0 0;">Livraison</p>
+                      {{/if}}
+                  {{/if}}
+                </td>
+              </tr>
+
+            
+              <!-- RANGEE 2 -->
+              <tr valign="top">
+
+                <!-- COLONE 1 -->
+                <td width="33%" style="padding:10px;">
+                  <p style="font-weight:600;margin:0;">Adresse de facturation</p>
+                  <p style="margin:5px 0 0 0;">{{billing.prename}} {{billing.name}}<br>{{billing.address}}<br>{{billing.city}} {{billing.postalCode}}<br>{{billing.country}}</p>
+                </td>
+
+                <!-- COLONE 2 -->
+                {{#if expedition}} {{!-- IF SHIPPING --}}
+                  <td width="33%" style="padding:10px;">
+                    <p style="font-weight:600;margin:0;">Adresse de livraison</p>
+                    <p style="margin:5px 0 0 0;">{{expedition.prename}} {{expedition.name}}<br>{{expedition.address}}<br>{{expedition.city}} {{expedition.postalCode}}<br>{{expedition.country}}</p>
+                  </td>
+                  {{else}}
+                    {{#if pickup}} {{!-- IF PICKUP --}}
+                      <td width="33%" style="padding:10px;">
+                        <p style="font-weight:600;margin:0;">Lieu de cueillette</p>
+                        <p style="margin:5px 0 0 0;">{{pickup.storeName}}</p>
+                        <p style="margin:5px 0 0 0;">{{pickup.address}}</p>
+                      
+                      {{#if pickup.location.latitude}} {{!-- LOCATION INFOS AVAILABLE --}}
+                        {{#if pickup.location.longitude}}
+                          <p style="margin:5px 0 0 0;text-decoration:underline;font-weight:600;"><a href="https://maps.google.com/?q={{pickup.location.latitude}},{{pickup.location.longitude}}">Voir l'emplacement</a></p>
+                        {{/if}}
+                      {{/if}}
+                      </td>
+                    {{/if}}
+                {{/if }}
+
+                <!-- COLONE 3 -->
+                <td width="33%" style="padding:10px;">
+                  <p style="font-weight:600;margin:0;">Méthode de paiement</p>
+                  <p style="margin:5px 0 0 0;font-weight:600;">Mastercard</p>
+                </td>
+              </tr>
+
+
+
+            </table>
+          </td>
+        </tr>
+
+        <!-- ORDER ITEMS -->
+        
+        <tr>
+          <td style="padding:20px 30px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              {{#each items}}
+                {{#isNotOvered @index}}
+                  <tr>
+                    <td width="25%" align="center" style="padding:10px;">
+                      <img src="{{this.imgUrl}}" width="100" style="display:block;border:none;" alt="Produit">
+                    </td>
+                    <td width="50%" style="padding:10px;vertical-align:top;">
+                      <p style="font-weight:700;font-size:15px;margin:0;">{{this.name}}</p>
+                      {{#isEqual purchaseType 1 }}
+                        <p style="margin:3px 0;">En gros</p>
+                        <p style="margin:3px 0;"> Qté : {{this.qte}} carton{{#isPlural this.qte}}s{{/isPlural}}</p>
+                        {{else}}
+                          {{#isEqual purchaseType 2}}
+                            <p style="margin:3px 0;">En détail</p>
+                            <p style="margin:3px 0;"> Qté : {{this.qte}} {{this.unitType}}{{#isPlural this.qte}}s{{/isPlural}}</p>
+                          {{/isEqual}}
+                      {{/isEqual}}
+                    </td>
+                    <td width="25%" align="right" style="padding:10px;vertical-align:top;">
+                      <p style="font-weight:700;font-size:15px;margin:0;">{{this.cost}} FCFA</p>
+                    </td>
+                  </tr>
+                {{/isNotOvered}}
+              {{/each}}
+              {{#isOvered items}}
+                <tr>
+                  <td colspan="3" style="text-align:center;">
+                    + {{getRemainingItemsCount items}} item{{#isRemainingItemsCountPlural items}}s{{/isRemainingItemsCountPlural}} | 
+                    <span style="display: inline-block; background-color: #f5f5f5; border: 1px solid #e4e4e4; border-radius: 20px; padding: 8px 16px; color: #666; font-size: 13px;"><a style="text-decoration: none;" href="#">Voir plus +</a></span>
+                  </td>
+              </tr>
+              {{/isOvered}}
+            </table>
+          </td>
+        </tr>
+        
+
+
+        <!-- BILLING -->
+        <tr>
+          <td style="padding:20px 30px;border-top:1px solid #e4e4e4;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="left" style="font-weight:600;">Sous-total</td>
+                <td align="right">{{subTotal}} FCFA</td>
+              </tr>
+              {{#if pickup}}
+                <tr>
+                  <td align="left" style="font-weight:600;">Cueillette en boutique</td>
+                  <td align="right">GRATUIT</td>
+                </tr>
+                {{else}}
+                  {{#if expedition}}
+                    <tr>
+                      <td align="left" style="font-weight:600;">Livraison</td>
+                      <td align="right">{{expeditionCosts}} FCFA</td>
+                    </tr>
+                  {{/if}}
+              {{/if}}
+              <tr>
+                <td align="left" style="font-weight:600;">Taxes</td>
+                <td align="right">{{tva}} FCFA</td>
+              </tr>
+              <tr>
+                <td align="left" style="font-weight:800;padding-top:10px;">Total</td>
+                <td align="right" style="font-weight:800;padding-top:10px;">{{totalWithTVA}} FCFA</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <!-- BOUTON CENTRÉ -->
+          <tr>
+            <td align="center">
+              <p style="background-color:#111;color:#ffffff !important;padding:10px 12px; width:fit-content;">
+                <a href="#"
+                  style="text-decoration:none;display:block;cursor:pointer;font-weight:700;color:#ffffff !important; padding:10px 30px;">
+                  Statut de la commande
+                </a>
+              </p>
+            </td>
+          </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
