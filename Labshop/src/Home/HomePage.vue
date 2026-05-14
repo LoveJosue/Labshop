@@ -4,7 +4,7 @@
         <section class="hero">
           <h2>Bienvenu sur LabStore</h2>
           <p>L'endroit idéal pour tout matériel de laboratoire dont vous avez besoin.</p>
-          <Button label="Commencer" class="p-button-raised p-button-primary" @click="goToProducts"></Button>
+          <button class="btn-primary" @click="goToProducts">Commencer</button>
         </section>
 
 
@@ -51,8 +51,6 @@
   import { ref } from 'vue';
   import { CCarousel, CCarouselItem } from '@coreui/vue'
   import { useRouter } from 'vue-router';
-
-  import Button from 'primevue/button';
 
   const router = useRouter();
 
@@ -112,6 +110,22 @@
 
   .caption-info {
     font-weight:bold;
+  }
+
+  .btn-primary {
+    background-color: var(--primaryColor);
+    border: 1px solid var(--primaryColor);
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    transition: opacity 0.2s ease;
+  }
+  .btn-primary:hover {
+    opacity: 0.8;
   }
   </style>
   

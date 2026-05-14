@@ -1,10 +1,9 @@
 :root {
     --bg: #ffffff;
-    --text: #314b6b;
     --gray: #0f46c6;
     --lightgray: #e5e5e5;
     --blue: #2f79ce;
-    --primaryColor : #007bff;
+    --primaryColor : rgb(18, 24, 29);
     --orderPageBackBgColor: rgb(237, 237, 237);
 
     /* Profil avatar */
