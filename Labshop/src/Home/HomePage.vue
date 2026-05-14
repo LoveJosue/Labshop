@@ -2,7 +2,7 @@
   <div class="homepage">
       <main> 
         <section class="hero">
-          <h2>Bienvenu sur LabStore</h2>
+          <h2>Bienvenu sur Labstore</h2>
           <p>L'endroit idéal pour tout matériel de laboratoire dont vous avez besoin.</p>
           <button class="btn-primary" @click="goToProducts">Commencer</button>
         </section>
