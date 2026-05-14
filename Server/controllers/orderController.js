@@ -41,6 +41,9 @@ const hbsOptions = {
             isNotOvered: function (index, options) {
                 return (index <= MAIL_ITEMS_LIMIT - 1) ? options.fn(this) : options.inverse(this);
             },
+            isRemainingItemsCountPlural: function(items, options) {
+                return (items.length - MAIL_ITEMS_LIMIT > 1) ? options.fn(this) : options.inverse(this);
+            },
             getRemainingItemsCount: function(items) {
                 return items.length - MAIL_ITEMS_LIMIT;
             },
@@ -49,6 +52,12 @@ const hbsOptions = {
                 const today = new Date();
                 const thisYear = today.toLocaleDateString(locale, { year: 'numeric'} )
                 return thisYear;
+            },
+            getOrderURLPath: function(options) {
+                const homaPagePath = process.env.HOME_PAGE_URL;
+                const orderNumber = options.data.root.orderNumber;
+                const endPoint = 'checkOrder';
+                return `${homaPagePath}/${endPoint}/${orderNumber}`;
             },
             getLocalFormattedDate: function(date, options) {
                 const locale = options.data.root.userLocality;
@@ -63,9 +72,6 @@ const hbsOptions = {
                 formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
                 return formattedDate;
             },
-            isRemainingItemsCountPlural: function(items, options) {
-                return (items.length - MAIL_ITEMS_LIMIT > 1) ? options.fn(this) : options.inverse(this);
-            }
         }
     },
     viewPath: "views",
@@ -205,4 +211,7 @@ async function createOrder(order, client) {
 
     const newOrder = await Order.create(orderData);
     return newOrder;
+}
+
+export async function getOrderByNumber(req, res, next) {
 }

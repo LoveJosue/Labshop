@@ -28,7 +28,7 @@
 .accordion button:hover, 
 .accordion button:focus {
     cursor: pointer;
-    color: var(--blue);
+    color: var(--primaryColor);
 }
 
 .accordion button .accordion-title {
@@ -42,7 +42,7 @@
     right: 0;
 }
 .accordion .accordion-itm button[aria-expanded = 'true'] {
-    color: var(--blue);
+    color: var(--primaryColor);
 }
 .accordion .accordion-itm button[aria-expanded = 'true'] + .content {
     opacity: 1;

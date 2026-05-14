@@ -239,8 +239,7 @@ onMounted(() => {
 }
 .checkout-btn {
     width: 100%;
-    /* background: linear-gradient(to right, #10b981, #059669); */
-    background: linear-gradient(to right, #339dff, #007bff);
+    background-color: var(--primaryColor);
     color: white;
     padding: 0.75rem;
     font-size: 1rem;
@@ -248,12 +247,15 @@ onMounted(() => {
     border-radius: 0.75rem;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: background-color 0.25s ease, transform 0.2s ease;
 }
 .checkout-btn:hover {
+    background-color: #333;
     transform: scale(1.02);
-    /* background: linear-gradient(to right, #059669, #047857); */
-    background: linear-gradient(to right, #007bff, #0062cc)
+}
+.checkout-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.3);
 }
 
 /* .overlay {

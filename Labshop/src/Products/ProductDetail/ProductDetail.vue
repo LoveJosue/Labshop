@@ -616,8 +616,8 @@ h2 {
 .select-item-1-active,
 .select-item-2-active {
   background-color: white;
-  border-bottom: 2px solid #007bff;
-  color: #007bff;
+  border-bottom: 2px solid var(--primaryColor);
+  color: var(--primaryColor);
   font-weight: 600;
 }
 .select-content {
@@ -647,34 +647,37 @@ h2 {
 .form_group_elem {
     text-align: center;
     align-content: center;
-    border: 1px solid black;
     cursor: pointer;
     width: 100%;
     height: 50px;
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+    outline: none;
 }
 .add_to_card {
     position: static;
-    background-color: #007bff;
+    background-color: var(--primaryColor);
+    border: 1px solid var(--primaryColor);
     font-size: 1rem;
     color: white;
     text-align: center;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
     padding: 14px;
     cursor: pointer;
     font-weight: 300;
+    outline: none;
 }
-
 .add_to_card:hover {
-    background-color: rgb(2, 111, 228);
+    background-color: #333;
 }
 .available_btn {
     font-weight: 300;
 }
 .available_btn:hover {
-    background-color: rgba(0, 0, 0, 0.9);
-    color: white;
-    font-weight: 300;
-    transition: background-color 0.3s ease;
+    border: 1px solid var(--primaryColor);
+    transition: all 0.15s ease-out;
+}
+.available_btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.3);
 }
 .input-box {
     border: 1px solid lightgray;
@@ -843,7 +846,7 @@ h2 {
         align-content: center;
     }
     .add_to_card:hover {
-        background-color: rgb(2, 111, 228);
+        background-color: #333;
     }
     .product-details {
         /* padding: 0; */

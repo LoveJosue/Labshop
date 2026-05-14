@@ -10,6 +10,9 @@ import HomePage from './Home/HomePage.vue';
 import ProductsPage from './Products/ProductsPage.vue';
 import ProductDetail from './Products/ProductDetail/ProductDetail.vue';
 import Order from './Order/Order.vue';
+import OrderState from './Order/OrderState.vue';
+import About from './Components/About.vue';
+import NotFound from './Components/NotFound.vue';
 
 import './assets/css/variables.css'
 import './assets/css/index.css'
@@ -20,9 +23,12 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         { path: '/', component:  HomePage },
+        { path: '/about', component: About},
         { path: '/products', component:  ProductsPage },
         { path: '/products/:id', component: ProductDetail },
-        { path: '/order', name: 'order', component: Order }
+        { path: '/order', name: 'order', component: Order },
+        { path: '/checkOrder/:orderNumber', component: OrderState },
+        { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
     ]
 })
 const app = createApp(App)

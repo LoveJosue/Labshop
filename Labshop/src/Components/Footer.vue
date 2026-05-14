@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-gray-900 text-gray-300 py-12 mt-12">
+  <footer class="text-gray-300 py-12 footer-primary">
     <div class="ctn">
       <!-- TOP : logo + description -->
       <div class="top">
@@ -18,8 +18,6 @@
             <li><RouterLink to="/">Accueil</RouterLink></li>
             <li><RouterLink to="/products">Produits</RouterLink></li>
             <li><RouterLink to="/about">À propos</RouterLink></li>
-            <li><RouterLink to="/contact">Contact</RouterLink></li>
-            <li><RouterLink to="/faq">FAQ / Aide</RouterLink></li>
           </ul>
         </div>
 
@@ -28,8 +26,7 @@
           <h3>Compte utilisateur</h3>
           <ul>
             <li><RouterLink to="/login">Connexion / inscription</RouterLink></li>
-            <li><RouterLink to="/mes-commandes">Historique des commandes</RouterLink></li>
-            <li><RouterLink to="/wishlist">Wishlist</RouterLink></li>
+            <li><RouterLink to="/mes-commandes">Suivi des commandes</RouterLink></li>
           </ul>
         </div>
 
@@ -47,10 +44,10 @@
           <h3>Méthodes de paiement</h3>
           <div class="payments">
             <img src="@/images/payments/mastercard.png" alt="Mastercard" />
-            <img src="@/images/payments/visa.png" alt="Visa" />
+            <!-- <img src="@/images/payments/visa.png" alt="Visa" />
             <img src="@/images/payments/applepay.png" alt="Apple Pay" />
             <img src="@/images/payments/tmoney.png" alt="TMoney" />
-            <img src="@/images/payments/flooz.png" alt="Flooz" />
+            <img src="@/images/payments/flooz.png" alt="Flooz" /> -->
           </div>
         </div>
 
@@ -82,6 +79,10 @@ const currentYear = new Date().getFullYear();
 </script>
 
 <style scoped>
+.footer-primary {
+  background-color: var(--primaryColor);
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -151,8 +152,8 @@ footer * {
 
 .payments img {
   height: 36px;
-  background: #fff;           /* fond blanc pour contraste */
-  border-radius: 8px;         /* coins arrondis */
+  background: #fff;
+  border-radius: 8px;
   padding: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
