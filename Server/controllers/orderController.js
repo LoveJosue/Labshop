@@ -86,17 +86,22 @@ export async function placeOrder(req, res, next) {
         const orderClient = order.client;
         const existingClient = await Client.findOne({ email:  orderClient.email});
         const userLocality = req.headers["accept-language"]?.split(",")[0] || "fr-TG";
+        const mailTemplate = 'orderConfirmationMail';
 
         if (!existingClient) {
             const newVisitorClient = await createVisitorClient(orderClient);
             const newOrder = await createOrder(order, newVisitorClient);
             const context = {...newOrder.toObject(), userLocality: userLocality}
-            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', context);
+            const email = context.clientInfos.email;
+            const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
+            await sendMail(email, mailObject, mailTemplate, context);
             return res.status(201).json({ orderNumber: newOrder.orderNumber });
         } else {
             const newOrder = await createOrder(order, existingClient);
             const context = {...newOrder.toObject(), userLocality: userLocality}
-            await sendMail('josue.avlah@outlook.com', `Confirmation de votre commande ${newOrder.orderNumber}`, 'orderConfirmationMail', context);
+            const email = context.clientInfos.email;
+            const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
+            await sendMail(email, mailObject, mailTemplate, context);
             return res.status(201).json({ orderNumber: newOrder.orderNumber });
         }
     } catch (err) {
@@ -214,4 +219,16 @@ async function createOrder(order, client) {
 }
 
 export async function getOrderByNumber(req, res, next) {
+    try {
+        const { orderNumber } = req.params;
+        const order = await Order.findOne({ orderNumber });
+        if (!order) {
+            return res.status(404).json({ message: 'Commande introuvable' });
+        }
+        const { payment, ...safeOrder } = order.toObject();
+        return res.status(200).json(safeOrder);
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
 }
