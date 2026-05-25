@@ -12,7 +12,14 @@
             <li><router-link to="/about">À propos</router-link></li>
           </ul>
           <div class="icons">
-            <img src="@/images/user-empty.svg">
+            <div class="user-icon" @click="onUserClick">
+              <img :src="isLoggedIn ? userFull : userEmpty" alt="Mon compte">
+              <div v-if="isLoggedIn && isUserMenuOpen" class="user-menu" @click.stop>
+                <p class="hello">Bonjour {{ user?.prename || 'client' }}</p>
+                <button @click="goToAccount">Mon compte</button>
+                <button @click="handleLogout">Déconnexion</button>
+              </div>
+            </div>
             <img src="@/images/heart-empty.svg">
             <img v-if="isCartEmpty" src="@/images/shop-bag-empty.svg" @click="toggleCart()">
             <div v-else  class="full-shop-bag">
@@ -44,15 +51,21 @@
           </svg>
         </div>
         <div v-if="isSideBarVisible === true" class="overlay" @click="toggleSideBar()"></div>
+
+        <AuthModal :is-open="isAuthOpen" @close="isAuthOpen = false" />
     </div>
 </template>
 
 <script setup>
 import Cart from './Cart.vue';
 import SlideTransition from './Transition/SlideTransition.vue';
+import AuthModal from '../Auth/AuthModal.vue';
+import userEmpty from '@/images/user-empty.svg';
+import userFull from '@/images/user-full.svg';
 
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuth } from '../stores/useAuth.js';
 
 const ONE_SEC = 1000;
 
@@ -65,6 +78,28 @@ const itemsQtySum = ref(0);
 let intervalID;
 
 const screenWidth = ref(window.innerWidth);
+
+// Auth — état réactif partagé via le composable
+const { user, isLoggedIn, logout } = useAuth();
+const isAuthOpen = ref(false);
+const isUserMenuOpen = ref(false);
+
+const onUserClick = () => {
+  if (isLoggedIn.value) {
+    isUserMenuOpen.value = !isUserMenuOpen.value;
+  } else {
+    isAuthOpen.value = true;
+  }
+};
+const goToAccount = () => {
+  isUserMenuOpen.value = false;
+  router.push('/'); // page /account ajoutée en Phase 3
+};
+const handleLogout = async () => {
+  isUserMenuOpen.value = false;
+  await logout();
+  router.push('/');
+};
 
 const goToHomePage = () => {
   router.push('/')
@@ -193,6 +228,43 @@ onUnmounted(() => {
 }
 .icons .menu {
   display: none;
+}
+.user-icon {
+  position: relative;
+  cursor: pointer;
+}
+.user-menu {
+  position: absolute;
+  top: 2rem;
+  right: 0;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  min-width: 180px;
+  z-index: 3;
+}
+.user-menu .hello {
+  margin: 0 0 0.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+.user-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #333;
+}
+.user-menu button:hover {
+  background: #f5f5f5;
 }
 .full-shop-bag {
   position: relative;

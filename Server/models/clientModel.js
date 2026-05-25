@@ -5,8 +5,8 @@ const clientSchema = new Schema({
     name: String,
     prename: String,
     phone: String,
-    email: { type: String, unique: true, required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    email: { type: String, unique: true, required: true, lowercase: true, trim: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', default: null },
     dateCreation: { type: Date, default: Date.now }
 });
 
