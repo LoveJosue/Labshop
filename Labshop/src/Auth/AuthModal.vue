@@ -4,7 +4,7 @@
             <div class="auth-modal" role="dialog" aria-modal="true">
                 <button class="close-btn" @click="close" aria-label="Fermer">✕</button>
                 <h2 class="logo-title">Labstore</h2>
-                <h3>{{ mode === 'login' ? 'Content de vous revoir' : 'Créer votre compte' }}</h3>
+                <h4>{{ mode === 'login' ? 'Connexion' : 'Créer votre compte' }}</h4>
 
                 <form @submit.prevent="submit">
                     <template v-if="mode === 'register'">
@@ -117,9 +117,12 @@ async function submit() {
 
 <style scoped>
 .auth-overlay {
-    position: fixed; inset: 0;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100lvh;
     background: rgba(17, 24, 39, 0.5);
-    display: flex; align-items: center; justify-content: center;
     z-index: 10;
 }
 .auth-modal {
@@ -129,13 +132,16 @@ async function submit() {
     width: min(420px, 92vw);
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     position: relative;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
 }
 .close-btn {
     position: absolute; top: 12px; right: 12px;
     background: none; border: 0; font-size: 1.1rem; cursor: pointer;
 }
 .logo-title { text-align: center; margin: 0 0 0.25rem; }
-h3 { text-align: center; font-weight: 400; margin: 0 0 1.5rem; color: #555; }
+h4 { text-align: center; font-weight: 400; margin: 0 0 1.5rem; color: #555;}
 label { display: block; margin-bottom: 1rem; font-size: 0.85rem; color: #555; }
 input {
     display: block; width: 100%; padding: 0.6rem; margin-top: 0.25rem;
