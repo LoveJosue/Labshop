@@ -4,5 +4,6 @@ import * as orderController from '../controllers/orderController.js';
 const router = express.Router();
 
 router.post('/', orderController.placeOrder);
+router.get('/:orderNumber', orderController.getOrderByNumber);
 
 export default router;
