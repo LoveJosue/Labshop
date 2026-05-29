@@ -27,7 +27,7 @@ const orderSchema = new Schema({
             return `CMD-${date}-${id}`;
         }
     },
-    clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
+    clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'client', required: true },
     clientInfos: {
         name: String,
         prename: String,

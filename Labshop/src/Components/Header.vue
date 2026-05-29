@@ -1,7 +1,6 @@
 <template>
   <div class="ctn">
         <div class="nav">
-          <!-- <h4 class="logo"><router-link to="/">Labstore</router-link></h4> -->
            <div class="logo-ctn">
             <img class="logo" src="@/images/logo-1.svg" @click="goToHomePage"/>
             <img class="logo" src="@/images/logo-2.svg" @click="goToHomePage"/>
@@ -12,7 +11,14 @@
             <li><router-link to="/about">À propos</router-link></li>
           </ul>
           <div class="icons">
-            <img src="@/images/user-empty.svg">
+            <div class="user-icon" @click="onUserClick()">
+              <img :src="isLoggedIn ? userFull : userEmpty" alt="Mon compte">
+              <div v-if="isLoggedIn && isUserMenuOpened" class="user-menu" @click.stop>
+                <p class="hello">Bonjour {{ user?.prename || 'client' }}</p>
+                <button @click="">Mon compte</button>
+                <button @click="">Déconnexion</button>
+              </div>
+            </div>
             <img src="@/images/heart-empty.svg">
             <img v-if="isCartEmpty" src="@/images/shop-bag-empty.svg" @click="toggleCart()">
             <div v-else  class="full-shop-bag">
@@ -24,6 +30,8 @@
             <img class="menu" src="@/images/menu.svg" alt="" @click="toggleSideBar()">
           </div>
         </div>
+        
+        <AuthModal :isOpen="isAuthModalOpened" @close="isAuthModalOpened = false"/>
         
         <SlideTransition>
           <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
@@ -50,14 +58,25 @@
 <script setup>
 import Cart from './Cart.vue';
 import SlideTransition from './Transition/SlideTransition.vue';
+import AuthModal from '@/Auth/AuthModal.vue';
+import userFull from '@/images/user-full.svg';
+import userEmpty from '@/images/user-empty.svg';
 
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { watch } from 'vue';
+import { useAuth } from '@/stores/useAuth';
+
 
 const ONE_SEC = 1000;
 
 const router = useRouter();
+const route = useRoute();
 
+const { user, isLoggedIn, login, logout } = useAuth();
+
+const isAuthModalOpened = ref(false);
+const isUserMenuOpened = ref(false);
 const isCardOpen = ref(false);
 const isSideBarVisible = ref(false);
 const isCartEmpty = ref(true);
@@ -74,6 +93,10 @@ const toggleCart = () => {
 }
 const toggleSideBar = () => {
   isSideBarVisible.value = !isSideBarVisible.value;
+}
+const onUserClick = () => {
+  isAuthModalOpened.value = !isLoggedIn.value;
+  if (isLoggedIn.value) isUserMenuOpened.value = !isUserMenuOpened.value;
 }
 const updateWidth = () => {
   const SM_SCREEN_WIDTH = 640;
@@ -92,6 +115,14 @@ const updateItemsQtySum = (cart) => {
   cart.forEach((item) => { qtySum += item.qte });
   itemsQtySum.value = qtySum;
 }
+const closeUserMenu = () => {
+  if (isLoggedIn.value && isUserMenuOpened.value) isUserMenuOpened.value = false;
+}
+
+watch(route, (to, from) => {
+  closeUserMenu();
+});
+
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
   checkCart(); // Vérifie au montage
@@ -193,6 +224,44 @@ onUnmounted(() => {
 }
 .icons .menu {
   display: none;
+}
+.user-icon {
+  position: relative;
+  cursor: pointer;
+}
+.user-menu {
+  position: absolute;
+  top: 2rem;
+  right: 0;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  min-width: 180px;
+  z-index: 3;
+}
+.user-menu .hello {
+  margin: 0 0 0.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  cursor: default;
+}
+.user-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #333;
+}
+.user-menu button:hover {
+  background: #f5f5f5;
 }
 .full-shop-bag {
   position: relative;

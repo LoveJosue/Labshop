@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import products from './routes/products.js';
 import order from './routes/order.js';
+import auth from './routes/auth.js'
 import express from 'express';
 import logger from './middleware/logger.js'
 import cors from 'cors';
@@ -33,6 +34,7 @@ app.use(logger);
 // Routes
 app.use('/api/products', products);
 app.use('/api/order', order);
+app.use('/api/auth', auth);
 
 // Middleware d'erreur global
 app.use((err, req, res, next) => {
