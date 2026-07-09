@@ -54,7 +54,7 @@ const hbsOptions = {
                 return thisYear;
             },
             getOrderURLPath: function(options) {
-                const homaPagePath = process.env.HOME_PAGE_URL;
+                const homaPagePath = process.env.FRONT_END_URL;
                 const orderNumber = options.data.root.orderNumber;
                 const endPoint = 'checkOrder';
                 return `${homaPagePath}/${endPoint}/${orderNumber}`;
@@ -84,26 +84,22 @@ export async function placeOrder(req, res, next) {
     try {
         const order = req.body;
         const orderClient = order.client;
-        const existingClient = await Client.findOne({ email:  orderClient.email});
         const userLocality = req.headers["accept-language"]?.split(",")[0] || "fr-TG";
         const mailTemplate = 'orderConfirmationMail';
 
-        if (!existingClient) {
-            const newVisitorClient = await createVisitorClient(orderClient);
-            const newOrder = await createOrder(order, newVisitorClient);
-            const context = {...newOrder.toObject(), userLocality: userLocality}
-            const email = context.clientInfos.email;
-            const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
-            await sendMail(email, mailObject, mailTemplate, context);
-            return res.status(201).json({ orderNumber: newOrder.orderNumber });
-        } else {
-            const newOrder = await createOrder(order, existingClient);
-            const context = {...newOrder.toObject(), userLocality: userLocality}
-            const email = context.clientInfos.email;
-            const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
-            await sendMail(email, mailObject, mailTemplate, context);
-            return res.status(201).json({ orderNumber: newOrder.orderNumber });
+        // Client rattaché : compte connecté > client existant (par email) > nouveau client visiteur
+        let client = req.user?.clientId
+            ?? await Client.findOne({ email: orderClient.email });
+        if (!client) {
+            client = await createVisitorClient(orderClient);
         }
+
+        const newOrder = await createOrder(order, client);
+        const context = {...newOrder.toObject(), userLocality: userLocality}
+        const email = context.clientInfos.email;
+        const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
+        await sendMail(email, mailObject, mailTemplate, context);
+        return res.status(201).json({ orderNumber: newOrder.orderNumber });
     } catch (err) {
         // En cas d'erreur faire un roll back de toutes les transactions faites dans la BD avant
         console.error(err);
@@ -227,6 +223,21 @@ export async function getOrderByNumber(req, res, next) {
         }
         const { payment, ...safeOrder } = order.toObject();
         return res.status(200).json(safeOrder);
+    } catch (err) {
+        console.error(err);
+        next(err);
+    }
+}
+
+// GET /api/orders — commandes du client connecté (nécessite requireAuth)
+export async function getMyOrders(req, res, next) {
+    try {
+        const clientId = req.user.clientId?._id ?? req.user.clientId;
+        const orders = await Order.find({ clientId })
+            .sort({ orderDate: -1 })
+            .select('-payment')
+            .lean();
+        return res.status(200).json(orders);
     } catch (err) {
         console.error(err);
         next(err);

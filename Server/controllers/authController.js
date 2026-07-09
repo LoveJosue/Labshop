@@ -1,8 +1,19 @@
 import User from '../models/userModel.js';
 import Client from '../models/clientModel.js';
+import jwt from 'jsonwebtoken';
+import { COOKIE_NAME, COOKIE_OPTIONS } from '../middleware/auth.js';
 
 const GENERIC_AUTH_ERROR = 'Email ou mot de passe incorrect.';
 
+function signToken(user) {
+    return jwt.sign(
+        { sub: user._id.toString(), role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+}
+
+// Forme publique sûre - pas de données sensibles ni de tokens.
 function publicUser(user) {
     const client = user.clientId;
     return {
@@ -24,6 +35,7 @@ export async function login(req, res, next) {
         if (!user || !(await user.comparePassword(password))) {
             return res.status(401).json({ error : GENERIC_AUTH_ERROR });
         }
+        res.cookie(COOKIE_NAME, signToken(user), COOKIE_OPTIONS)
         return res.json({ user: publicUser(user) });
     } catch(error) {
         next(error);
@@ -66,4 +78,16 @@ export async function register(req, res, next) {
     } catch(error) {
         next(error);
     }
+}
+
+// POST /api/auth/logout
+export function logout(_req, res) {
+    res.clearCookie(COOKIE_NAME, { ...COOKIE_OPTIONS, maxAge: undefined });
+    return res.json({ ok: true });
+}
+
+// GET /api/auth/me
+export function me(req, res) {
+    if (!req.user) return res.json({ user: null });
+    return res.json({ user: publicUser(req.user) });
 }

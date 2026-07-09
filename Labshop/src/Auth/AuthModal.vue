@@ -66,6 +66,8 @@
 import { ref, reactive, watch } from 'vue';
 import { useAuth } from '../stores/useAuth.js';
 
+const GLOBAL_ERROR_MESSAGE = "Une erreur est survenue";
+
 const props = defineProps({
     isOpen: Boolean,
     initialMode: { type: String, default: 'login' }, // 'login' | 'register'
@@ -110,7 +112,7 @@ async function submit() {
         emit('success');
         close();
     } catch (e) {
-        error.value = e.message || 'Une erreur est survenue.';
+        error.value = GLOBAL_ERROR_MESSAGE;
     } finally {
         loading.value = false;
     }

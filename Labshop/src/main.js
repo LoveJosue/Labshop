@@ -11,6 +11,8 @@ import ProductsPage from './Products/ProductsPage.vue';
 import ProductDetail from './Products/ProductDetail/ProductDetail.vue';
 import Order from './Order/Order.vue';
 import OrderState from './Order/OrderState.vue';
+import MyOrders from './Order/MyOrders.vue';
+import TrackOrder from './Order/TrackOrder.vue';
 import About from './Components/About.vue';
 import NotFound from './Components/NotFound.vue';
 
@@ -27,7 +29,9 @@ const router = createRouter({
         { path: '/products', component:  ProductsPage },
         { path: '/products/:id', component: ProductDetail },
         { path: '/order', name: 'order', component: Order },
+        { path: '/checkOrder', name: 'track-order', component: TrackOrder },
         { path: '/checkOrder/:orderNumber', component: OrderState },
+        { path: '/myOrders', name: 'myOrders', component: MyOrders },
         { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
     ]
 })

@@ -17,16 +17,9 @@
           <ul>
             <li><RouterLink to="/">Accueil</RouterLink></li>
             <li><RouterLink to="/products">Produits</RouterLink></li>
-            <li><RouterLink to="/about">À propos</RouterLink></li>
-          </ul>
-        </div>
+            <li v-if="isLoggedIn"><RouterLink to="/myOrders">Mes commandes</RouterLink></li>
+            <li v-else><RouterLink to="/checkOrder">Suivi des commandes</RouterLink></li>
 
-        <!-- Compte utilisateur -->
-        <div>
-          <h3>Compte utilisateur</h3>
-          <ul>
-            <li><RouterLink to="/login">Connexion / inscription</RouterLink></li>
-            <li><RouterLink to="/mes-commandes">Suivi des commandes</RouterLink></li>
           </ul>
         </div>
 
@@ -34,6 +27,7 @@
         <div>
           <h3>À propos de Labstore</h3>
           <ul>
+            <li><RouterLink to="/about">À propos</RouterLink></li>
             <li>Adresse : Lomé, TG</li>
             <li>Téléphone : +228 90 08 85 22</li>
           </ul>
@@ -75,6 +69,8 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
+import { useAuth } from "@/stores/useAuth";
+const { isLoggedIn } = useAuth();
 const currentYear = new Date().getFullYear();
 </script>
 
