@@ -63,7 +63,6 @@ const fetchOrders = async () => {
     try {
         const { data } = await axios.get(`${apiUrl}/orders`, { withCredentials: true });
         orders.value = data;
-        console.log('Orders : ', orders.value);
     } catch (err) {
         error.value = true;
     } finally {
