@@ -15,8 +15,8 @@
               <img :src="isLoggedIn ? userFull : userEmpty" alt="Mon compte">
               <div v-if="isLoggedIn && isUserMenuOpened" class="user-menu" @click.stop>
                 <p class="hello">Bonjour {{ user?.prename || 'client' }}</p>
-                <button @click="">Mon compte</button>
-                <button @click="">Déconnexion</button>
+                <button @click="goToAccount()">Mon compte</button>
+                <button @click="onLogout()">Déconnexion</button>
               </div>
             </div>
             <img src="@/images/heart-empty.svg">
@@ -117,6 +117,18 @@ const updateItemsQtySum = (cart) => {
 }
 const closeUserMenu = () => {
   if (isLoggedIn.value && isUserMenuOpened.value) isUserMenuOpened.value = false;
+}
+const goToAccount = () => {
+  isUserMenuOpened.value = false;
+  router.push({ name: 'account-orders' });
+}
+const onLogout = async () => {
+  try {
+    await logout();
+  } finally {
+    router.push('/');
+    isUserMenuOpened.value = false;
+  }
 }
 
 watch(route, (to, from) => {

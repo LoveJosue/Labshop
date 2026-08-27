@@ -10,6 +10,7 @@ const userSchema = new Schema({
     password: { type: String, required: true, select: false },
     role:     { type: String, enum: ['client', 'admin'], default: 'client' },
     clientId: { type: Schema.Types.ObjectId, ref: 'client', required: true },
+    tokenVersion: { type: Number, default: 0 }, // incrémenté pour révoquer les sessions
     signUpDate: { type: Date, default: Date.now }
 });
 

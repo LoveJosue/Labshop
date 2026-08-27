@@ -21,9 +21,9 @@ export async function optionalAuth(req, _res, next) {
     const token = readToken(req);
     if (!token) return next();
     try {
-        const playload = await jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(playload.sub).populate('clientId');
-        if (user) req.user = user;
+        const payload = await jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(payload.sub).populate('clientId');
+        if (user && payload.ver === user.tokenVersion) req.user = user;
     } catch {
         // Token invalide ou expiré. On reste anonyme.
     }
@@ -35,9 +35,11 @@ export async function requireAuth(req, res, next) {
     const token = readToken(req);
     if (!token) return res.status(401).json({ error: 'Authentification requise.' });
     try {
-        const playload = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(playload.sub).populate('clientId');
-        if (!user) return res.status(401).json({ error: 'Session invalide.' });
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(payload.sub).populate('clientId');
+        if (!user || payload.ver !== user.tokenVersion) {
+            return res.status(401).json({ error: 'Session invalide.' });
+        }
         req.user = user;
         next();
     } catch {
