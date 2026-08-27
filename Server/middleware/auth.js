@@ -5,10 +5,13 @@ export const COOKIE_NAME = 'labstore_token';
 
 const isProd = process.env.NODE_ENV === 'production';
 
+// Le front (www.labstore.ca) et l'API (api.labstore.ca) partagent le même domaine
+// enregistrable : le cookie est first-party, donc 'lax' suffit. Surtout, on évite
+// 'none', qui fait du cookie un cookie tiers — bloqué par défaut par Safari (ITP).
 export const COOKIE_OPTIONS = {
     httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'none' : 'lax',
+    secure: isProd, // en local le front est en http://, où Secure n'est pas fiable
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
 };
 
@@ -21,7 +24,7 @@ export async function optionalAuth(req, _res, next) {
     const token = readToken(req);
     if (!token) return next();
     try {
-        const payload = await jwt.verify(token, process.env.JWT_SECRET);
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(payload.sub).populate('clientId');
         if (user && payload.ver === user.tokenVersion) req.user = user;
     } catch {
