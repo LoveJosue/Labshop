@@ -31,8 +31,11 @@ export async function fetchMe() {
     }
 }
 export async function logout() {
-    await api.post(`/auth/logout`);
-    state.user = null;
+    try {
+        await api.post(`/auth/logout`);
+    } finally {
+        state.user = null;
+    }
 }
 export function useAuth () {
     return {

@@ -17,8 +17,7 @@
           <ul>
             <li><RouterLink to="/">Accueil</RouterLink></li>
             <li><RouterLink to="/products">Produits</RouterLink></li>
-            <li v-if="isLoggedIn"><RouterLink to="/myOrders">Mes commandes</RouterLink></li>
-            <li v-else><RouterLink to="/checkOrder">Suivi des commandes</RouterLink></li>
+            <li v-if="!isLoggedIn"><RouterLink to="/checkOrder">Suivi des commandes</RouterLink></li>
 
           </ul>
         </div>
