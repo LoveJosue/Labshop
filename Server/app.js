@@ -16,6 +16,12 @@ import connectDB from './db.js';
 const port = process.env.PORT || 3000;
 const app = express();
 
+// L'app tourne derrière un proxy (Render / Vercel) : sans ceci, req.ip est
+// l'IP du proxy et express-rate-limit compte toutes les tentatives de login
+// dans le même seau. 1 = on ne fait confiance qu'au dernier proxy (celui de
+// l'hébergeur) ; `true` laisserait un client falsifier son IP via X-Forwarded-For.
+app.set('trust proxy', 1);
+
 // Connexion à MongoDB
 connectDB();
 
