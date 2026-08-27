@@ -11,6 +11,11 @@ import ProductsPage from './Products/ProductsPage.vue';
 import ProductDetail from './Products/ProductDetail/ProductDetail.vue';
 import Order from './Order/Order.vue';
 import OrderState from './Order/OrderState.vue';
+import TrackOrder from './Order/TrackOrder.vue';
+import AccountLayout from './Account/AccountLayout.vue';
+import AccountOrders from './Account/AccountOrders.vue';
+import AccountReviews from './Account/AccountReviews.vue';
+import AccountSettings from './Account/AccountSettings.vue';
 import About from './Components/About.vue';
 import NotFound from './Components/NotFound.vue';
 
@@ -27,7 +32,20 @@ const router = createRouter({
         { path: '/products', component:  ProductsPage },
         { path: '/products/:id', component: ProductDetail },
         { path: '/order', name: 'order', component: Order },
+        { path: '/checkOrder', name: 'track-order', component: TrackOrder },
         { path: '/checkOrder/:orderNumber', component: OrderState },
+        {
+            path: '/account',
+            component: AccountLayout,
+            children: [
+                { path: '', redirect: { name: 'account-orders' } },
+                { path: 'myOrders', name: 'account-orders', component: AccountOrders },
+                { path: 'myComments', name: 'account-reviews', component: AccountReviews },
+                { path: 'mySettings', name: 'account-settings', component: AccountSettings },
+            ]
+        },
+        // Ancienne URL de l'historique des commandes.
+        { path: '/myOrders', name: 'myOrders', redirect: { name: 'account-orders' } },
         { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
     ]
 })
