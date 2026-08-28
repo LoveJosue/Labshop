@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
@@ -24,6 +25,14 @@ app.set('trust proxy', 1);
 
 // Connexion à MongoDB
 connectDB();
+
+// En-têtes de sécurité. L'essentiel ici est HSTS : jusqu'à présent on dépendait
+// entièrement de Render/Vercel pour l'imposer. En premier dans la pile pour que
+// toutes les réponses en héritent, y compris celles du middleware d'erreur.
+// L'API ne renvoie que du JSON, donc les défauts d'Helmet passent tels quels :
+// la CSP par défaut ne s'applique à rien, et le CORP `same-origin` ne bloque pas
+// les requêtes CORS du front (il ne vise que les intégrations en mode no-cors).
+app.use(helmet());
 
 // CORS — origine précise + credentials pour que le cookie httpOnly voyage
 app.use(cors({

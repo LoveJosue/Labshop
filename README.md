@@ -15,10 +15,12 @@ Voici quelques aperçus de l'application :
 * Page de détails du produit
 * Ajout au panier
 * Gestion du pannier
-### À venir très prochainement
 * Passation de commande avec courriel de confirmation
-* Paiement
-* Authentification
+* Choix du mode de réception : expédition ou retrait en magasin (Click & Collect)
+* Suivi d'une commande à partir de son numéro
+* Authentification (JWT en cookie httpOnly) et espace client avec historique des commandes
+### À venir très prochainement
+* Paiement en ligne via un prestataire
 
 ## Architecture du projet
 ```bash
@@ -30,13 +32,18 @@ Labshop/
 
 ## Technologies utilisées
 ### Frontend
-* Vue.js 3
+* Vue.js 3 + Vue Router
+* Vite
 * TailwindCSS
+* PrimeVue
 * Axios
 ### Backend
 * Node.js
-* Express.js
+* Express.js 5
 * Mongoose pour MongoDB
+* jsonwebtoken + bcrypt pour l'authentification
+* Helmet et express-rate-limit pour la sécurité
+* Nodemailer + Handlebars pour les courriels transactionnels
 ### Déploiement
 * Vercel -> Frontend
 * Render -> API
@@ -67,6 +74,14 @@ SMTP_HOST=smtp_host
 SMTP_PORT=465
 SMTP_USER=email_username
 SMTP_APP_PASS=email_application_password
+
+# FRONT-END
+# Origine autorisée par CORS, et base des liens de suivi dans les courriels
+FRONT_END_URL=http://localhost:5173
+
+# AUTH
+JWT_SECRET=chaine_aleatoire_longue
+JWT_EXPIRES_IN=7d
 ```
 4. Lancez maintenant le serveur d'API avec la commande suivante :
 ```
@@ -90,14 +105,37 @@ npm run dev
 Le frontend s'exécutera localement au : http://localhost:5173 et l'application sera prête à utiliser.
 
 ## API Documentation
->POST /orders  
+Toutes les routes sont préfixées par `/api`.
 
-Créer une nouvelle commande  
+### Produits
+| Méthode | Route | Description | Accès |
+|---------|-------|-------------|-------|
+| GET | `/api/products` | Retourner la liste des produits | public |
+| GET | `/api/products/:id` | Retourner les détails d'un produit | public |
+| POST | `/api/products` | Créer un produit | administrateur |
 
->GET /products  
+### Commandes
+| Méthode | Route | Description | Accès |
+|---------|-------|-------------|-------|
+| POST | `/api/order` | Créer une nouvelle commande | public (rattachée au compte si connecté) |
+| GET | `/api/order/:orderNumber` | Suivre une commande par son numéro | public |
+| GET | `/api/orders` | Historique des commandes du client | connecté |
 
-Retourner la liste des produits  
+### Authentification
+| Méthode | Route | Description | Accès |
+|---------|-------|-------------|-------|
+| POST | `/api/auth/register` | Créer un compte | public |
+| POST | `/api/auth/login` | Se connecter | public (limité en fréquence) |
+| POST | `/api/auth/logout` | Se déconnecter | public |
+| GET | `/api/auth/me` | Retourner la session courante | public |
 
->GET /products/:id
+Le jeton d'authentification est un JWT déposé dans un cookie `httpOnly` nommé
+`labstore_token` (`SameSite=Lax`, et `Secure` dès que `NODE_ENV=production`).
+Les appels du frontend doivent donc être faits avec `withCredentials: true`.
 
-Retourner les détails sur un produit spécifique
+## Sécurité
+* Toutes les communications sont en HTTPS en production : le frontend appelle l'API via `VITE_API_URL`, et l'API n'autorise que l'origine `FRONT_END_URL` en CORS.
+* L'API ajoute ses propres en-têtes de sécurité avec Helmet, dont HSTS, plutôt que de dépendre uniquement de l'hébergeur.
+* Les tentatives de connexion sont limitées en fréquence (`express-rate-limit`).
+* Les mots de passe sont hachés avec bcrypt.
+* Le courriel transactionnel part en TLS implicite (port 465, certificat vérifié).
