@@ -4,6 +4,7 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import {createRouter, createWebHistory} from 'vue-router';
 import VueTelInput from 'vue3-tel-input'
+import { ensureSession, isAuthenticated } from './stores/useAuth.js'
 
 
 import HomePage from './Home/HomePage.vue';
@@ -37,6 +38,7 @@ const router = createRouter({
         {
             path: '/account',
             component: AccountLayout,
+            meta: { requiresAuth: true }, // hérité par toutes les vues enfants
             children: [
                 { path: '', redirect: { name: 'account-orders' } },
                 { path: 'myOrders', name: 'account-orders', component: AccountOrders },
@@ -49,6 +51,19 @@ const router = createRouter({
         { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
     ]
 })
+
+// Garde globale : bloque les routes marquées `requiresAuth` tant que la session
+// n'est pas établie. On attend ensureSession() car au premier chargement (F5 sur
+// /account, ou onglet ouvert depuis un lien) /auth/me est encore en vol.
+// `redirect` mémorise la destination pour y revenir après connexion.
+router.beforeEach(async (to) => {
+    if (!to.matched.some((record) => record.meta.requiresAuth)) return true;
+
+    await ensureSession();
+    if (isAuthenticated()) return true;
+
+    return { path: '/', query: { redirect: to.fullPath } };
+});
 const app = createApp(App)
 app.use(router);
 app.use(PrimeVue, {
