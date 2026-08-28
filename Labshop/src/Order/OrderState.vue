@@ -55,7 +55,44 @@
             </div>
         </section>
 
-        <!-- Section 2: Contenu -->
+        <!-- Section 2: Point de cueillette (commandes à récupérer en boutique) -->
+        <section v-if="hasPickup" class="card pickup">
+            <h2 class="section-title">Point de cueillette</h2>
+            <p class="pickup-intro">Présentez votre numéro de commande à l'accueil de la boutique.</p>
+
+            <div class="pickup-body">
+                <div class="pickup-infos">
+                    <div class="info-block">
+                        <p class="label">Boutique</p>
+                        <p class="value">{{ pickup.storeName || '—' }}</p>
+                    </div>
+                    <div class="info-block">
+                        <p class="label">Adresse</p>
+                        <p class="value">{{ pickup.address || '—' }}</p>
+                    </div>
+                    <a
+                        v-if="mapsUrl"
+                        :href="mapsUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn btn-outlined maps-link"
+                    >
+                        <span class="pi pi-map-marker" aria-hidden="true"></span>
+                        Itinéraire Google Maps
+                    </a>
+                </div>
+
+                <div v-if="mapEmbedUrl" class="map-frame">
+                    <iframe
+                        :src="mapEmbedUrl"
+                        title="Emplacement du point de cueillette"
+                        loading="lazy"
+                    ></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Contenu -->
         <section class="card order-content">
             <h2 class="section-title">Contenu</h2>
 
@@ -131,7 +168,6 @@ const fetchOrder = async () => {
     try {
         const { data } = await axios.get(`${apiUrl}/order/${route.params.orderNumber}`);
         order.value = data;
-        console.log(order.value);
     } catch (err) {
         error.value = true;
     } finally {
@@ -142,6 +178,35 @@ const fetchOrder = async () => {
 const retry = () => fetchOrder();
 
 const isExpedition = computed(() => !!order.value?.expedition);
+
+const pickup = computed(() => order.value?.pickup ?? {});
+const pickupCoords = computed(() => {
+    const { latitude, longitude } = pickup.value.location ?? {};
+    return Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } : null;
+});
+const hasPickup = computed(
+    () => !!(pickup.value.storeName || pickup.value.address || pickupCoords.value)
+);
+
+// Coordonnées si on les a, sinon recherche textuelle sur le nom + l'adresse.
+const mapsUrl = computed(() => {
+    if (pickupCoords.value) {
+        const { latitude, longitude } = pickupCoords.value;
+        return `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    }
+    const query = [pickup.value.storeName, pickup.value.address].filter(Boolean).join(', ');
+    return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
+});
+
+// Aperçu cartographique via OpenStreetMap : embarquable sans clé d'API ni facturation,
+// contrairement à Google Maps Embed. Le lien ci-dessus reste sur Google Maps pour l'itinéraire.
+const mapEmbedUrl = computed(() => {
+    if (!pickupCoords.value) return null;
+    const { latitude, longitude } = pickupCoords.value;
+    const delta = 0.004; // ~400 m de part et d'autre du point
+    const bbox = [longitude - delta, latitude - delta, longitude + delta, latitude + delta].join(',');
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latitude},${longitude}`;
+});
 
 const receptionMode = computed(() => isExpedition.value ? 'Livraison' : 'Cueillette en boutique');
 
@@ -282,6 +347,49 @@ onMounted(fetchOrder);
 .status-shipped  { background: #ede7ff; color: #5a32c8;  border-color: #d8caff; }
 .status-delivered{ background: #e7f7ec; color: #137a3b;  border-color: #bfe6cc; }
 .status-cancelled{ background: #fdecec; color: #b32424;  border-color: #f5c7c7; }
+
+/* Point de cueillette */
+.pickup-intro {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 300;
+    margin-top: -0.75rem;
+    margin-bottom: 1.25rem;
+}
+.pickup-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+.pickup-infos {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    align-items: flex-start;
+}
+.maps-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+}
+.maps-link .pi {
+    font-size: 0.9rem;
+}
+.map-frame {
+    border: 1px solid var(--lightgray);
+    border-radius: 10px;
+    overflow: hidden;
+    line-height: 0;
+}
+.map-frame iframe {
+    width: 100%;
+    height: 220px;
+    border: 0;
+    display: block;
+}
 
 /* Content - items */
 .items-list {
@@ -485,6 +593,9 @@ onMounted(fetchOrder);
     .item-name {
         white-space: normal;
     }
+    .pickup-body {
+        grid-template-columns: 1fr;
+    }
     .error-actions {
         flex-direction: column;
         width: 100%;
@@ -492,6 +603,9 @@ onMounted(fetchOrder);
     .btn {
         width: 100%;
         text-align: center;
+    }
+    .maps-link {
+        justify-content: center;
     }
 }
 </style>
