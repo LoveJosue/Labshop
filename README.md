@@ -65,6 +65,7 @@ npm install
 ```
 # API
 PORT=3000
+NODE_ENV='production' ou 'development' selon l'environnement
 
 # DATABASE
 MONGO_URI=mongodb_connection_string/labstore-local
