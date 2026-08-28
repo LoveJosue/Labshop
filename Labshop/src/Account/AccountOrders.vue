@@ -28,10 +28,9 @@
 
         <!-- Liste -->
         <div v-else class="order-list">
-            <router-link
+            <article
                 v-for="order in orders"
                 :key="order.orderNumber"
-                :to="`/checkOrder/${order.orderNumber}`"
                 class="order-card"
             >
                 <div class="order-main">
@@ -42,20 +41,68 @@
                     <span class="item-count">{{ itemCount(order) }} article{{ itemCount(order) > 1 ? 's' : '' }}</span>
                     <span class="status-badge" :class="statusClass(order.statut)">{{ order.statut }}</span>
                     <span class="order-total">{{ formatAmount(order.totalWithTVA) }} FCFA</span>
+
+                    <div class="actions">
+                        <button
+                            type="button"
+                            class="actions-trigger"
+                            :class="{ 'is-open': openedMenu === order.orderNumber }"
+                            aria-haspopup="menu"
+                            :aria-expanded="openedMenu === order.orderNumber"
+                            :aria-label="`Actions pour la commande ${order.orderNumber}`"
+                            @click.stop="toggleMenu(order.orderNumber)"
+                        >
+                            <span class="pi pi-ellipsis-v" aria-hidden="true"></span>
+                        </button>
+
+                        <Transition name="menu-fade">
+                            <div v-if="openedMenu === order.orderNumber" class="actions-menu" role="menu">
+                                <!-- target="_blank" : le suivi s'ouvre dans un onglet dédié, l'historique reste affiché. -->
+                                <router-link
+                                    :to="`/checkOrder/${order.orderNumber}`"
+                                    target="_blank"
+                                    class="actions-item"
+                                    role="menuitem"
+                                    @click="closeMenu"
+                                >
+                                    <span class="pi pi-external-link" aria-hidden="true"></span>
+                                    Consulter
+                                </router-link>
+                            </div>
+                        </Transition>
+                    </div>
                 </div>
-            </router-link>
+            </article>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import { apiUrl } from '@/config.js';
 
 const orders = ref([]);
 const loading = ref(true);
 const error = ref(false);
+
+// Numéro de la commande dont le menu d'actions est ouvert (un seul à la fois).
+const openedMenu = ref(null);
+const toggleMenu = (orderNumber) => {
+    openedMenu.value = openedMenu.value === orderNumber ? null : orderNumber;
+};
+const closeMenu = () => { openedMenu.value = null; };
+
+// Fermeture au clic extérieur : le clic sur le déclencheur est arrêté par @click.stop.
+const onEscape = (event) => { if (event.key === 'Escape') closeMenu(); };
+onMounted(() => {
+    document.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', onEscape);
+});
+onBeforeUnmount(() => {
+    document.removeEventListener('click', closeMenu);
+    document.removeEventListener('keydown', onEscape);
+});
 
 const fetchOrders = async () => {
     loading.value = true;
@@ -143,13 +190,6 @@ const statusClass = (statut) => {
     border: 1px solid var(--lightgray);
     border-radius: 10px;
     padding: 1.25rem 1.5rem;
-    text-decoration: none;
-    color: inherit;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.order-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .order-main {
@@ -250,6 +290,73 @@ const statusClass = (statut) => {
 }
 .btn:hover {
     opacity: 0.85;
+}
+
+/* Menu d'actions (⋮) */
+.actions {
+    position: relative;
+    flex-shrink: 0;
+}
+.actions-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+.actions-trigger:hover,
+.actions-trigger.is-open {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--primaryColor);
+}
+
+.actions-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 20;
+    min-width: 168px;
+    padding: 0.35rem;
+    background: #fff;
+    border: 1px solid var(--lightgray);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+.actions-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--primaryColor);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+}
+.actions-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+.actions-item .pi {
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.45);
+}
+
+.menu-fade-enter-active,
+.menu-fade-leave-active {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.menu-fade-enter-from,
+.menu-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
 }
 
 /* Chargement */

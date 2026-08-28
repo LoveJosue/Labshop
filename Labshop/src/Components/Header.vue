@@ -31,7 +31,7 @@
           </div>
         </div>
         
-        <AuthModal :isOpen="isAuthModalOpened" @close="isAuthModalOpened = false"/>
+        <AuthModal :isOpen="isAuthModalOpened" @close="onAuthModalClose" @success="onAuthSuccess"/>
         
         <SlideTransition>
           <Cart v-if="isCardOpen" @close="isCardOpen = false"/>
@@ -65,7 +65,7 @@ import userEmpty from '@/images/user-empty.svg';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { watch } from 'vue';
-import { useAuth } from '@/stores/useAuth';
+import { useAuth, ensureSession } from '@/stores/useAuth';
 
 
 const ONE_SEC = 1000;
@@ -131,9 +131,38 @@ const onLogout = async () => {
   }
 }
 
+// Une garde de route a renvoyé un visiteur non connecté ici : on lui ouvre
+// directement la modale de connexion plutôt que de le laisser sur l'accueil
+// sans explication.
+const redirectTarget = () => route.query.redirect || null;
+
+const onAuthModalClose = () => {
+  isAuthModalOpened.value = false;
+  // La modale émet aussi `close` après un succès : dans ce cas onAuthSuccess a
+  // déjà lancé la navigation, il ne faut surtout pas l'annuler ici.
+  // Sinon, connexion abandonnée : on nettoie la destination mémorisée.
+  if (!isLoggedIn.value && redirectTarget()) router.replace({ path: route.path });
+};
+
+const onAuthSuccess = () => {
+  isAuthModalOpened.value = false;
+  const target = redirectTarget();
+  router.replace(target ?? { path: route.path });
+};
+
 watch(route, (to, from) => {
   closeUserMenu();
 });
+
+watch(
+  () => route.query.redirect,
+  async (redirect) => {
+    if (!redirect) return;
+    await ensureSession(); // en cas d'accès direct à une URL portant déjà ?redirect
+    if (!isLoggedIn.value) isAuthModalOpened.value = true;
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   window.addEventListener('resize', updateWidth);

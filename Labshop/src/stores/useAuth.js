@@ -30,6 +30,18 @@ export async function fetchMe() {
         state.loading = false;
     }
 }
+
+// Même appel que fetchMe, mais mémoïsé : App.vue et les gardes de route se
+// partagent une seule requête /auth/me, et les gardes peuvent l'attendre au lieu
+// de décider sur un état encore en cours de chargement.
+let sessionPromise = null;
+export function ensureSession() {
+    if (!sessionPromise) sessionPromise = fetchMe();
+    return sessionPromise;
+}
+
+// L'état courant, sans passer par les computed (utilisable hors composant).
+export const isAuthenticated = () => !!state.user;
 export async function logout() {
     try {
         await api.post(`/auth/logout`);
