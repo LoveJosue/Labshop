@@ -16,9 +16,9 @@
 
     <div v-else class="account">
         <!-- Menu -->
-        <aside class="sidebar">
+        <aside class="account-sidebar">
             <div class="identity">
-                <div class="avatar" aria-hidden="true">{{ initials }}</div>
+                <div class="account-avatar" aria-hidden="true">{{ initials }}</div>
                 <div class="identity-text">
                     <p class="identity-name">{{ fullName }}</p>
                     <p class="identity-email">{{ user?.email }}</p>
@@ -114,7 +114,12 @@ const onLogout = async () => {
 }
 
 /* ---------- Menu ---------- */
-.sidebar {
+/* `account-sidebar` et non `sidebar` : CoreUI (importé globalement par
+   scss/custom.scss) définit un composant `.sidebar` hors-canvas qui, sous
+   992px, applique `margin-left: calc(-1 * var(--cui-sidebar-width))` et sort
+   le menu de l'écran. `scoped` ne protège pas de ça : il restreint nos
+   sélecteurs, pas ceux des feuilles globales. Idem pour `account-avatar`. */
+.account-sidebar {
     position: sticky;
     top: calc(80px + 2.5rem);
     display: flex;
@@ -134,7 +139,7 @@ const onLogout = async () => {
     border-bottom: 1px solid var(--lightgray);
     min-width: 0;
 }
-.avatar {
+.account-avatar {
     flex-shrink: 0;
     width: 42px;
     height: 42px;
@@ -306,23 +311,20 @@ const onLogout = async () => {
         gap: 1.25rem;
         padding: 1.5rem 0 3rem;
     }
-    .sidebar {
+    .account-sidebar {
         position: static;
         gap: 1rem;
         padding: 1rem;
     }
     .menu {
         flex-direction: row;
+        flex-wrap: wrap;
         gap: 0.5rem;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-    .menu::-webkit-scrollbar {
-        display: none;
     }
     .menu-item {
         width: auto;
         flex-shrink: 0;
+        max-width: 100%;
     }
     .logout {
         width: auto;
