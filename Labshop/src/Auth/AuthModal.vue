@@ -212,23 +212,28 @@ async function submit() {
 <style scoped>
 .auth-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
     height: 100lvh;
+    inset: 0;
     background: rgba(17, 24, 39, 0.5);
     z-index: 10;
+    display: flex;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1.5rem 1rem;
+    box-sizing: border-box;
 }
 .auth-modal {
     background: #fff;
     padding: 2rem;
     border-radius: 12px;
-    width: min(420px, 92vw);
+    width: min(420px, 100%);
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     position: relative;
-    left: 50%;
-    top: 20%;
-    transform: translateX(-50%);
+    margin: auto;
+}
+@media (max-width: 420px) {
+    .auth-overlay { padding: 1rem 0.75rem; }
+    .auth-modal { padding: 1.75rem 1.25rem; }
 }
 .close-btn {
     position: absolute; top: 12px; right: 12px;
