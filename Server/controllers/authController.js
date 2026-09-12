@@ -111,6 +111,7 @@ export async function register(req, res, next) {
         client.userId = user._id;
         await client.save();
         await user.populate('clientId');
+        res.cookie(COOKIE_NAME, signToken(user), COOKIE_OPTIONS);
         return res.status(201).json({ user: publicUser(user) });
     } catch(error) {
         next(error);
