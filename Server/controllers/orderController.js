@@ -22,7 +22,7 @@ export async function placeOrder(req, res, next) {
         const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
         // La commande est déjà enregistrée : un SMTP en panne ne doit pas la faire échouer.
         try {
-            await sendMail(email, mailObject, mailTemplate, context);
+            await sendMail(email, mailObject, mailTemplate, context, { withBrandLogo: true });
         } catch (mailErr) {
             console.error(`Échec de l'envoi du mail de confirmation ${newOrder.orderNumber} :`, mailErr.message);
         }
