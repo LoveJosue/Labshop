@@ -17,6 +17,7 @@ import AccountLayout from './Account/AccountLayout.vue';
 import AccountOrders from './Account/AccountOrders.vue';
 import AccountReviews from './Account/AccountReviews.vue';
 import AccountSettings from './Account/AccountSettings.vue';
+import ResetPassword from './Auth/ResetPassword.vue';
 import About from './Components/About.vue';
 import NotFound from './Components/NotFound.vue';
 
@@ -34,6 +35,8 @@ const router = createRouter({
         { path: '/products/:id', component: ProductDetail },
         { path: '/order', name: 'order', component: Order },
         { path: '/checkOrder', name: 'track-order', component: TrackOrder },
+        // Cible des liens envoyés par courriel : le jeton arrive en query string.
+        { path: '/reset-password', name: 'reset-password', component: ResetPassword },
         { path: '/checkOrder/:orderNumber', component: OrderState },
         {
             path: '/account',

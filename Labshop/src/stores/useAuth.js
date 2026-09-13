@@ -19,6 +19,26 @@ export async function login(email, password) {
     state.user = user;
     return user;
 }
+// Demande l'envoi d'un lien de réinitialisation. Le backend répond la même chose
+// que l'adresse existe ou non — ne rien en déduire côté interface.
+export async function requestPasswordReset(email) {
+    const response = await api.post(`/auth/forgot-password`, { email });
+    return response.data.message;
+}
+
+// Vérifie un lien avant d'afficher le formulaire de nouveau mot de passe.
+export async function verifyResetToken(token) {
+    const response = await api.post(`/auth/reset-password/verify`, { token });
+    return response.data.valid === true;
+}
+
+// Applique le nouveau mot de passe. Le backend révoque toutes les sessions
+// existantes : on remet donc l'état local à l'état déconnecté.
+export async function resetPassword(token, password) {
+    await api.post(`/auth/reset-password`, { token, password });
+    state.user = null;
+}
+
 // Rétablit la session depuis le cookie httpOnly au démarrage de l'app.
 export async function fetchMe() {
     try {
@@ -56,5 +76,6 @@ export function useAuth () {
         isAdmin: computed(() => state.user?.role === 'admin'),
         loading: computed(() => state.loading),
         login, logout, register, fetchMe,
+        requestPasswordReset, verifyResetToken, resetPassword,
     }
 }

@@ -1,9 +1,24 @@
+import crypto from 'crypto';
 import User from '../models/userModel.js';
 import Client from '../models/clientModel.js';
+import PasswordResetToken from '../models/passwordResetTokenModel.js';
 import jwt from 'jsonwebtoken';
 import { COOKIE_NAME, COOKIE_OPTIONS } from '../middleware/auth.js';
+import { sendMail } from '../services/mailer.js';
 
 const GENERIC_AUTH_ERROR = 'Email ou mot de passe incorrect.';
+
+// Durée de vie volontairement courte : un lien de réinitialisation est un
+// équivalent de mot de passe tant qu'il est valide.
+const RESET_TOKEN_TTL_MINUTES = 10;
+
+// Réponse unique de /forgot-password, que le compte existe ou non : sinon
+// l'endpoint devient un oracle permettant d'énumérer les clients de la boutique.
+const RESET_REQUEST_GENERIC_MESSAGE =
+    "Si un compte est associé à cette adresse, un lien de réinitialisation vient d'être envoyé.";
+
+const RESET_TOKEN_INVALID_MESSAGE =
+    'Ce lien de réinitialisation est invalide, a déjà été utilisé ou a expiré.';
 
 // Exige un domaine complet avec TLD — doit refléter la modale d'inscription (AuthModal.vue).
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -136,4 +151,140 @@ export async function logout(req, res, next) {
 export function me(req, res) {
     if (!req.user) return res.json({ user: null });
     return res.json({ user: publicUser(req.user) });
+}
+
+/* ------------------------------------------------------------------ *
+ *  Mot de passe oublié
+ * ------------------------------------------------------------------ */
+
+// Le jeton en clair ne vit que dans le courriel ; la base n'en garde que l'empreinte.
+function hashResetToken(rawToken) {
+    return crypto.createHash('sha256').update(rawToken).digest('hex');
+}
+
+function userLocaleFrom(req) {
+    return req.headers['accept-language']?.split(',')[0] || 'fr-TG';
+}
+
+// Retrouve le jeton correspondant, uniquement s'il est encore utilisable.
+// Un lien déjà consommé n'a plus de document en base, d'où l'usage unique.
+async function findUsableResetToken(rawToken) {
+    if (typeof rawToken !== 'string' || rawToken.trim() === '') return null;
+    return PasswordResetToken.findOne({
+        tokenHash: hashResetToken(rawToken.trim()),
+        expiresAt: { $gt: new Date() },
+    });
+}
+
+// POST /api/auth/forgot-password — envoie le lien de réinitialisation.
+export async function forgotPassword(req, res, next) {
+    try {
+        const { email } = req.body;
+        if (!email || !EMAIL_REGEX.test(String(email).trim())) {
+            return res.status(400).json({ error: 'Veuillez saisir une adresse e-mail valide.' });
+        }
+
+        const normalizedEmail = String(email).toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail }).populate('clientId');
+
+        if (user) {
+            // Un seul lien actif à la fois : redemander un lien invalide le précédent.
+            await PasswordResetToken.deleteMany({ userId: user._id });
+
+            // 256 bits d'entropie cryptographique : impossible à deviner ou à forcer.
+            const rawToken = crypto.randomBytes(32).toString('base64url');
+            await PasswordResetToken.create({
+                userId: user._id,
+                tokenHash: hashResetToken(rawToken),
+                expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MINUTES * 60 * 1000),
+            });
+
+            const resetUrl = `${process.env.FRONT_END_URL}/reset-password?token=${encodeURIComponent(rawToken)}`;
+            try {
+                await sendMail(
+                    user.email,
+                    'Réinitialisation de votre mot de passe Labstore',
+                    'passwordResetMail',
+                    {
+                        prename: user.clientId?.prename ?? '',
+                        resetUrl,
+                        expiresInMinutes: RESET_TOKEN_TTL_MINUTES,
+                        userLocality: userLocaleFrom(req),
+                    },
+                    { withBrandLogo: true }
+                );
+            } catch (mailErr) {
+                // Journalisé côté serveur seulement : renvoyer une erreur ici
+                // révélerait au demandeur que l'adresse correspond à un compte.
+                console.error("Échec de l'envoi du mail de réinitialisation :", mailErr.message);
+            }
+        }
+
+        return res.json({ message: RESET_REQUEST_GENERIC_MESSAGE });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// POST /api/auth/reset-password/verify — l'écran de réinitialisation vérifie le
+// lien avant d'afficher le formulaire, plutôt que de le rejeter après la saisie.
+// Le jeton passe par le corps de la requête : une URL finirait dans les journaux.
+export async function verifyResetToken(req, res, next) {
+    try {
+        const resetToken = await findUsableResetToken(req.body?.token);
+        return res.json({ valid: Boolean(resetToken) });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// POST /api/auth/reset-password — applique le nouveau mot de passe.
+export async function resetPassword(req, res, next) {
+    try {
+        const { token, password } = req.body;
+
+        const resetToken = await findUsableResetToken(token);
+        if (!resetToken) return res.status(400).json({ error: RESET_TOKEN_INVALID_MESSAGE });
+
+        const passwordError = validatePassword(password);
+        if (passwordError) return res.status(400).json({ error: passwordError });
+
+        const user = await User.findById(resetToken.userId).select('+password').populate('clientId');
+        if (!user) {
+            await PasswordResetToken.deleteMany({ userId: resetToken.userId });
+            return res.status(400).json({ error: RESET_TOKEN_INVALID_MESSAGE });
+        }
+
+        user.password = password; // haché par le hook pre('save') du modèle
+        // Révoque toutes les sessions ouvertes : si un tiers avait pris la main sur
+        // le compte, son cookie cesse d'être valide au moment même du changement.
+        user.tokenVersion += 1;
+        await user.save();
+
+        // Usage unique : le jeton consommé disparaît, comme les autres liens en attente.
+        await PasswordResetToken.deleteMany({ userId: user._id });
+
+        // La révocation ci-dessus rend le cookie courant inutilisable : autant le retirer.
+        res.clearCookie(COOKIE_NAME, { ...COOKIE_OPTIONS, maxAge: undefined });
+
+        try {
+            await sendMail(
+                user.email,
+                'Votre mot de passe Labstore a été modifié',
+                'passwordChangedMail',
+                {
+                    prename: user.clientId?.prename ?? '',
+                    userLocality: userLocaleFrom(req),
+                },
+                { withBrandLogo: true }
+            );
+        } catch (mailErr) {
+            // Simple avis de sécurité : son échec ne doit pas annuler un changement déjà appliqué.
+            console.error("Échec de l'envoi du mail de confirmation de changement :", mailErr.message);
+        }
+
+        return res.json({ ok: true });
+    } catch (error) {
+        next(error);
+    }
 }

@@ -71,7 +71,9 @@
           <!-- HEADER -->
           <tr>
             <td align="center" style="padding:20px 20px 10px 20px;">
-              {{!-- <img src="https://labstore.tg/logo.png" width="120" height="40" alt="Labstore"> --}}
+              {{!-- Pas de logo global ici : les gabarits qui en veulent un l'affichent
+                    eux-mêmes avec <img src="cid:labstore-logo">, en étant envoyés avec
+                    l'option { withBrandLogo: true } (voir services/mailer.js). --}}
             </td>
           </tr>
 
@@ -96,16 +98,18 @@
               <p style="font-size:14px;margin:0;color:#ccc;text-decoration:none;">Téléphone : +228 90 08 85 22</p>
 
               <p style="margin:18px 0 0 0;font-size:14px;">
-                <a href="https://labstore.tg" style="color:#fff;text-decoration:none;">Visiter le site</a> ·
-                <a href="https://labstore.tg/faq" style="color:#fff;text-decoration:none;">FAQ / Aide</a>
+                <a href="{{getSiteURL}}" style="color:#fff;text-decoration:none;">Visiter le site</a> ·
+                <a href="{{getSiteURL 'about'}}" style="color:#fff;text-decoration:none;">Aide</a>
               </p>
 
               <hr style="border:0;border-top:1px solid #444;width:80%;margin:20px auto;">
 
+              {{!-- Les liens « Conditions générales » et « Politique de confidentialité »
+                    ont été retirés : les routes /conditions et /confidentialite n'existent
+                    pas côté front et tombaient sur la page NotFound. À remettre (via
+                    getSiteURL) le jour où ces pages sont créées. --}}
               <p style="font-size:12px;color:#777;line-height:1.4;margin:0;">
-                © {{ getLocalYear }} Labstore. Tous droits réservés.<br>
-                <a href="https://labstore.tg/conditions" style="color:#ccc;text-decoration:none;">Conditions générales</a> ·
-                <a href="https://labstore.tg/confidentialite" style="color:#ccc;text-decoration:none;">Politique de confidentialité</a>
+                © {{ getLocalYear }} Labstore. Tous droits réservés.
               </p>
             </td>
           </tr>

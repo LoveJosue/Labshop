@@ -1,84 +1,6 @@
 import Order from '../models/orderModel.js';
 import Client from '../models/clientModel.js'
-import nodemailer from 'nodemailer';
-import hbs from "nodemailer-express-handlebars";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const MAIL_ITEMS_LIMIT = 3;
-
-
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT || 465,
-    secure: true,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_APP_PASS,
-    },
-    tls: {
-        rejectUnauthorized: true
-    }
-});
-// Configure handlebars plugin
-const hbsOptions = {
-    viewEngine: {
-        extname: ".hbs",
-        partialsDir: "views",
-        layoutsDir: "views",
-        defaultLayout: "baseMessage",
-        helpers: {
-            isEqual: function (a, b, options) {
-                return (a === b) ? options.fn(this) : options.inverse(this);
-            },
-            isPlural: function (a, options) {
-                return (a > 1) ? options.fn(this) : options.inverse(this);
-            },
-            isOvered: function (array, options) {
-                return (array.length > MAIL_ITEMS_LIMIT) ? options.fn(this) : options.inverse(this);
-            },
-            isNotOvered: function (index, options) {
-                return (index <= MAIL_ITEMS_LIMIT - 1) ? options.fn(this) : options.inverse(this);
-            },
-            isRemainingItemsCountPlural: function(items, options) {
-                return (items.length - MAIL_ITEMS_LIMIT > 1) ? options.fn(this) : options.inverse(this);
-            },
-            getRemainingItemsCount: function(items) {
-                return items.length - MAIL_ITEMS_LIMIT;
-            },
-            getLocalYear: function(options) {
-                const locale = options.data.root.userLocality;
-                const today = new Date();
-                const thisYear = today.toLocaleDateString(locale, { year: 'numeric'} )
-                return thisYear;
-            },
-            getOrderURLPath: function(options) {
-                const homaPagePath = process.env.FRONT_END_URL;
-                const orderNumber = options.data.root.orderNumber;
-                const endPoint = 'checkOrder';
-                return `${homaPagePath}/${endPoint}/${orderNumber}`;
-            },
-            getLocalFormattedDate: function(date, options) {
-                const locale = options.data.root.userLocality;
-                let newDate = new Date(date);
-                const formatOptions = {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                };
-                let formattedDate = newDate.toLocaleDateString(locale, formatOptions);
-                formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-                return formattedDate;
-            },
-        }
-    },
-    viewPath: "views",
-    extName: ".hbs",
-}
-
-transporter.use('compile', hbs(hbsOptions));
+import { sendMail } from '../services/mailer.js';
 
 export async function placeOrder(req, res, next) {
     try {
@@ -98,7 +20,12 @@ export async function placeOrder(req, res, next) {
         const context = {...newOrder.toObject(), userLocality: userLocality}
         const email = context.clientInfos.email;
         const mailObject = `Confirmation de votre commande ${newOrder.orderNumber}`;
-        await sendMail(email, mailObject, mailTemplate, context);
+        // La commande est déjà enregistrée : un SMTP en panne ne doit pas la faire échouer.
+        try {
+            await sendMail(email, mailObject, mailTemplate, context);
+        } catch (mailErr) {
+            console.error(`Échec de l'envoi du mail de confirmation ${newOrder.orderNumber} :`, mailErr.message);
+        }
         return res.status(201).json({ orderNumber: newOrder.orderNumber });
     } catch (err) {
         // En cas d'erreur faire un roll back de toutes les transactions faites dans la BD avant
@@ -115,22 +42,6 @@ async function createVisitorClient(orderClient) {
         dateCreation: Date.now()
     });
     return newClient;
-}
-async function sendMail(to, subject, template, context) {
-    const mailOptions = {
-        from: `"Labstore" <contact@labstore.ca>`,
-        to,
-        subject,
-        template,
-        context
-    }
-    await transporter.sendMail(mailOptions, (err, info) => {
-        if (err) {
-            console.log('Error: ', err); 
-        } else {
-            console.log('Mail sent!')
-        }
-    });
 }
 async function createOrder(order, client) {
     const orderData = {}; // objet vide que tu remplis graduellement

@@ -4,9 +4,16 @@
             <div class="auth-modal" role="dialog" aria-modal="true">
                 <button class="close-btn" @click="close" aria-label="Fermer">✕</button>
                 <h2 class="logo-title">Labstore</h2>
-                <h4>{{ mode === 'login' ? 'Connexion' : 'Créer votre compte' }}</h4>
+                <h4>{{ heading }}</h4>
 
-                <form @submit.prevent="submit">
+                <p v-if="mode === 'forgot' && !resetRequested" class="hint">
+                    Saisissez l'adresse e-mail de votre compte. Si elle nous est connue,
+                    vous recevrez un lien pour choisir un nouveau mot de passe.
+                </p>
+
+                <p v-if="resetRequested" class="notice" role="status">{{ resetMessage }}</p>
+
+                <form v-if="!resetRequested" @submit.prevent="submit">
                     <template v-if="mode === 'register'">
                         <div class="name-row">
                             <label>Nom
@@ -44,7 +51,7 @@
                         </span>
                     </label>
 
-                    <label>Mot de passe
+                    <label v-if="mode !== 'forgot'">Mot de passe
                         <div class="password-row">
                             <input
                                 v-model="form.password"
@@ -67,6 +74,12 @@
                         </div>
                     </label>
 
+                    <p v-if="mode === 'login'" class="forgot-row">
+                        <button type="button" class="link-btn" @click="switchMode('forgot')">
+                            Mot de passe oublié ?
+                        </button>
+                    </p>
+
                     <ul v-if="mode === 'register'" class="pwd-rules" aria-live="polite">
                         <li v-for="rule in passwordRules" :key="rule.key" :class="{ ok: rule.valid }">
                             <span class="rule-icon" aria-hidden="true">{{ rule.valid ? '✓' : '○' }}</span>
@@ -77,7 +90,7 @@
                     <p v-if="error" class="error">{{ error }}</p>
 
                     <button type="submit" class="submit" :disabled="loading || !canSubmit">
-                        {{ loading ? '…' : (mode === 'login' ? 'Se connecter' : 'Créer mon compte') }}
+                        {{ loading ? '…' : submitLabel }}
                     </button>
                 </form>
 
@@ -86,9 +99,12 @@
                         Pas encore de compte ?
                         <button type="button" @click="switchMode('register')">Créer un compte</button>
                     </template>
-                    <template v-else>
+                    <template v-else-if="mode === 'register'">
                         Déjà client ?
                         <button type="button" @click="switchMode('login')">Se connecter</button>
+                    </template>
+                    <template v-else>
+                        <button type="button" @click="switchMode('login')">Retour à la connexion</button>
                     </template>
                 </div>
             </div>
@@ -99,6 +115,7 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue';
 import { useAuth } from '../stores/useAuth.js';
+import { getPasswordRules } from './passwordRules.js';
 import eyeIcon from '@/images/eye.svg';
 import eyeOffIcon from '@/images/eye-off.svg';
 
@@ -118,11 +135,11 @@ const isNonEmptyString = (v) => typeof v === 'string' && v.trim() !== '';
 
 const props = defineProps({
     isOpen: Boolean,
-    initialMode: { type: String, default: 'login' }, // 'login' | 'register'
+    initialMode: { type: String, default: 'login' }, // 'login' | 'register' | 'forgot'
 });
 const emit = defineEmits(['close', 'success']);
 
-const { login, register } = useAuth();
+const { login, register, requestPasswordReset } = useAuth();
 
 const mode = ref(props.initialMode);
 const showPwd = ref(false);
@@ -132,22 +149,31 @@ const emailTouched = ref(false);
 const phoneTouched = ref(false);
 const form = reactive({ prename: '', name: '', phone: '', email: '', password: '' });
 
+// Accusé de réception de la demande de réinitialisation : il remplace le
+// formulaire une fois la demande envoyée.
+const resetRequested = ref(false);
+const resetMessage = ref('');
+
+const HEADINGS = {
+    login:    'Connexion',
+    register: 'Créer votre compte',
+    forgot:   'Mot de passe oublié',
+};
+const SUBMIT_LABELS = {
+    login:    'Se connecter',
+    register: 'Créer mon compte',
+    forgot:   'Recevoir le lien',
+};
+const heading = computed(() => HEADINGS[mode.value]);
+const submitLabel = computed(() => SUBMIT_LABELS[mode.value]);
+
 const isEmailValid = computed(() => EMAIL_REGEX.test(form.email.trim()));
 const showEmailError = computed(() => emailTouched.value && form.email.trim() !== '' && !isEmailValid.value);
 
 const isPhoneValid = computed(() => isPhoneAcceptable(form.phone));
 const showPhoneError = computed(() => phoneTouched.value && form.phone.trim() !== '' && !isPhoneValid.value);
 
-const passwordRules = computed(() => {
-    const pwd = form.password;
-    return [
-        { key: 'length',  label: 'Au moins 8 caractères',        valid: pwd.length >= 8 },
-        { key: 'upper',   label: 'Une lettre majuscule (A-Z)',   valid: /[A-Z]/.test(pwd) },
-        { key: 'lower',   label: 'Une lettre minuscule (a-z)',   valid: /[a-z]/.test(pwd) },
-        { key: 'digit',   label: 'Un chiffre (0-9)',             valid: /[0-9]/.test(pwd) },
-        { key: 'special', label: 'Un caractère spécial',         valid: /[^A-Za-z0-9]/.test(pwd) },
-    ];
-});
+const passwordRules = computed(() => getPasswordRules(form.password));
 const isPasswordValid = computed(() => passwordRules.value.every(r => r.valid));
 
 // Valide le formulaire d'inscription. Retourne un message d'erreur (français) ou null si tout est valide.
@@ -159,7 +185,11 @@ function validateRegistration() {
     if (!isPasswordValid.value) return 'Votre mot de passe ne respecte pas les règles de sécurité.';
     return null;
 }
-const canSubmit = computed(() => mode.value === 'login' || validateRegistration() === null);
+const canSubmit = computed(() => {
+    if (mode.value === 'forgot')   return isEmailValid.value;
+    if (mode.value === 'register') return validateRegistration() === null;
+    return true;
+});
 
 watch(() => props.isOpen, (open) => {
     if (open) {
@@ -169,14 +199,42 @@ watch(() => props.isOpen, (open) => {
         showPwd.value = false;
         emailTouched.value = false;
         phoneTouched.value = false;
+        resetRequested.value = false;
+        resetMessage.value = '';
     }
 });
 
-const switchMode = (m) => { mode.value = m; error.value = ''; };
+const switchMode = (m) => {
+    mode.value = m;
+    error.value = '';
+    resetRequested.value = false;
+    resetMessage.value = '';
+};
 const close = () => emit('close');
+
+// Demande de lien de réinitialisation. La réponse est volontairement la même que
+// l'adresse corresponde à un compte ou non : on l'affiche telle quelle.
+async function submitForgotPassword() {
+    if (!isEmailValid.value) {
+        emailTouched.value = true;
+        error.value = 'Veuillez saisir une adresse e-mail valide.';
+        return;
+    }
+    loading.value = true;
+    try {
+        resetMessage.value = await requestPasswordReset(form.email.trim());
+        resetRequested.value = true;
+    } catch (e) {
+        // Ici le message du serveur est utile (adresse invalide, trop de demandes).
+        error.value = e.response?.data?.error ?? GLOBAL_ERROR_MESSAGE;
+    } finally {
+        loading.value = false;
+    }
+}
 
 async function submit() {
     error.value = '';
+    if (mode.value === 'forgot') return submitForgotPassword();
     if (mode.value === 'register') {
         const validationError = validateRegistration();
         if (validationError) {
@@ -278,6 +336,18 @@ input {
     border-radius: 50%; border: 1px solid currentColor;
     transition: color 0.2s ease, border-color 0.2s ease;
 }
+.hint { font-size: 0.85rem; line-height: 1.5; color: #666; margin: -0.75rem 0 1.25rem; text-align: center; }
+.notice {
+    font-size: 0.87rem; line-height: 1.5; color: #166534; text-align: center;
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+    padding: 0.9rem 1rem; margin: -0.5rem 0 0.5rem;
+}
+.forgot-row { margin: -0.5rem 0 1rem; text-align: right; }
+.link-btn {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    color: #555; font-size: 0.8rem; text-decoration: underline;
+}
+.link-btn:hover { color: #111; }
 .error { color: #c00; font-size: 0.85rem; margin: 0 0 1rem; }
 input.invalid { border-color: #dc2626; }
 input.invalid:focus { outline-color: #dc2626; }
